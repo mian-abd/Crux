@@ -37,7 +37,8 @@ Configuration (:class:`LLMConfig`; ``core/config.py`` imports and overrides it):
 * ``role_models``: role -> model name; must contain ``"default"``.
 * ``role_temperature``: role -> temperature; ``"default"`` is the fallback.
 * ``prices_per_mtok``: model -> (input $/1M tokens, output $/1M tokens).
-* ``cache`` / ``cache_dir``: enable the disk cache and choose its directory.
+* ``cache`` / ``cache_dir``: enable the disk cache and choose its directory (default
+  ``runs/.cache/llm``, or ``$CRUX_LLM_CACHE_DIR`` when set).
 * ``max_concurrency``: maximum in-flight API calls per :class:`LLM` instance.
 * ``max_retries``: retries after the first attempt for transient errors.
 * ``timeout_s``: per-request timeout of the client this module creates.
@@ -114,6 +115,15 @@ def _default_role_temperature() -> dict[str, float]:
     return {"predictor": 0.8, "proposer": 0.7, "default": 0.2}
 
 
+# The evaluation runner sets this per run, so repeats of one case never replay each other's
+# cached answers. Unset, every run shares ``runs/.cache/llm`` as before.
+CACHE_DIR_ENV = "CRUX_LLM_CACHE_DIR"
+
+
+def _default_cache_dir() -> Path:
+    return Path(os.environ.get(CACHE_DIR_ENV) or "runs/.cache/llm")
+
+
 class LLMConfig(BaseModel):
     """Settings for :class:`LLM`. See the module docstring for the meaning of each field."""
 
@@ -123,7 +133,7 @@ class LLMConfig(BaseModel):
     role_temperature: dict[str, float] = Field(default_factory=_default_role_temperature)
     prices_per_mtok: dict[str, tuple[float, float]] = Field(default_factory=dict)
     cache: bool = True
-    cache_dir: Path = Path("runs/.cache/llm")
+    cache_dir: Path = Field(default_factory=_default_cache_dir)
     max_concurrency: int = Field(8, ge=1)
     max_retries: int = Field(3, ge=0)
     timeout_s: float = Field(120.0, gt=0)

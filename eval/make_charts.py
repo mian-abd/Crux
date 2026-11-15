@@ -123,6 +123,8 @@ def load_task9(paths: list[Path]) -> tuple[list[dict], list[Path]]:
             continue
         data = json.loads(p.read_text(encoding="utf-8"))
         for r in data.get("runs", []):
+            if r.get("status") == "not run: budget":
+                continue  # the launch's spend cap stopped it: never ran, so it is not a 0
             runs.append({**r, "case": r.get("case") or p.parent.name})
         used.append(p)
     return runs, used

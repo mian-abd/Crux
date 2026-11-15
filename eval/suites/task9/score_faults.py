@@ -100,6 +100,8 @@ async def score(truth: dict, results: dict, runs: Path) -> list[dict]:
     llm = LLM(config)
     rows, jobs = [], []
     for run in results["runs"]:
+        if run.get("status") == "not run: budget":
+            continue  # stopped by the launch's spend cap before it started
         info = truth["cases"].get(run.get("case", ""))
         if info is None or info["fault"] == "clean":
             continue

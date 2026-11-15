@@ -305,7 +305,12 @@ def test_cli_passes_the_corpus_and_case_to_the_run_config(tmp_path, monkeypatch)
 
 
 def arms_args(**values) -> argparse.Namespace:
-    base = {"arms": ["swarm", "swarm-lessons"], "lessons": None, "with_tools": False}
+    base = {
+        "arms": ["swarm", "swarm-lessons"],
+        "lessons": None,
+        "with_tools": False,
+        "runs_dir": Path("runs"),
+    }
     return argparse.Namespace(**{**base, "baseline_model": "gpt-5.5", **values})
 
 

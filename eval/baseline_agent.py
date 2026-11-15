@@ -241,6 +241,7 @@ async def run_baseline(
 async def _run(args: argparse.Namespace) -> None:
     executor = ModalExecutor(
         Task9Inputs.load(args.manifest),
+        args.runs_dir,
         minimal_image=args.minimal,
         diagnostic_timeout_s=args.diagnostic_timeout,
     )
@@ -264,6 +265,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--run-id", required=True)
+    parser.add_argument("--runs-dir", type=Path, default=Path("runs"))
     parser.add_argument("--model", required=True)
     parser.add_argument("--prompt", type=Path)
     parser.add_argument("--input-rate", type=Decimal, required=True, help="USD per million tokens")
