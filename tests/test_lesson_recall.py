@@ -375,6 +375,13 @@ def test_paired_table_compares_the_two_swarm_arms_per_case():
 # --- the drafted candidates and the freeze script -----------------------------------------
 
 
+def unreviewed(document: dict) -> dict:
+    """The candidates as drafted, before anyone reviewed them."""
+    for candidate in document["candidates"]:
+        candidate["lesson"].update(approved=False, reviewed_by="", reviewed_at="")
+    return document
+
+
 def approve(document: dict, ids: set[str] | None = None) -> dict:
     for candidate in document["candidates"]:
         if ids is None or candidate["lesson"]["id"] in ids:
@@ -384,11 +391,23 @@ def approve(document: dict, ids: set[str] | None = None) -> dict:
     return document
 
 
-def test_dev_candidates_are_unapproved_and_become_reviewed_lessons_once_approved():
+def test_committed_review_matches_the_frozen_corpus():
+    """Mian approved six candidates and rejected the exchange-direction one (batch-03 protocol)."""
     document = json.loads(CANDIDATES.read_text(encoding="utf-8"))
-    candidates = document["candidates"]
-    assert candidates and not any(c["lesson"]["approved"] for c in candidates)
-    assert all(c["lesson"]["reviewed_by"] == "" for c in candidates)
+    approved = [c["lesson"]["id"] for c in document["candidates"] if c["lesson"]["approved"]]
+    rejected = [c["lesson"]["id"] for c in document["candidates"] if not c["lesson"]["approved"]]
+    assert rejected == ["task9-ambiguous-exchange-direction-v1"] and len(approved) == 6
+    assert all(c["lesson"]["reviewed_by"] == "Mian (mian-abd)"
+               for c in document["candidates"] if c["lesson"]["approved"])
+    [path] = sorted((CANDIDATES.parent / "frozen").glob("lessons-*.json"))
+    frozen = FrozenLessons.load(path)
+    assert path.stem == f"lessons-{frozen.digest}"
+    assert [lesson.id for lesson in frozen.lessons] == approved
+    assert frozen.held_out_case_ids == freeze_task9.HELD_OUT
+
+
+def test_dev_candidates_become_reviewed_lessons_once_approved():
+    document = unreviewed(json.loads(CANDIDATES.read_text(encoding="utf-8")))
     for candidate in approve(document)["candidates"]:
         reviewed = ReviewedLesson.model_validate(candidate["lesson"])
         for source in reviewed.sources:
@@ -402,7 +421,7 @@ def test_dev_candidates_are_unapproved_and_become_reviewed_lessons_once_approved
 
 def test_freeze_keeps_approved_lessons_and_declares_the_nine_held_out_cases(tmp_path, capsys):
     candidates = tmp_path / "candidates.json"
-    document = json.loads(CANDIDATES.read_text(encoding="utf-8"))
+    document = unreviewed(json.loads(CANDIDATES.read_text(encoding="utf-8")))
     candidates.write_text(json.dumps(document), encoding="utf-8")
     assert freeze_task9.main([str(candidates), "--out", str(tmp_path / "out")]) == 1
 

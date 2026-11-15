@@ -1,0 +1,30 @@
+[
+  {
+    "name": "suite",
+    "cases": "suite",
+    "arms": ["swarm", "baseline"],
+    "repeats": 1,
+    "score_faults": true
+  },
+  {
+    "name": "clean",
+    "cases": "clean",
+    "arms": ["swarm", "baseline"],
+    "repeats": 2
+  },
+  {
+    "name": "lessons",
+    "cases": ["case-01", "case-02", "case-03", "case-04", "case-07", "case-08", "case-10", "case-11", "case-13"],
+    "arms": ["swarm-lessons"],
+    "lessons": "lessons-89a5141864a769e087311e42b101fb061dedd634d2a81ecdcb2f204ffe740f5e.json",
+    "repeats": 1,
+    "score_faults": true
+  },
+  {
+    "name": "random",
+    "cases": "suite",
+    "arms": ["swarm-random"],
+    "repeats": 1,
+    "score_faults": true
+  }
+]
