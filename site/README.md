@@ -29,6 +29,7 @@ Copy `.env.example` to `.env.local`. Nothing in it is required for a first run.
 | Variable | Used for |
 | --- | --- |
 | `OPENAI_API_KEY` | Claim extraction. Server only; it never reaches the browser. Without it the paper page shows "Extraction needs an API key". |
+| `EXA_API_KEY` | "Find sources with Exa" on each extracted claim (one search, about $0.007). Server only. Without it the button is hidden. |
 | `OPENAI_MODEL` | Optional extraction model, default `gpt-4.1-mini`. |
 | `BETTER_AUTH_SECRET` | Signs session cookies. If unset, a random secret is generated once into `.data/auth-secret`. |
 | `BETTER_AUTH_URL` | Optional public URL when the site is not on `http://localhost:3000`. |

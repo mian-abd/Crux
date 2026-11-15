@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ClaimSources } from "@/components/app/claim-sources";
 import { PageHeader } from "@/components/app/page-header";
 import { DeletePaperButton, ExtractButton } from "@/components/app/paper-actions";
 import { StartAuditButton } from "@/components/app/start-audit-button";
@@ -12,6 +13,7 @@ import { libraryClaim, notCheckableReason } from "@/lib/claim-library";
 import { MAX_PAPER_CHARS } from "@/lib/extract";
 import { dateTime, fileSize, plural } from "@/lib/format";
 import { requireUser } from "@/lib/server/auth";
+import { hasExaKey } from "@/lib/server/exa";
 import { hasOpenAiKey } from "@/lib/server/openai";
 import { getPaper, listClaims, type PaperClaim } from "@/lib/server/papers";
 
@@ -50,6 +52,7 @@ export default async function PaperPage({ params }: PageProps<"/app/papers/[id]"
   const checkable = claims.filter((c) => c.libraryId);
   const notYet = claims.filter((c) => !c.libraryId);
   const keyReady = hasOpenAiKey();
+  const exaReady = hasExaKey();
   const extracted = paper.status === "extracted";
 
   return (
@@ -145,6 +148,7 @@ export default async function PaperPage({ params }: PageProps<"/app/papers/[id]"
                           <span className="text-muted-foreground">{lib.check}</span>
                         </p>
                       )}
+                      <ClaimSources paperId={paper.id} claimId={c.id} enabled={exaReady} />
                     </ClaimItem>
                   );
                 })}
@@ -168,6 +172,7 @@ export default async function PaperPage({ params }: PageProps<"/app/papers/[id]"
                 {notYet.map((c) => (
                   <ClaimItem key={c.id} claim={c}>
                     <p className="text-muted-foreground">{notCheckableReason(c.kind)}</p>
+                    <ClaimSources paperId={paper.id} claimId={c.id} enabled={exaReady} />
                   </ClaimItem>
                 ))}
               </ul>

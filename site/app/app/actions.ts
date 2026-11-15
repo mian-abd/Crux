@@ -3,13 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import type { ClaimSourcesResult } from "@/lib/exa";
 import { requireUser } from "@/lib/server/auth";
+import { SourcesError, findClaimSources, hasExaKey } from "@/lib/server/exa";
 import { startLiveRun } from "@/lib/server/live-runs";
 import { ExtractionError, extractClaims, hasOpenAiKey } from "@/lib/server/openai";
 import {
   deletePaper,
   getPaper,
   getPaperText,
+  listClaims,
   markExtractionFailed,
   saveExtraction,
 } from "@/lib/server/papers";
@@ -42,6 +45,24 @@ export async function extractClaimsAction(paperId: string): Promise<ActionResult
   revalidatePath(`/app/papers/${paperId}`);
   revalidatePath("/app");
   return { ok: true };
+}
+
+export type SourcesActionResult = ({ ok: true } & ClaimSourcesResult) | { ok: false; error: string };
+
+/** Searches Exa for sources on one of the signed-in user's extracted claims. */
+export async function findSourcesAction(paperId: string, claimId: string): Promise<SourcesActionResult> {
+  const user = await requireUser();
+  if (!ID_RE.test(paperId) || !getPaper(user.id, paperId)) {
+    return { ok: false, error: "That paper was not found." };
+  }
+  const claim = listClaims(user.id, paperId).find((c) => c.id === claimId);
+  if (!claim) return { ok: false, error: "That claim was not found." };
+  if (!hasExaKey()) return { ok: false, error: "Finding sources needs an Exa API key." };
+  try {
+    return { ok: true, ...(await findClaimSources(claim.claim)) };
+  } catch (err) {
+    return { ok: false, error: err instanceof SourcesError ? err.message : "Exa search failed. Try again." };
+  }
 }
 
 export async function deletePaperAction(paperId: string): Promise<void> {
