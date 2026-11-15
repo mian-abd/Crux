@@ -146,6 +146,11 @@ EVENT_TYPES: tuple[str, ...] = (
     RUN_ERROR,
 )
 TERMINAL_EVENTS: tuple[str, ...] = (RUN_FINISHED, RUN_ERROR)
+
+# Lab events: emitted by the orchestrator for one lab only (``LabHooks.opening_events``)
+# and documented in that lab's section of docs/EVENTS.md, not in the core table.
+CLAIMS_SOURCE = "claims.source"  # the claims lab's source paper and claims, after run.started
+LAB_EVENT_TYPES: tuple[str, ...] = (CLAIMS_SOURCE,)
 EVENTS_FILE = "events.jsonl"
 
 

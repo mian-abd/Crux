@@ -85,7 +85,13 @@ class LabHooks(Protocol):
     ``Observation.log_ref``, when set, names a text file (absolute, or relative to the run
     directory) whose lines the orchestrator streams as ``experiment.log`` events. Lines
     starting with ``[stderr] `` go to the stderr stream.
+
+    ``opening_events`` returns ``(type, payload)`` pairs that the orchestrator emits right
+    after ``run.started``, before ``bind``. Each type must be in
+    ``core.events.LAB_EVENT_TYPES`` (for example ``claims.source``).
     """
+
+    def opening_events(self) -> list[tuple[str, dict]]: ...
 
     def bind(self, run_id: str, run_dir: Path, executor: Executor | None) -> None: ...
 

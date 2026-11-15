@@ -127,3 +127,29 @@ How the standard types are used in a `oneletter` run:
   `hypothesis.proposed` and `dna.variant` for every option and `hypothesis.merged`.
 * `question.unresolved` ends a sample that timed out, read letters too far from HBB to name, or did
   not settle within the read budget. A timeout finishes the run with `status: "stopped"`.
+
+## Claims (`lab = "claims"`): `claims.source`
+
+Additive: the types above are unchanged. The claims lab (`labs/claims`, see `docs/CLAIMS.md`) audits a
+hand-curated set of four claims from Love, Huber & Anders (2014), DESeq2, with the standard types plus
+one lab event. `core/events.py` names it `CLAIMS_SOURCE` and lists it in `LAB_EVENT_TYPES` (events the
+orchestrator emits for one lab, through `LabHooks.opening_events`), not in the core `EVENT_TYPES`:
+
+* `claims.source` `{"title": str, "citation": str, "url": str, "license": str, "excerpt": str,
+  "claims": [{"question_id": str, "claim": str, "quote": str, "kind": "symbolic" | "statistical",
+  "planted": bool}]}`: emitted once, right after `run.started` (seq 1) and before `profile.done`.
+  `excerpt` is our paraphrase of the paper's Methods (the paper is CC BY 4.0; `citation`, `url` and
+  `license` attribute it). Each claim's `quote` is a substring of `excerpt` to highlight, or `""`.
+  `question_id` is the engine's question id, as in `question.opened`. `planted` is true only for the
+  claim added as a known falsehood (`claim-bh-fwer`); it is there to be shown after the fact, and no
+  agent reads it.
+
+How the standard types are used in a `claims` run:
+
+* Four categorical questions: `claim-nb-variance`, `claim-wald-calibration`, `claim-bh-fdr` and
+  `claim-bh-fwer`. Options are `<question_id>.<answer_key>` plus `<question_id>.h0`; `answer_key` is one
+  of `holds`, `fails`, `holds_if`, `alt_param` and `fails_conservative`.
+* Experiment ids are the diagnostic names (`nb_variance_symbolic`, `wald_pergene`, ...).
+  `experiment.proposed` carries the code, the bins and `design.stated`, what each option predicts;
+  `experiment.log` streams the script's output; `referee.verdict` notes start with `code referee:`.
+* `artifact.written` delivers `CLAIMS.md`.

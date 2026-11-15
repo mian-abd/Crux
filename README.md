@@ -21,6 +21,14 @@ Run `uv run python -m scripts.make_demo_fixture` to regenerate the UI replays.
 and a critic review. `web/fixtures/demo-error.jsonl` records a failed run. Each file has one
 terminal event. Together they exercise the full [event contract](docs/EVENTS.md).
 
+## Claims lab (MVP)
+
+`uv run python -m core.cli --lab claims --run-id claims-demo` audits four hand-curated
+mathematical and statistical claims from the DESeq2 paper (Love, Huber & Anders 2014) with the
+same engine, using SymPy derivations and simulations run on this machine; no API key is needed.
+It is an MVP on four curated claims, not claim extraction from arbitrary papers. See
+[docs/CLAIMS.md](docs/CLAIMS.md); the recorded run is `runs/demo/claims_deseq2.jsonl`.
+
 ## Leakage controls
 
 Agent-visible inputs exclude benchmark ground truth and planted-fault truth tables. The ERD reserves grading for a separate process in `eval/`. Ordinary run logs and artifacts are ignored by Git. Review files in `runs/demo/` before staging them.

@@ -2,7 +2,8 @@
 
 ``await run(lab, cfg, deps)`` drives one run end to end and returns its ``Report``:
 
-1. ``run.started``, ``lab.profile()`` (``profile.done``), the reviewed lessons when
+1. ``run.started``, the lab's opening events (``lab.opening_events()``, lab event types
+   only, such as ``claims.source``), ``lab.profile()`` (``profile.done``), the reviewed lessons when
    ``Deps.lessons`` is set (``memory.recalled`` per reader), ``agents.propose`` and the option set
    of every question: exact duplicates merged (weights summed), priors normalised, and a
    "none of these" option ``<question>.h0`` with prior ``cfg.null_prior`` added.
@@ -310,6 +311,13 @@ class _Run:
 
     async def _main(self) -> None:
         lab = self.lab
+        opening = getattr(lab, "opening_events", None)
+        if callable(opening):
+            self._where = "opening"
+            for type_, payload in opening():
+                if type_ not in E.LAB_EVENT_TYPES:
+                    raise ValueError(f"{type_!r} is not a lab event type")
+                await self._emit(type_, **payload)
         bind = getattr(lab, "bind", None)
         if callable(bind):
             self._where = "bind"
@@ -351,7 +359,7 @@ class _Run:
 
     async def _emit(self, type_: str, **payload: Any) -> None:
         """Write one event (after any queued ticks, so the file keeps call order)."""
-        if type_ not in E.EVENT_TYPES:
+        if type_ not in E.EVENT_TYPES and type_ not in E.LAB_EVENT_TYPES:
             raise ValueError(f"unknown event type {type_!r}")
         async with self._emit_lock:
             await self._drain_ticks()

@@ -55,7 +55,9 @@ FAKE_LABS: dict[str, str] = {
 # ``oneletter`` reads an HBB strip through the Jetson reader service (labs/oneletter): its
 # overrides are its own settings (``reader_url``, default ``$CRUX_ONELETTER_READER``), not a
 # core config preset, and ``overrides.fake`` runs it on the in-process fake reader.
-REAL_LABS = ("bixbench3", "oneletter")
+# ``claims`` audits four curated claims from the DESeq2 paper on this machine (no model, no
+# API key; labs/claims, docs/CLAIMS.md).
+REAL_LABS = ("bixbench3", "oneletter", "claims")
 CASES_ENV = "CRUX_TASK9_CASES"
 
 
@@ -116,6 +118,11 @@ class DefaultLauncher:
             )
         except (KeyError, ValueError, TypeError) as exc:  # unknown preset or bad override
             raise InvalidRunRequest(f"invalid config: {exc}") from exc
+        if lab == "claims":
+            from labs.claims.lab import build_claims_run
+
+            lab_obj, deps = build_claims_run(cfg)
+            return orchestrator.run(lab_obj, cfg, deps, run_id=run_id)
         if lab in REAL_LABS:
             return self._task9_coroutine(cfg, case, run_id)
         try:
