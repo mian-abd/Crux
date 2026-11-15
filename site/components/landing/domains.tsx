@@ -230,7 +230,7 @@ function PaperPanel() {
   const steps = [
     { n: "01", title: "Upload a PDF", body: "The file stays on the server, and its text is extracted there. Nothing goes to a model until you ask." },
     { n: "02", title: "Extract its claims", body: "Each claim keeps a quote, and any quote not found word for word in the paper is flagged." },
-    { n: "03", title: "Match to checks", body: "Claims are matched to the ones the engine can test today: four from the DESeq2 paper." },
+    { n: "03", title: "Line up the tests", body: "Each claim Crux can test by derivation or simulation gets competing readings and a planned check." },
     { n: "04", title: "Watch the audit", body: "The run streams live: options, experiments, Bayes updates and the rejected ledger." },
   ];
   return (

@@ -5,12 +5,11 @@ import { Wordmark } from "@/components/wordmark";
 import { REPO_URL } from "@/lib/site";
 
 const NAV = [
-  { href: "/explore", label: "Explore" },
-  { href: "/runs", label: "Graded runs" },
-  { href: "/#domains", label: "What it tests" },
   { href: "/#results", label: "Results" },
-  { href: "/#how", label: "How it works", wide: true },
-  { href: "/#sponsors", label: "Built with", wide: true },
+  { href: "/#runs", label: "Graded runs" },
+  { href: "/#sponsors", label: "Built with" },
+  { href: "/#explore", label: "Explore" },
+  { href: "/#how", label: "How it works" },
 ];
 
 /** A slim charcoal bar above the header, for the one result worth knowing first. */

@@ -18,11 +18,12 @@ function Ext({ href, children }: { href: string; children: React.ReactNode }) {
 }
 
 const LINKS = [
-  { href: "/explore", label: "Explore" },
-  { href: "/runs", label: "Graded runs" },
-  { href: "/#domains", label: "What it tests" },
   { href: "/#results", label: "Results" },
-  { href: "/#how", label: "How it works" },
+  { href: "/#runs", label: "Graded runs" },
+  { href: "/#sponsors", label: "Built with" },
+  { href: "/#explore", label: "Explore" },
+  { href: "/explore", label: "The full gallery" },
+  { href: "/runs", label: "All graded runs" },
   { href: "/login", label: "Sign in" },
 ];
 

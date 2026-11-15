@@ -88,7 +88,7 @@ export function RunView({ runId }: { runId: string }) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4 border-b pb-6">
         <div className="min-w-0 max-w-3xl">
-          <p className="eyebrow mb-3">Claims audit · MVP on four curated claims</p>
+          <p className="eyebrow mb-3">Claims audit</p>
           <h1 className="font-display text-4xl leading-tight text-balance">
             {claims?.title || "Claims audit"}
           </h1>

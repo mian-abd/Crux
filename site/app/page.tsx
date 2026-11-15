@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Domains } from "@/components/landing/domains";
+import { GradedRunPreview } from "@/components/landing/graded-run-preview";
 import { Loop } from "@/components/landing/loop";
 import { Plate } from "@/components/landing/plate";
 import { Sponsors } from "@/components/landing/sponsors";
@@ -12,7 +13,6 @@ import { SiteFooter } from "@/components/site-footer";
 import { AnnouncementBar, SiteHeader } from "@/components/site-header";
 import { REPO_URL, repoFile } from "@/lib/site";
 
-const BATCH04 = "eval/results/task9_batch04.md";
 const BATCH05 = "eval/results/task9_batch05.md";
 const BATCH03 = "eval/results/task9_batch03.md";
 
@@ -27,13 +27,6 @@ const PLATES = {
     credit: "Apparatus from Lavoisier, Traité élémentaire de chimie (1789), engraved by Marie-Anne Paulze Lavoisier. Public domain.",
     width: 1440,
     height: 876,
-  },
-  statement: {
-    src: "/plates/hooke-flea.jpg" as string | undefined,
-    alt: "Robert Hooke's 1665 engraving of a flea seen under a microscope.",
-    credit: "A flea under the microscope, Robert Hooke, Micrographia (1665), Schem. XXXIV. Public domain.",
-    width: 1920,
-    height: 1440,
   },
   banner: {
     src: "/plates/wright-air-pump.jpg" as string | undefined,
@@ -50,50 +43,24 @@ const EXPLORE_CARDS = [
     image: { src: "/plates/hooke-cork.jpg", alt: "Hooke's 1665 engraving of cork cells under a microscope.", width: 905, height: 935 },
     title: "Genomics",
     tags: ["DNA", "Proteins", "Molecules"],
-    body: "From the single DNA letter behind sickle-cell disease to the haemoglobin it builds, in 3D.",
+    body: "One DNA letter, the protein it builds, and molecules you can turn in 3D.",
   },
   {
     href: "/explore#statistics",
     image: { src: "/plates/galton-quincunx.png", alt: "Galton's 1889 drawings of the quincunx, balls falling through pins into bins.", width: 744, height: 577 },
     title: "Statistics",
     tags: ["Galton board", "FDR", "Simulation"],
-    body: "Simulations you can rerun: coin flips piling into a bell curve, and how Benjamini–Hochberg picks what to believe.",
+    body: "A Galton board, and how Benjamini–Hochberg decides which results to believe.",
   },
   {
     href: "/explore#mathematics",
     image: { src: "/plates/euclid-1482.jpg", alt: "Triangle diagrams from the first printed edition of Euclid's Elements, 1482.", width: 400, height: 1100 },
     title: "Mathematics",
     tags: ["Derivation", "Counterexample", "Monte Carlo"],
-    body: "A formula derived by SymPy, checked by simulation, and a false claim broken by a counterexample.",
+    body: "A formula derived and checked, and a false claim broken by a counterexample.",
   },
 ];
 
-const REPORTS = [
-  {
-    date: "November 15, 2026",
-    title: "Batch-05: 52 fresh cases in four suites",
-    body: "Three more pre-registered suites in parallel. Swarm 0.817, single agent 0.671; +0.146 (+0.084 to +0.215); 48 of 48 faults against 14.",
-    path: BATCH05,
-  },
-  {
-    date: "November 15, 2026",
-    title: "Batch-04: the first fresh held-out suite",
-    body: "13 pre-registered cases nobody had run. Swarm 0.811, single agent 0.608; 12 of 12 planted faults against 3.",
-    path: BATCH04,
-  },
-  {
-    date: "November 14, 2026",
-    title: "Batch-03: the reused suite, and random selection",
-    body: "Scores tied, and random experiment choice did as well as information gain. Reported as found.",
-    path: BATCH03,
-  },
-  {
-    date: "November 14, 2026",
-    title: "A claims audit of the DESeq2 paper",
-    body: "Four claims, checked by SymPy and simulation in about 10 seconds for $0. One planted false claim, refuted.",
-    path: "docs/CLAIMS.md",
-  },
-];
 
 const RUN1 = "runs/demo/task9_real_swarm_run1.jsonl";
 
@@ -200,10 +167,10 @@ export default function Home() {
                 <CircleArrow />
               </Link>
               <Link
-                href="#results"
+                href="#runs"
                 className="inline-flex items-center gap-1.5 text-[0.95rem] font-medium underline decoration-border underline-offset-[6px] transition-colors hover:decoration-foreground"
               >
-                Read the results
+                Watch a graded run
                 <ArrowRightIcon className="size-4" aria-hidden="true" />
               </Link>
             </div>
@@ -232,6 +199,157 @@ export default function Home() {
             </Link>
           </div>
           <Plate {...PLATES.hero} priority sizes="(min-width: 1024px) 55vw, 100vw" className="w-full" />
+        </section>
+
+        {/* Results */}
+        <section id="results" className="scroll-mt-24 border-t bg-card">
+          <div className={`${WRAP} py-24 sm:py-32`}>
+            <div className="max-w-3xl">
+              <p className="eyebrow">Results · pilot, one task</p>
+              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">On cases nobody had seen, the swarm scored higher</h2>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                BixBench3 task 9: an RNA-seq analysis from published counts, with faults planted in the data. The swarm
+                ran against a single gpt-5.5 agent with the same inputs, prompt, sandbox, grader and $2 cap.
+              </p>
+            </div>
+
+            <Scoreboard className="mt-14" />
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Link href="#runs" className="pill">
+                Watch a graded run
+                <CircleArrow />
+              </Link>
+              <a
+                href={repoFile("eval/results")}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-[0.95rem] font-medium underline decoration-border underline-offset-[6px] transition-colors hover:decoration-foreground"
+              >
+                All results
+                <ArrowUpRightIcon className="size-4" aria-hidden="true" />
+              </a>
+            </div>
+
+            <div className="mt-8 max-w-4xl border-t pt-4">
+              <h3 className="text-xs font-medium text-muted-foreground">What it does not show</h3>
+              <ul className="mt-3 grid gap-x-8 gap-y-3 md:grid-cols-2">
+                {CAVEATS.map((c) => (
+                  <li key={c.title} className="text-xs leading-relaxed text-muted-foreground">
+                    <p><span className="font-medium text-foreground/80">{c.title}</span> {c.body}</p>
+                    <p className="mt-1">
+                      <a href={repoFile(c.path)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[0.7rem] underline decoration-border underline-offset-4 hover:text-foreground">
+                        Full report <ArrowUpRightIcon className="size-3" aria-hidden="true" />
+                      </a>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Graded runs */}
+        <section id="runs" className="scroll-mt-24 border-t">
+          <div className={`${WRAP} py-24 sm:py-32`}>
+            <div className="max-w-3xl">
+              <p className="eyebrow">Graded runs</p>
+              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">Watch it work</h2>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                Real task 9 runs, replayed from their logs: the questions the agents raised, the checks they chose, the
+                referee&apos;s verdicts and how belief moved. Nothing is redrawn after the fact.
+              </p>
+            </div>
+            <div className="mt-12 grid gap-8 lg:grid-cols-[1.45fr_0.55fr] lg:items-start">
+              <GradedRunPreview />
+              <aside>
+                <h3 className="font-display text-3xl leading-tight">What it ruled out, and why</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  Each of these lost to a check, not a vote. Thirteen questions in run 1 stayed open, and the report says so.
+                </p>
+                <ul className="mt-6 divide-y border-y">
+                  {REJECTED.map((r) => (
+                    <li key={r.question} className="py-3.5">
+                      <p className="text-sm font-medium">{r.question}</p>
+                      <p className="mt-1 text-sm text-muted-foreground line-through decoration-v-refuted/60">{r.option}</p>
+                      <p className="mt-1 flex items-baseline justify-between gap-3 text-xs text-muted-foreground">
+                        <span>{r.by}</span>
+                        <span className="font-mono text-v-refuted tabular-nums">{r.posterior}</span>
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-4">
+                  <Source path={RUN1} />
+                </p>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        {/* Sponsors */}
+        <section id="sponsors" className={`${WRAP} scroll-mt-24 border-t py-24 sm:py-32`}>
+          <div className="max-w-3xl">
+            <p className="eyebrow">Built with</p>
+            <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">What each sponsor does in Crux</h2>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              Every tool below runs in the product, and each card links to the evidence.
+            </p>
+          </div>
+          <div className="mt-14">
+            <Sponsors />
+          </div>
+        </section>
+
+        {/* One engine, many sciences */}
+        <section id="explore" className="dark scroll-mt-24 bg-ink text-foreground">
+          <div className={`${WRAP} py-24 sm:py-32`}>
+            <div className="max-w-3xl">
+              <p className="eyebrow">Explore</p>
+              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">One engine, many sciences</h2>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                The same loop runs wherever a claim can be checked: a genomics pipeline, a statistical method, a formula
+                in a paper. Pick a field for the numbers from a recorded run, or open its live figures.
+              </p>
+            </div>
+            <div className="mt-14">
+              <Domains />
+            </div>
+            <ul className="mt-14 grid gap-3 md:grid-cols-3">
+              {EXPLORE_CARDS.map((card) => (
+                <li key={card.href}>
+                  <Link
+                    href={card.href}
+                    className="group flex h-full items-stretch overflow-hidden rounded-2xl border bg-card transition-colors hover:border-foreground/30"
+                  >
+                    <div className="relative w-28 shrink-0 overflow-hidden bg-[#f7f6f3]">
+                      <Image
+                        src={card.image.src}
+                        alt={card.image.alt}
+                        width={card.image.width}
+                        height={card.image.height}
+                        sizes="112px"
+                        className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <p className="font-display text-2xl">{card.title}</p>
+                      <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">{card.body}</p>
+                      <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium">
+                        Live figures
+                        <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-10">
+              <Link href="/explore" className="pill">
+                Open the gallery
+                <CircleArrow />
+              </Link>
+            </div>
+          </div>
         </section>
 
         {/* How far it came (self-improvement) */}
@@ -295,44 +413,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* What it tests */}
-        <section id="domains" className="scroll-mt-24 border-t">
-          <div className={`${WRAP} py-24 sm:py-32`}>
-            <div className="max-w-3xl">
-              <p className="eyebrow">What it tests</p>
-              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">From a disagreement to an experiment</h2>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                The same loop runs wherever a claim can be checked: a genomics pipeline, a statistical method, a
-                formula in a paper. Every number below is from a recorded run.
-              </p>
-            </div>
-            <div className="mt-16">
-              <Domains />
-            </div>
-          </div>
-        </section>
-
-        {/* Statement */}
-        <section className={`${WRAP} pb-24 sm:pb-32`}>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Plate {...PLATES.statement} imgClassName="aspect-square lg:aspect-auto lg:h-full" className="lg:[&>div]:h-full [&>figcaption]:hidden" />
-            <div className="flex flex-col justify-center rounded-2xl bg-card p-8 sm:p-12 lg:p-16">
-              <p className="font-display text-4xl leading-[1.08] sm:text-5xl">
-                Every rejected idea keeps the evidence that rejected it.
-              </p>
-              <p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">
-                Hard rules live in code, not in prompts. Outcomes are binned by code, a blind referee checks each run
-                before any belief moves, and a run can be replayed from its event log alone.
-              </p>
-              <Link href="#how" className="pill mt-8 self-start">
-                How it works
-                <CircleArrow />
-              </Link>
-              <p className="mt-8 text-xs text-muted-foreground">{PLATES.statement.credit}</p>
-            </div>
-          </div>
-        </section>
-
         {/* How it works */}
         <section id="how" className="scroll-mt-24 border-t">
           <div className={`${WRAP} py-24 sm:py-32`}>
@@ -347,205 +427,6 @@ export default function Home() {
             <div className="mt-16">
               <Loop />
             </div>
-          </div>
-        </section>
-
-        {/* Results */}
-        <section id="results" className="scroll-mt-24 border-t bg-card">
-          <div className={`${WRAP} py-24 sm:py-32`}>
-            <div className="max-w-3xl">
-              <p className="eyebrow">Results · pilot, one task</p>
-              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">On cases nobody had seen, the swarm scored higher</h2>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                BixBench3 task 9: an RNA-seq analysis from published counts, with faults planted in the data. The swarm
-                ran against a single gpt-5.5 agent with the same inputs, prompt, sandbox, grader and $2 cap.
-              </p>
-            </div>
-
-            <Scoreboard className="mt-14" />
-            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href="/app/live" className="pill">
-                Start a live run
-                <CircleArrow />
-              </Link>
-              <Link
-                href="/runs"
-                className="inline-flex items-center gap-1.5 text-[0.95rem] font-medium underline decoration-border underline-offset-[6px] transition-colors hover:decoration-foreground"
-              >
-                Watch a graded run
-                <ArrowRightIcon className="size-4" aria-hidden="true" />
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                Sign in to run the swarm on a real task 9 case (about 6 minutes), or replay graded runs: every check, referee verdict, belief update and rejection.
-              </p>
-            </div>
-
-            <div className="mt-8 max-w-4xl border-t pt-4">
-              <h3 className="text-xs font-medium text-muted-foreground">What it does not show</h3>
-              <ul className="mt-3 grid gap-x-8 gap-y-3 md:grid-cols-2">
-                {CAVEATS.map((c) => (
-                  <li key={c.title} className="text-xs leading-relaxed text-muted-foreground">
-                    <p><span className="font-medium text-foreground/80">{c.title}</span> {c.body}</p>
-                    <p className="mt-1">
-                      <a href={repoFile(c.path)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[0.7rem] underline decoration-border underline-offset-4 hover:text-foreground">
-                        Full report <ArrowUpRightIcon className="size-3" aria-hidden="true" />
-                      </a>
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* What it rejected (Track 3 asks for it) */}
-        <section id="rejected" className="scroll-mt-24 border-t">
-          <div className={`${WRAP} py-24 sm:py-32`}>
-            <div className="max-w-3xl">
-              <p className="eyebrow">What it rejected</p>
-              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">Every rejection keeps the evidence behind it</h2>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                What the swarm ruled out matters as much as what it found. The first five options fell below posterior 0.02
-                in the first graded run; the last one fell in a run with documentation search on. Thirteen questions in the
-                first run ended unresolved and were reported that way, not guessed.
-              </p>
-            </div>
-            <div className="mt-12 overflow-x-auto rounded-2xl border bg-card">
-              <table className="w-full min-w-[40rem] text-left text-[0.95rem]">
-                <thead>
-                  <tr className="border-b text-sm text-muted-foreground">
-                    <th className="px-6 py-4 font-normal">Question</th>
-                    <th className="px-6 py-4 font-normal">Rejected option</th>
-                    <th className="px-6 py-4 font-normal">Rejected by</th>
-                    <th className="px-6 py-4 text-right font-normal">Posterior</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {REJECTED.map((r) => (
-                    <tr key={r.question} className="border-b last:border-0">
-                      <td className="px-6 py-4 font-medium">{r.question}</td>
-                      <td className="px-6 py-4 text-muted-foreground line-through decoration-v-refuted/60">{r.option}</td>
-                      <td className="px-6 py-4 font-mono text-sm">{r.by}</td>
-                      <td className="px-6 py-4 text-right font-mono text-sm text-v-refuted tabular-nums">{r.posterior}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link
-                href="/runs"
-                className="inline-flex items-center gap-1.5 text-[0.95rem] font-medium underline decoration-border underline-offset-[6px] transition-colors hover:decoration-foreground"
-              >
-                Replay the run and its rejected ledger
-                <ArrowRightIcon className="size-4" aria-hidden="true" />
-              </Link>
-              <Source path={RUN1} />
-            </div>
-          </div>
-        </section>
-
-        {/* Explore, on ink */}
-        <section className="bg-ink text-ink-foreground">
-          <div className={`${WRAP} py-24 sm:py-32`}>
-            <div className="max-w-3xl">
-              <p className="eyebrow text-ink-foreground/60">Explore</p>
-              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">One engine, many sciences</h2>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-foreground/70">
-                Live figures from the domains Crux works in: real structures you can turn, and simulations you can rerun
-                in the browser.
-              </p>
-            </div>
-            <ul className="mt-14 grid gap-4 md:grid-cols-3">
-              {EXPLORE_CARDS.map((card) => (
-                <li key={card.href}>
-                  <Link
-                    href={card.href}
-                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-ink-foreground/12 bg-ink-foreground/[0.04] transition-colors hover:bg-ink-foreground/[0.08]"
-                  >
-                    <div className="relative aspect-[16/10] overflow-hidden bg-[#f7f6f3]">
-                      <Image
-                        src={card.image.src}
-                        alt={card.image.alt}
-                        width={card.image.width}
-                        height={card.image.height}
-                        sizes="(min-width: 768px) 33vw, 100vw"
-                        className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                      />
-                    </div>
-                    <div className="flex flex-1 flex-col p-7">
-                    <p className="font-display text-3xl">{card.title}</p>
-                    <ul className="mt-5 flex flex-wrap gap-2">
-                      {card.tags.map((t) => (
-                        <li
-                          key={t}
-                          className="rounded-full border border-ink-foreground/20 px-3 py-1 text-[0.8rem] text-ink-foreground/75"
-                        >
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="mt-5 flex-1 leading-relaxed text-ink-foreground/70">{card.body}</p>
-                    <p className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium">
-                      Explore
-                      <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                    </p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-12 flex justify-center">
-              <Link href="/explore" className="pill-light">
-                Open the gallery
-                <CircleArrow />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Sponsors */}
-        <section id="sponsors" className={`${WRAP} scroll-mt-24 pt-24 sm:pt-32`}>
-          <div className="max-w-3xl">
-            <p className="eyebrow">Built with</p>
-            <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">What each sponsor does in Crux</h2>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-              Every tool below runs in the product, and each card links to the evidence.
-            </p>
-          </div>
-          <div className="mt-14">
-            <Sponsors />
-          </div>
-        </section>
-
-        {/* Reports */}
-        <section className={`${WRAP} py-24 sm:py-32`}>
-          <h2 className="text-center font-display text-5xl leading-[1.02] sm:text-6xl">Reports</h2>
-          <ul className="mt-14 grid gap-4 md:grid-cols-3">
-            {REPORTS.map((r) => (
-              <li key={r.path}>
-                <a
-                  href={repoFile(r.path)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group flex h-full flex-col rounded-2xl border bg-card p-7 transition-colors hover:border-foreground/25"
-                >
-                  <p className="font-mono text-xs text-muted-foreground">{r.date}</p>
-                  <p className="mt-4 font-display text-2xl leading-snug">{r.title}</p>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{r.body}</p>
-                  <p className="mt-6 inline-flex items-center gap-1 font-mono text-xs text-muted-foreground group-hover:text-foreground">
-                    {r.path}
-                    <ArrowUpRightIcon className="size-3" aria-hidden="true" />
-                  </p>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-12 flex justify-center">
-            <a href={repoFile("eval/results")} target="_blank" rel="noreferrer" className="pill">
-              All results
-              <CircleArrow />
-            </a>
           </div>
         </section>
 
