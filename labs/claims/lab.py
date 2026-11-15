@@ -123,7 +123,7 @@ class ClaimsLab:
             return Observation(
                 experiment_id=exp.id, valid=False, referee_note="not a claims-library diagnostic"
             )
-        root = self._root()
+        root = self._root().resolve()  # absolute: the script runs with cwd=work
         work, logs = root / "work", root / "logs"
         work.mkdir(parents=True, exist_ok=True)
         logs.mkdir(parents=True, exist_ok=True)

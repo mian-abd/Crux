@@ -7,6 +7,7 @@ import asyncio
 import hashlib
 import itertools
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -289,10 +290,16 @@ def test_critic_blocks_a_deliverable_without_a_section(tmp_path: Path) -> None:
 
 @pytest.fixture(scope="module")
 def claims_run(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    runs = tmp_path_factory.mktemp("claims-runs")
-    argv = ["--lab", "claims", "--run-id", "claims-test", "--runs-dir", str(runs), "--fake-clock"]
-    assert cli_main(argv) == 0
-    return runs / "claims-test"
+    # A relative --runs-dir, like the CLI's default: scripts must still be found.
+    home = tmp_path_factory.mktemp("claims-home")
+    argv = ["--lab", "claims", "--run-id", "claims-test", "--runs-dir", "runs", "--fake-clock"]
+    cwd = Path.cwd()
+    os.chdir(home)
+    try:
+        assert cli_main(argv) == 0
+    finally:
+        os.chdir(cwd)
+    return home / "runs" / "claims-test"
 
 
 def _outcome(events: list[dict]) -> dict:
