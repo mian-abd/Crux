@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import logging
 from pathlib import Path
 from typing import Literal
 
@@ -13,6 +14,8 @@ from core.interfaces import LLM, Memory
 from core.model_sandbox import validate_model_source
 from core.schemas import Evidence, Experiment, Hypothesis, Question
 from memory.lessons import format_lessons
+
+logger = logging.getLogger(__name__)
 
 ROLES = ("statistician", "bioinformatician", "sceptic")
 PROMPTS = Path(__file__).parent / "prompts"
@@ -113,6 +116,22 @@ def _complete_plan(plan: MergePlan, sources: dict, options: dict) -> MergePlan:
     )
 
 
+def _plan_problem(plan: MergePlan, sources: dict, options: dict) -> str | None:
+    """Why ``propose`` cannot use this merge plan, or ``None`` if it can."""
+    for group in plan.questions:
+        if any(source not in sources for source in group.source_ids):
+            return "it references an unknown question"
+        if len({sources[source][1].kind for source in group.source_ids}) != 1:
+            return "it merges categorical and model questions"
+        for cluster in group.options:
+            if any(
+                source not in options or options[source][0] not in group.source_ids
+                for source in cluster.source_ids
+            ):
+                return "an option is placed under another question"
+    return None
+
+
 async def propose(
     brief: dict,
     profile: list[Evidence],
@@ -197,6 +216,13 @@ async def propose(
         ],
     )
     plan = _complete_plan(MergePlan.model_validate(raw_plan), sources, options)
+    problem = _plan_problem(plan, sources, options)
+    if problem is not None:
+        # A malformed merge must not end the run: keep every proposer's question and
+        # option as proposed, unmerged (in batch-03, three swarm runs crashed here when
+        # the merge model put an option under the wrong question).
+        logger.warning("merge plan rejected (%s); proposals are kept unmerged", problem)
+        plan = _complete_plan(MergePlan.model_construct(questions=[]), sources, options)
     used_questions, used_options = [], []
     for group in plan.questions:
         if any(source not in sources for source in group.source_ids):

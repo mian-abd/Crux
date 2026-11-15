@@ -131,20 +131,25 @@ def test_clean_and_fault_profiles_keep_distinct_questions(tmp_path, fault, count
     asyncio.run(scenario())
 
 
-def test_invalid_merge_emits_no_partial_proposals(tmp_path):
+def test_invalid_merge_keeps_every_proposal_unmerged(tmp_path):
+    """A malformed merge plan no longer ends the run (three batch-03 swarm runs crashed on it)."""
+
     async def scenario():
         bus = EventBus("bad", tmp_path)
         await bus.emit("run.started", {})
-        with pytest.raises(ValueError, match="another question"):
-            await propose(
-                {},
-                [],
-                llm=Client(corrupt=True),
-                memory=FakeMemory(),
-                bus=bus,
-                config=RunConfig(),
-            )
-        assert len(bus.path.read_bytes().splitlines()) == 1
+        result = await propose(
+            {},
+            [],
+            llm=Client(corrupt=True),
+            memory=FakeMemory(),
+            bus=bus,
+            config=RunConfig(),
+        )
+        # 3 proposers x 2 questions, each kept as its own question with both of its options
+        assert len(result.questions) == 6
+        assert [len(result.provenance[q.id]) for q in result.questions] == [1] * 6
+        real = [h for h in result.hypotheses if not h.is_null]
+        assert len(real) == 12
 
     asyncio.run(scenario())
 
