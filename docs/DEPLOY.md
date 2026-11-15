@@ -14,6 +14,8 @@ Task 9 runs execute R and DESeq2 in network-blocked Modal sandboxes, which Railw
 - **`crux-api` without `OPENAI_API_KEY` or Modal tokens.** The free claims audit (about 8 s, $0) and the recorded replays work. A Task 9 run can't spend money: it fails without the keys.
 - **`crux-site` without `OPENAI_API_KEY`.** Paper upload and accounts work. Claim extraction shows its "extraction needs an API key" state instead of letting anyone with an account spend your OpenAI budget. Add the key only behind an invite gate.
 
+**The current deploy differs on one point:** `crux-site` has `OPENAI_API_KEY`, so claim extraction from an uploaded paper works for anyone with an account. Each extraction is one gpt-4.1-mini call (about a cent for a typical paper). Keep a spend limit on the OpenAI project, and remove the variable or rotate the key after the event. `crux-api` still has no OpenAI or Modal keys, so nobody can start a paid Task 9 run through it.
+
 ## Variables
 
 `crux-api`:
