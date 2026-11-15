@@ -28,9 +28,12 @@ Built at the SF AI Research Hackathon, Track 3 (AI Scientist Swarms). The submis
 | | Link | What you can do |
 | --- | --- | --- |
 | Site | https://crux-site-production-95830f5f.up.railway.app | Sign up, upload a paper, replay recorded runs, run the free claims audit, turn DNA, proteins and molecules in the 3D Explore gallery |
+| Run viewer | https://crux-viewer-production.up.railway.app | Replay graded Task 9 runs from their event logs: [run 1](https://crux-viewer-production.up.railway.app/?apireplay=task9_real_swarm_run1.jsonl&speed=8) (rankings, referee, Bayes updates, rejected ledger) and [tools-run-02](https://crux-viewer-production.up.railway.app/?apireplay=task9_tools_run2.jsonl&speed=8) (Exa searches and past.dev memory in the loop) |
 | Engine API | https://crux-api-production-fef3e0e8.up.railway.app | `/health`, `/replays` (recorded runs as Server-Sent Events), `POST /runs {"lab": "claims"}` (about 10 s, $0) |
 
 The hosted API has no OpenAI or Modal keys, so it can't start paid Task 9 runs; those run from a laptop or the Modal cloud runner ([docs/DEPLOY.md](docs/DEPLOY.md), [docs/CLOUD.md](docs/CLOUD.md)).
+
+**For judges:** [docs/SUBMISSION.md](docs/SUBMISSION.md#how-this-maps-to-the-judging-criteria) maps each judging criterion, the Track 3 asks and the Exa, past.dev and Modal challenges to the evidence in this repository.
 
 ## At a glance
 

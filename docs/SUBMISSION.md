@@ -2,6 +2,10 @@
 
 SF AI Research Hackathon, Track 3 (AI Scientist Swarms). Benchmark: Edison Scientific's BixBench3, task 9. Repository: https://github.com/mian-abd/Crux.
 
+**Sponsor challenges entered:** Exa (search runs inside the experiment loop), past.dev (multi-agent memory) and Modal (sandboxes and the cloud evaluation runner).
+
+**Live:** site https://crux-site-production-95830f5f.up.railway.app · run viewer https://crux-viewer-production.up.railway.app · engine API https://crux-api-production-fef3e0e8.up.railway.app
+
 Every number below comes from a file in this repository, cited next to it. Where we have no measurement we say "not measured". Task 9 results are a pilot: one task of 20, from published counts.
 
 ## Project description (150 words)
@@ -14,14 +18,33 @@ Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
 
 - **Live site:** https://crux-site-production-95830f5f.up.railway.app (sign up, replay the recorded runs, run the free claims audit, the 3D Explore gallery). The engine API behind it is https://crux-api-production-fef3e0e8.up.railway.app. It has no OpenAI or Modal keys, so it cannot start paid Task 9 runs (`docs/DEPLOY.md`).
 - **The loop:** `core/orchestrator.py`. The README has a diagram and a step-by-step map to its functions.
-- **Latest results:** `eval/results/task9_batch03.md`, its protocol `eval/results/task9_protocol_batch03.md` (pushed before any run, PR #48) and raw outputs in `eval/results/task9_batch03/`. Earlier batches: `task9_batch02.md`, `task9_batch01.md`, `task9_runs.md` in the same folder.
-- **Charts:** `docs/figures/batch-03/` (swarm versus single agent, per case, faults caught). Batch-02's charts are `docs/figures/task9_*.png`; real-data fault detection, the airway label swap and predictor calibration are also in `docs/figures/`.
+- **Watch a graded Task 9 run:** https://crux-viewer-production.up.railway.app/?apireplay=task9_real_swarm_run1.jsonl&speed=8 replays run 1 from its event log: questions, EIG rankings, sandboxed diagnostics, the referee, Bayes updates and the rejected ledger.
+- **Watch Exa and past.dev in the loop:** https://crux-viewer-production.up.railway.app/?apireplay=task9_tools_run2.jsonl&speed=8 replays `tools-run-02`. The memory and search panel shows each Exa query's URLs (blocked ones struck through), and the critic's recall of the referee's records.
+- **Latest results:** `eval/results/task9_batch04.md`, its protocol `eval/results/task9_protocol_batch04.md` (pushed before any run, PR #59) and raw outputs in `eval/results/task9_batch04/`. Earlier batches: `task9_batch03.md`, `task9_batch02.md`, `task9_batch01.md`, `task9_runs.md` in the same folder.
+- **Charts:** `docs/figures/batch-04/` (swarm versus single agent, per case, faults caught) and `docs/figures/batch-03/`. Batch-02's charts are `docs/figures/task9_*.png`; real-data fault detection, the airway label swap and predictor calibration are also in `docs/figures/`.
 - **A real run you can replay:** `runs/demo/task9_real_swarm_run1.jsonl`, the first officially graded run. `uv run python -m core.replay runs/demo/task9_real_swarm_run1.jsonl` re-derives all 11 Bayes updates from the log. The API serves it under `/replays` for the UI.
 - **The run with search and memory on:** `runs/demo/task9_tools_run2.jsonl` (`tools-run-02`; see Exa and past.dev below).
 - **Claims audit (MVP):** `uv run python -m core.cli --lab claims` audits four curated claims from the DESeq2 paper with SymPy and simulations, no API key needed. The recorded run is `runs/demo/claims_deseq2.jsonl`; details in `docs/CLAIMS.md`. Extraction from any paper and formal proofs are next.
 - **Consumer site:** `site/`. Run the API with `CRUX_CORS_ORIGINS=http://localhost:3000 uv run uvicorn api.server:app --port 8001`, then `cd site && npm ci && npm run dev` (`site/README.md`). It has accounts, PDF upload with claim extraction, a live claims audit view and 3D views (`site/components/viz/README.md`).
 - **Cloud evaluations:** `eval/cloud.py` and `docs/CLOUD.md` (see Modal below).
 - **BoxingGym study:** `eval/results/boxing/README.md` (DU-41, repaired study).
+
+## How this maps to the judging criteria
+
+| What the judges asked for | Where the evidence is |
+| --- | --- |
+| **Research rigour:** clear question, sound design, baselines or ablations, claims backed by results | Every batch pre-registered before it ran (PRs #48, #59); a single gpt-5.5 agent on the same inputs, prompt, image, grader and $2 cap; ablations for random selection and lessons; failed runs count as 0; bootstrap CIs. [Rigour](#rigour) |
+| **Novelty:** beyond existing papers and baselines | Analysis forks become questions; pre-registered diagnostics and doc searches compete on EIG per cost; a blind referee gates every update; "unresolved" is a result; the same engine audits a paper's maths. [Novelty](#novelty) |
+| **Results:** measurable, on a real benchmark, against a baseline; a working live demo | BixBench3 task 9, 13 fresh cases: 0.811 vs 0.608, paired +0.203 (95% CI +0.048 to +0.382), 12 of 12 planted faults vs 3. The live site runs a claims audit in about 10 s for $0, and the viewer replays graded runs. [Results](#results-against-the-baseline-and-the-record-pilot) |
+| **Autonomy and self-improvement** | One command runs profile, propose, experiment, deliver, critique and report unattended within $2; 52 runs launched by one command in Modal; lessons from its own runs (measured: no effect); a predictor fine-tuned on its own diagnostics. [Autonomy](#autonomy-and-self-improvement) |
+| **Interpretability and reproducibility** | Every decision is an event; `core.replay` recomputes every Bayes update from the log; manifests with model IDs, prompt hashes and input digests; Langfuse traces; failures and negatives reported. [Interpretability](#interpretability-and-reproducibility) |
+| **Track 3:** roles that check each other | Proposers (statistician, bioinformatician, sceptic), an experimenter, a blind referee and a critic with one repair round (`agents/`) |
+| **Track 3:** score vs a single-agent baseline on the same budget | Batch-04 above; batch-03 tied, reported as found |
+| **Track 3:** score vs the record | Not comparable: the 0.523 record is all 20 tasks from raw reads; ours is one task from counts. We say so rather than compare |
+| **Track 3:** report what the swarm rejected | [What the swarm rejected](#what-the-swarm-rejected), and the rejected ledger in the run viewer |
+| **Exa challenge:** Exa in the main loop, shown in the demo | Search competes with compute diagnostics on EIG per cost; call path in [Exa](#exa); `tools-run-02` replay in the viewer |
+| **past.dev challenge:** more than one writer and reader, cross-agent use, store map | Referee, experimenter and critic write; critic, designer and proposers read; the critic's prompt uses the referee's records. [past.dev](#pastdev) and the README's "Which memory holds what" |
+| **Modal challenge:** sandboxes and many experiments in parallel | A network-blocked sandbox per run, and a cloud runner that orchestrates, sandboxes and grades whole launches. [Modal](#modal) |
 
 ## Track 3: AI Scientist Swarms
 
@@ -180,6 +203,8 @@ We do not claim to have invented LLM-guided experimental design. BED-LLM combine
 4. When a search wins, `_Run._run_categorical` calls `_Run._run_search`, which calls `search.find(exp.query, k=5)`. That goes through `search/task9_policy.py`, `GuardedSearch.find` (query check, then URL and snippet checks), to `search/task9.py`, `ExaProvider.__call__`, to `search/exa.py`, `ExaSearch.lookup`.
 5. `_run_search` evaluates the bin rules over `{"n_results", "text", "urls"}`. Every bin requires at least one result, so a search with no usable documentation is invalid and moves no belief. A refused query or a provider error becomes an invalid observation, not a crashed run. The referee then checks the result before the Bayes update.
 
+**See it.** https://crux-viewer-production.up.railway.app/?apireplay=task9_tools_run2.jsonl&speed=8 replays `tools-run-02`; the three searches, their URLs and the rejection they caused appear as the run plays.
+
 **How sources are shown.** Each search emits a `search.done` event with the query, the returned URLs, the URLs the policy blocked and the observed bin. Each excerpt is streamed as an `experiment.log` line, `url: excerpt`. The observation keeps the text the bins were computed on, so the referee and a reader see the rules' inputs. The UI's memory and search panel lists the first three URLs and shows blocked URLs struck through (`web/src/components/MemoryPanel.tsx`). Results are written to shared memory as the experimenter's evidence, with their URLs. Every query, URL and denial is also audited in `<runs_dir>/.cache/search/` (`docs/SEARCH.md`).
 
 **Leakage policy** (`search/task9_policy.py`). Exa receives an include-list of documentation hosts (Bioconductor, CRAN, nf-core, Seqera docs, Subread, PyDESeq2 docs, Ensembl) and an exclude-list. Queries, URLs and snippets are screened for the source paper and its DOI, its journal, preprint servers, the study's GEO/SRA/ENA records, PubMed/PMC mirrors, the ground-truth bucket and study terms (glioblastoma, T98G, HEK293, the REST-targeting compounds, the output file names). Exclusions come from public task metadata, never from the ground truth. This is a lexical policy, not a proof of isolation (`docs/SEARCH.md`).
@@ -206,6 +231,8 @@ One run is in line with the tools-off clean runs of batch-02 (0.790 to 0.861), s
 | Designer (stand-in) | | recalls before each design; `SwarmRoles.design` ignores what it recalls |
 | Proposers | | at proposal time; in a fresh run audience only the profile exists then, and they already receive it |
 | Reporter | lessons, only with `lessons` on | |
+
+**See it.** The same `tools-run-02` replay shows each `memory.written` and `memory.recalled` event with its author, including the critic's recall of 8 referee records.
 
 **The cross-role read.** The critic reviews the deliverables with the experimenter's and the referee's records in its prompt (`contract["recalled_evidence"]`, read by `agents/critic.py`), and in a repair round with its own earlier objections. Every orchestrator recall is logged as `memory.recalled` with the author of each record, so the UI shows one agent using another's evidence; the proposers' recalls are logged in the memory journal only. Objections are mandatory context and are never dropped by recall's `k`. Recalled records only reach prompts; beliefs change only through a Bayes update on a new observation, and a record is never counted twice.
 

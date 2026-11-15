@@ -59,7 +59,12 @@ railway service source connect --repo mian-abd/Crux --branch main --service crux
 
 `crux-site` needs its root directory set to `/site` (its Dockerfile copies from there). A watch path of `/site/**` keeps API-only commits from rebuilding it. Both are service settings: set them in the dashboard (Settings, Source), or with `railway api` and the `serviceInstanceUpdate` mutation (`rootDirectory`, `watchPatterns`). `crux-api` finds `Dockerfile.api` through `RAILWAY_DOCKERFILE_PATH` and rebuilds on any change.
 
+## The run viewer (third service)
+
+`crux-viewer` serves `web/` (the engineering run viewer) as a static site from `web/Dockerfile`, with root directory `/web`, watch path `/web/**` and `VITE_API_URL` set to the API (read at build time). The API's `CRUX_CORS_ORIGINS` lists both the site and the viewer, comma-separated. Deep links: `?apireplay=<file in runs/demo>&speed=8`.
+
 ## Where it runs now
 
 - Site: https://crux-site-production-95830f5f.up.railway.app
+- Run viewer: https://crux-viewer-production.up.railway.app
 - API: https://crux-api-production-fef3e0e8.up.railway.app (`/health`, `/replays`)
