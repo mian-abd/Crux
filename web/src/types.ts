@@ -297,6 +297,35 @@ export const DNA_EVENT_TYPES: readonly DnaEventType[] = [
   'dna.lesson',
 ] as const;
 
+/* Paper & claims (lab "claims"): the paper and its claims, sent once after
+   run.started. Each claim is one engine question; its verdict comes from the
+   standard question events. */
+
+export interface ClaimSpec {
+  question_id: string;
+  claim: string;
+  /** Substring of the excerpt to highlight, or empty. */
+  quote: string;
+  kind: 'symbolic' | 'statistical';
+  /** A deliberately false claim planted to test the engine. */
+  planted: boolean;
+}
+
+export interface ClaimsPayloadMap {
+  'claims.source': {
+    title: string;
+    citation: string;
+    url: string;
+    license: string;
+    excerpt: string;
+    claims: ClaimSpec[];
+  };
+}
+
+export type ClaimsEventType = keyof ClaimsPayloadMap;
+
+export const CLAIMS_EVENT_TYPES: readonly ClaimsEventType[] = ['claims.source'] as const;
+
 export const EVENT_TYPES: readonly EventType[] = [
   'run.started',
   'profile.done',

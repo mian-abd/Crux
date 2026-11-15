@@ -1,0 +1,6 @@
+$ python nb_variance_montecarlo.py
+mu=5 alpha=2: mean=4.987 var=54.88 | mu+alpha*mu^2=55.00 (rel err 0.0022) | mu+mu^2/alpha=17.50 (rel err 2.1361)
+mu=10 alpha=0.5: mean=10.014 var=60.26 | mu+alpha*mu^2=60.00 (rel err 0.0044) | mu+mu^2/alpha=210.00 (rel err 0.7130)
+mu=50 alpha=0.1: mean=50.032 var=300.71 | mu+alpha*mu^2=300.00 (rel err 0.0024) | mu+mu^2/alpha=25050.00 (rel err 0.9880)
+mu=200 alpha=0.02: mean=200.057 var=1001.21 | mu+alpha*mu^2=1000.00 (rel err 0.0012) | mu+mu^2/alpha=2000200.00 (rel err 0.9995)
+RESULT: {"max_rel_err_alpha_form": 0.004392, "max_rel_err_inv_alpha_form": 2.136099, "n_draws": 200000, "n_settings": 4, "seed": 2014}

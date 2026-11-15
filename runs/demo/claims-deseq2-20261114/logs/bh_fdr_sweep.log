@@ -1,0 +1,11 @@
+$ python bh_fdr_sweep.py
+m=10    pi0=0.5: FDR 0.0258 (se 0.0006), pi0*q 0.0250, excess z +1.46
+m=10    pi0=0.8: FDR 0.0396 (se 0.0010), pi0*q 0.0400, excess z -0.44
+m=10    pi0=1.0: FDR 0.0508 (se 0.0016), pi0*q 0.0500, excess z +0.48
+m=100   pi0=0.5: FDR 0.0253 (se 0.0004), pi0*q 0.0250, excess z +0.75
+m=100   pi0=0.8: FDR 0.0395 (se 0.0009), pi0*q 0.0400, excess z -0.60
+m=100   pi0=1.0: FDR 0.0526 (se 0.0032), pi0*q 0.0500, excess z +0.82
+m=1000  pi0=0.5: FDR 0.0257 (se 0.0003), pi0*q 0.0250, excess z +2.42
+m=1000  pi0=0.8: FDR 0.0389 (se 0.0006), pi0*q 0.0400, excess z -1.77
+m=1000  pi0=1.0: FDR 0.0420 (se 0.0063), pi0*q 0.0500, excess z -1.26
+RESULT: {"max_alpha_z": 0.8235, "max_excess_z": 2.4205, "n_settings": 9, "seed": 3202, "worst_setting": "m=1000, pi0=0.5"}

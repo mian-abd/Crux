@@ -1,0 +1,6 @@
+$ python bh_fwer_counterexample.py
+m=2 m0=1: FWER 0.0512 (99.9% lower bound 0.0496)
+m=3 m0=1: FWER 0.0500 (99.9% lower bound 0.0484)
+m=3 m0=2: FWER 0.0659 (99.9% lower bound 0.0641)
+counterexample: m=3, 2 true nulls, 1 strong signals -> FWER 0.0659
+RESULT: {"found": true, "fwer": 0.06591, "fwer_lower": 0.064085, "m": 3, "m0": 2, "max_fwer_seen": 0.06591, "reps": 200000, "seed": 4202, "settings_tried": 3}

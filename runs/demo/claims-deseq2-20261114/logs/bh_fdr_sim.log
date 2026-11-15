@@ -1,0 +1,5 @@
+$ python bh_fdr_sim.py
+2000 experiments x 1000 tests, pi0 = 0.9, effect 3.0, BH at q = 0.05
+mean rejections 63.6, mean false rejections 2.92
+FDR = 0.0450 (se 0.0006); pi0*q = 0.0450
+RESULT: {"fdr": 0.044993, "fdr_se": 0.000581, "m": 1000, "mean_rejections": 63.647, "pi0": 0.9, "reps": 2000, "seed": 3101}

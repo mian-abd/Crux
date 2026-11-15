@@ -1,0 +1,5 @@
+$ python wald_pergene_vs_moderated.py
+20000 null genes, 3 vs 3 samples
+fitted trend: alpha(mean) = 0.0532 + 0.8517 / mean (truth 0.05 + 1/mu)
+false positives at p < 0.05: per-gene 0.1139, moderated 0.0575
+RESULT: {"fpr_moderated": 0.05755, "fpr_pergene": 0.1139, "n_genes": 20000, "n_per_group": 3, "seed": 9003, "trend_a0": 0.05323, "trend_a1": 0.851734}
