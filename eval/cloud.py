@@ -389,6 +389,7 @@ def upload(
     lessons: list[Path],
     *,
     force: bool,
+    truth_dest: str = "/task9-suite/truth.json",
 ) -> None:
     if not (references / "artifacts_grading.json").is_file():
         raise SystemExit(f"{references} has no artifacts_grading.json")
@@ -398,7 +399,7 @@ def upload(
     volume = modal.Volume.from_name(EVALUATOR_VOLUME, create_if_missing=True)
     with volume.batch_upload(force=force) as batch:
         batch.put_directory(str(references), "/task9")
-        batch.put_file(str(truth), "/task9-suite/truth.json")
+        batch.put_file(str(truth), truth_dest)
         for manifest in manifests:
             batch.put_file(str(manifest), f"/manifests/{manifest.name}")
         for corpus in lessons:
@@ -422,6 +423,9 @@ def main(argv: list[str] | None = None) -> None:
     put = commands.add_parser("upload", help="put evaluator files on the evaluator volume")
     put.add_argument("--references", type=Path, required=True)
     put.add_argument("--truth", type=Path, required=True)
+    put.add_argument("--truth-dest", default="/task9-suite/truth.json",
+                     help="where the truth file goes on the evaluator volume "
+                          "(/task9-suite-h44/truth.json for the seed-44 suite)")
     put.add_argument("--manifests", type=Path, nargs="+", required=True)
     put.add_argument("--lessons", type=Path, nargs="*", default=[])
     put.add_argument("--force", action="store_true", help="overwrite files already there")
@@ -431,7 +435,8 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "fetch":
         fetch(args.launch, args.to, runs=not args.no_runs, cache=args.with_cache)
     else:
-        upload(args.references, args.truth, args.manifests, args.lessons, force=args.force)
+        upload(args.references, args.truth, args.manifests, args.lessons, force=args.force,
+               truth_dest=args.truth_dest)
 
 
 if __name__ == "__main__":

@@ -274,6 +274,24 @@ def test_suite_jobs_lessons_and_validation():
         plan([{"name": "a", "cases": "clean"}], max_total_usd=0)
 
 
+def test_the_fresh_seed_44_suite_has_its_own_names_and_truth():
+    launch = plan([{"name": "fresh", "cases": "suite-h44", "arms": ["swarm", "baseline"],
+                    "score_faults": True}])
+    [job] = launch["jobs"]
+    assert job["cases"] == [f"h44-case-{i:02d}" for i in range(1, 14)]
+    assert job["runs"] == 26
+    command = cloud_jobs.job_command(job, launch)
+    assert "h44-case-01=/evaluator/manifests/h44-case-01.json" in command
+    faults = cloud_jobs.score_faults_command(job, launch)
+    assert faults[faults.index("--truth") + 1] == "/evaluator/task9-suite-h44/truth.json"
+    # the seed-43 suite keeps its own truth file
+    [old] = plan([{"name": "old", "cases": "suite", "score_faults": True}])["jobs"]
+    old_faults = cloud_jobs.score_faults_command(old, plan([{"name": "old", "cases": "suite"}]))
+    assert old_faults[old_faults.index("--truth") + 1] == "/evaluator/task9-suite/truth.json"
+    with pytest.raises(ValueError, match="one suite"):
+        plan([{"name": "mixed", "cases": ["case-01", "h44-case-01"], "score_faults": True}])
+
+
 def test_status_lines_show_finished_runs_and_spend():
     launch = plan([{"name": "smoke", "cases": "clean"}])
     budget = BudgetCap(3.0)
