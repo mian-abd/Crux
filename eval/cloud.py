@@ -188,8 +188,10 @@ def _preflight(launch: dict, root: Path) -> None:
     secrets=[modal.Secret.from_name(SECRET_NAME)],
     volumes={EVALUATOR_MOUNT: evaluator_volume.read_only(), RESULTS_MOUNT: results_volume},
     timeout=TIMEOUT_S,
-    cpu=4.0,
-    memory=16384,
+    # Up to 8 runs at once, each mostly waiting on the model; non-preemptible capacity is
+    # billed at 3x, so keep the container small.
+    cpu=2.0,
+    memory=8192,
     nonpreemptible=True,
 )
 def run_launch(launch: dict) -> dict:
