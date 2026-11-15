@@ -130,6 +130,13 @@ class RunManifest:
         if deps.llm is not None and hasattr(deps.llm, "config"):
             self.data["model_ids"] = dict(deps.llm.config.role_models)
             self.data["config"]["llm"] = deps.llm.config.model_dump(mode="json")
+        # What the run actually had, next to what the config asked for: run.started's
+        # config can say search=True and memory="pastdev" while no key was set.
+        search, memory = getattr(deps, "search", None), getattr(deps, "memory", None)
+        self.data["tools_connected"] = {
+            "search": type(search).__name__ if search is not None else None,
+            "memory": type(memory).__name__ if memory is not None else None,
+        }
         self.write()
 
     def write(self):

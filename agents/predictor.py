@@ -78,11 +78,40 @@ def library_row(
     return {b: (1 - floor) * p + floor / len(row) for b, p in row.items()}
 
 
+class OptionBin(BaseModel):
+    option_id: str
+    bin_id: str
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
+class JointChoice(BaseModel):
+    predictions: list[OptionBin]
+
+
+_JOINT_SYSTEM = """You predict the outcome of one pre-registered diagnostic under each of several
+competing options. For every option, assume that option alone is true and give the id of the bin
+the result will most likely land in, with your confidence (0-1) that it lands there. Reason from
+what the diagnostic measures; do not assume any option is likely or unlikely."""
+
+
 class SampledPredictor:
-    def __init__(self, llm, *, n: int = 8, eps: float = 0.1) -> None:
+    """Library rows first; then n samples per option, or one joint call when that is cheaper.
+
+    Sampling costs ``n`` model calls per option. When ``options * n`` would exceed
+    ``max_calls_per_experiment`` (for example a search diagnostic matched to a question with
+    five proposer options), one joint call predicts every remaining option at once: each option
+    gets its predicted bin with the stated confidence, the rest spread evenly, then the same
+    epsilon floor. On the first real runs with search on, per-option sampling spent a Task 9
+    run's whole 40-call budget before a single experiment ran.
+    """
+
+    def __init__(
+        self, llm, *, n: int = 8, eps: float = 0.1, max_calls_per_experiment: int = 8
+    ) -> None:
         self.llm = llm
         self.n = n
         self.eps = eps
+        self.max_calls_per_experiment = max_calls_per_experiment
 
     async def predict(
         self, exp: Experiment, hypotheses: list[Hypothesis], context: str
@@ -96,12 +125,45 @@ class SampledPredictor:
                 table[h.id] = row
             else:
                 sampled.append(h)
+        if sampled and len(sampled) * self.n > self.max_calls_per_experiment:
+            table.update(await self._joint(exp, sampled, context))
+            return table
         rows = await asyncio.gather(*(self._sample(exp, h, context) for h in sampled))
         for h, counts in zip(sampled, rows, strict=True):
             table[h.id] = scoring.likelihood_from_samples(
                 {b: counts.get(b, 0) for b in bins}, len(bins), self.eps
             )
         return table
+
+    async def _joint(
+        self, exp: Experiment, options: list[Hypothesis], context: str
+    ) -> dict[str, dict[str, float]]:
+        bins = [b.id for b in exp.bins]
+        messages = [
+            {"role": "system", "content": _JOINT_SYSTEM},
+            {
+                "role": "user",
+                "content": json.dumps(
+                    {
+                        "options": [{"option_id": h.id, "statement": h.statement} for h in options],
+                        "diagnostic": diagnostic_spec(exp),
+                        "context": context[:4000],
+                    }
+                ),
+            },
+        ]
+        [choice] = await self.llm.structured("predictor", JointChoice, messages)
+        picks = {p.option_id: p for p in JointChoice.model_validate(choice).predictions}
+        out = {}
+        for h in options:
+            pick = picks.get(h.id)
+            if pick is None or pick.bin_id not in bins:
+                row = {b: 1 / len(bins) for b in bins}
+            else:
+                rest = (1 - pick.confidence) / max(len(bins) - 1, 1)
+                row = {b: (pick.confidence if b == pick.bin_id else rest) for b in bins}
+            out[h.id] = {b: (1 - self.eps) * p + self.eps / len(bins) for b, p in row.items()}
+        return out
 
     async def _sample(
         self, exp: Experiment, h: Hypothesis, context: str
