@@ -61,11 +61,11 @@ httpOnly session cookies. No third-party service holds an account.
 
 ### Where the run page gets its events
 
-1. A live run, when `GET /tasks` lists the `claims` lab: `POST /runs`, then
-   `GET /runs/{id}/events`.
-2. Otherwise the recorded run `runs/demo/claims_deseq2.jsonl` through `/replays`, labelled
+1. A live run, when `GET /tasks` lists the `claims` lab: `POST /runs {"lab": "claims"}`, then
+   `GET /runs/{id}/events`. It needs no API key and takes a few seconds.
+2. `/app/runs/demo` plays the recorded run `runs/demo/claims_deseq2.jsonl` through `/replays`, labelled
    "Replay of a recorded run".
-3. Otherwise `public/fixtures/demo_claims.jsonl`, a hand-written UI fixture copied from
+3. If the API cannot be reached: `public/fixtures/demo_claims.jsonl`, a hand-written UI fixture copied from
    `web/public/fixtures/`. The page labels it as a fixture, not a recorded run.
 
 The event types, the fold and the claims derivation in `lib/crux/` are copies of

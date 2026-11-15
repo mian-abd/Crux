@@ -11,16 +11,16 @@ describe("claim extraction", () => {
       {
         title: " A paper ",
         claims: [
-          { claim: "Variance is mu + alpha mu^2", quote: "the variance of a count is mu + alpha mu^2", kind: "symbolic", library_id: "claim-nb_variance" },
+          { claim: "Variance is mu + alpha mu^2", quote: "the variance of a count is mu + alpha mu^2", kind: "symbolic", library_id: "claim-nb-variance" },
           { claim: "Made-up match", quote: "x", kind: "statistical", library_id: "claim-not-in-library" },
-          { claim: "312 genes changed", quote: "We saw 312 genes change.", kind: "empirical", library_id: "claim-bh_fdr" },
+          { claim: "312 genes changed", quote: "We saw 312 genes change.", kind: "empirical", library_id: "claim-bh-fdr" },
           { claim: "No match", quote: "", kind: "symbolic", library_id: NO_MATCH },
         ],
       },
       PAPER,
     );
     expect(out.title).toBe("A paper");
-    expect(out.claims.map((c) => c.libraryId)).toEqual(["claim-nb_variance", null, null, null]);
+    expect(out.claims.map((c) => c.libraryId)).toEqual(["claim-nb-variance", null, null, null]);
   });
 
   it("checks each quote against the paper, ignoring case and whitespace", () => {

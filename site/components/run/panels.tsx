@@ -401,7 +401,7 @@ export function ConsolePanel({ lines }: { lines: ConsoleLine[] }) {
 export function RefereePanel({ experiments }: { experiments: ExperimentView[] }) {
   const judged = experiments.filter((e) => e.verdict).sort((a, b) => b.proposedSeq - a.proposedSeq);
   return (
-    <Panel title="Referee verdicts" hint="A result counts only if the blind referee passes it">
+    <Panel title="Referee verdicts" hint="A result counts only if the referee passes it">
       {judged.length === 0 ? (
         <EmptyNote>No result has reached the referee yet.</EmptyNote>
       ) : (

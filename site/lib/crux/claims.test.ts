@@ -139,6 +139,20 @@ describe('claim verdicts from the standard events', () => {
     expect(claimVerdict(reopened.questions.q)).toBe('open');
   });
 
+  it('is refuted once the claim\'s own holds option is rejected and no holds-if option stands', () => {
+    const reject = (s: RunState, hid: string) =>
+      foldEvent(s, ev('hypothesis.rejected', { question_id: 'q', hypothesis_id: hid, reason: 'posterior below 0.02', evidence_id: 'ev-1' }));
+    const unresolved = (s: RunState) =>
+      foldEvent(s, ev('question.unresolved', { question_id: 'q', reason: 'no informative experiment left', top: [] }));
+    // holds rejected, but "holds only if" still standing: not refuted yet
+    const holdsOnly = reject(oneClaim(), 'q-h0');
+    expect(claimVerdict(unresolved(holdsOnly).questions.q)).toBe('unresolved');
+    // holds and holds-if both rejected: the claim is refuted even though the question ends unresolved
+    const both = reject(holdsOnly, 'q-h2');
+    expect(claimVerdict(both.questions.q)).toBe('refuted');
+    expect(claimVerdict(unresolved(both).questions.q)).toBe('refuted');
+  });
+
   it('labels options by answer key', () => {
     const q = oneClaim().questions.q!;
     expect(q.optionOrder.map((id) => optionLabel(q.options[id]!))).toEqual([
@@ -149,6 +163,25 @@ describe('claim verdicts from the standard events', () => {
       'Conservative',
       'None of these',
     ]);
+  });
+});
+
+describe('the recorded claims run (runs/demo/claims_deseq2.jsonl)', () => {
+  it('shows the four verdicts the engine reached', () => {
+    const recorded = parseJsonl(
+      readFileSync(fileURLToPath(new URL('../../../runs/demo/claims_deseq2.jsonl', import.meta.url)), 'utf8'),
+    );
+    const s = foldAll(recorded);
+    const verdicts = Object.fromEntries(
+      ['claim-nb-variance', 'claim-wald-calibration', 'claim-bh-fdr', 'claim-bh-fwer'].map((id) => [id, claimVerdict(s.questions[id])]),
+    );
+    expect(verdicts).toEqual({
+      'claim-nb-variance': 'holds',
+      'claim-wald-calibration': 'holds_if',
+      'claim-bh-fdr': 'holds',
+      // its holds option was rejected by the counterexample; the question itself ended unresolved
+      'claim-bh-fwer': 'refuted',
+    });
   });
 });
 

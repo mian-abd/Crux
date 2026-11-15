@@ -44,8 +44,24 @@ export function claimVerdict(q: QuestionView | null | undefined): ClaimVerdict {
     return verdictForKey(q.options[q.settled.hypothesisId]?.answerKey);
   }
   if (q.status === 'robust' && q.robust) return verdictForKey(q.robust.answerKey);
+  if (holdsRejected(q)) return 'refuted';
   if (q.status === 'unresolved') return 'unresolved';
   return 'open';
+}
+
+/**
+ * The claim itself (its `holds` option) was rejected by evidence and no
+ * "holds only if" option is still standing. That refutes the claim even when
+ * the question ends unresolved between the alternatives that remain, which is
+ * the rule the claims lab's CLAIMS.md report uses.
+ */
+export function holdsRejected(q: QuestionView): boolean {
+  const options = Object.values(q.options);
+  const holds = options.find((o) => normKey(o.answerKey) === 'holds');
+  if (!holds || holds.status !== 'rejected') return false;
+  return !options.some(
+    (o) => normKey(o.answerKey).startsWith('holds_if') && o.status !== 'rejected',
+  );
 }
 
 export const VERDICT_LABEL: Record<ClaimVerdict, string> = {

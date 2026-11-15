@@ -1,6 +1,6 @@
 // The curated claims the engine can check today: four claims from the DESeq2 paper.
-// The ids are the question ids of the `claims.source` event (as in the engineering
-// viewer's fixture, web/public/fixtures/demo_claims.jsonl), so a
+// The ids are the question ids the claims lab sends in its `claims.source` event
+// (labs/claims; see runs/demo/claims_deseq2.jsonl), so a
 // claim extracted from an uploaded paper can be matched to a check that exists.
 //
 // Keep this list in step with the claims lab. Three claims read the paper; the fourth
@@ -29,35 +29,35 @@ export const LIBRARY_PAPER = {
 
 export const CLAIM_LIBRARY: readonly LibraryClaim[] = [
   {
-    id: "claim-nb_variance",
+    id: "claim-nb-variance",
     kind: "symbolic",
     meaning:
-      "Under the negative binomial model, the variance of a count is μ + αμ² (mean μ, dispersion α).",
-    check: "Symbolic derivation, then a simulation.",
+      "A negative binomial count with mean μ and dispersion α has variance μ + αμ².",
+    check: "Symbolic derivation with SymPy, then a Monte Carlo check.",
     planted: false,
   },
   {
-    id: "claim-wald_calibration",
+    id: "claim-wald-calibration",
     kind: "statistical",
     meaning:
-      "With three replicates per condition, Wald test P values are calibrated: under the null, about 5% fall below 0.05.",
+      "With 3 replicates per group, Wald-test p-values from the negative binomial GLM are calibrated under the null.",
     check: "Simulation of null genes.",
     planted: false,
   },
   {
-    id: "claim-bh_fdr",
+    id: "claim-bh-fdr",
     kind: "statistical",
     meaning:
-      "Benjamini-Hochberg adjusted P values control the false discovery rate: among genes with padj < 0.1, at most about 10% are false on average.",
-    check: "Simulation over many datasets.",
+      "Benjamini–Hochberg adjusted p-values below α control the false discovery rate at α (independent tests).",
+    check: "Simulation, then a search for a setting that breaks it.",
     planted: false,
   },
   {
-    id: "claim-bh_fwer",
+    id: "claim-bh-fwer",
     kind: "statistical",
     meaning:
-      "Calling genes with BH-adjusted P below 0.1 also keeps the family-wise error rate, the chance of any false positive, at 10%.",
-    check: "Simulation that looks for a counterexample.",
+      "Benjamini–Hochberg adjustment controls the family-wise error rate at α.",
+    check: "Simulation, then a search for a counterexample.",
     planted: true,
   },
 ] as const;
