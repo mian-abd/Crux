@@ -31,7 +31,7 @@ Built at the SF AI Research Hackathon, Track 3 (AI Scientist Swarms). The submis
 | Run viewer | https://crux-viewer-production.up.railway.app | Replay graded Task 9 runs from their event logs: [run 1](https://crux-viewer-production.up.railway.app/?apireplay=task9_real_swarm_run1.jsonl&speed=8) (rankings, referee, Bayes updates, rejected ledger) and [tools-run-02](https://crux-viewer-production.up.railway.app/?apireplay=task9_tools_run2.jsonl&speed=8) (Exa searches and past.dev memory in the loop) |
 | Engine API | https://crux-api-production-fef3e0e8.up.railway.app | `/health`, `/replays` (recorded runs as Server-Sent Events), `POST /runs {"lab": "claims"}` (about 10 s, $0) |
 
-The hosted API has no OpenAI or Modal keys, so it can't start paid Task 9 runs; those run from a laptop or the Modal cloud runner ([docs/DEPLOY.md](docs/DEPLOY.md), [docs/CLOUD.md](docs/CLOUD.md)).
+The hosted API holds the OpenAI, Modal, Exa, past.dev and Langfuse keys, but no Task 9 case is loaded on it, so nobody can start a paid Task 9 run through it. Those run from a laptop or the Modal cloud runner ([docs/DEPLOY.md](docs/DEPLOY.md), [docs/CLOUD.md](docs/CLOUD.md)).
 
 **For judges:** [docs/SUBMISSION.md](docs/SUBMISSION.md#how-this-maps-to-the-judging-criteria) maps each judging criterion, the Track 3 asks and the Exa, past.dev and Modal challenges to the evidence in this repository.
 
@@ -231,7 +231,7 @@ flowchart TB
     AG -.-> PAST
 ```
 
-The claims audit runs in-process in the API (SymPy and SciPy, no keys). Task 9 runs need `OPENAI_API_KEY` and Modal tokens; the hosted API has neither, by design. Dotted lines are optional tools that every graded batch stripped, except the separately labelled `tools-run-02`.
+The claims audit runs in-process in the API (SymPy and SciPy, no keys). Task 9 runs need `OPENAI_API_KEY`, Modal tokens and a staged case; the hosted API has the keys but no case loaded, so it cannot start one. Dotted lines are optional tools that every graded batch stripped, except the separately labelled `tools-run-02`.
 
 ```mermaid
 flowchart TB
