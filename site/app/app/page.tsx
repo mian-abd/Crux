@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { StartAuditButton } from "@/components/app/start-audit-button";
 import { UploadDropzone } from "@/components/app/upload-dropzone";
+import { GrowthChart } from "@/components/growth-chart";
 import { Scoreboard } from "@/components/scoreboard";
 import { Chip } from "@/components/verdict-chip";
 import { LIBRARY_PAPER } from "@/lib/claim-library";
@@ -81,10 +82,64 @@ export default async function HomePage() {
               Upload a paper
             </Link>
           </div>
+          <dl className="mt-8 grid max-w-xl grid-cols-[1.4fr_1fr_1fr] gap-4 border-t border-ink-foreground/15 pt-5">
+            <div className="flex flex-col-reverse">
+              <dt className="mt-1 text-xs leading-snug text-ink-foreground/60">Clean case, first run to now</dt>
+              <dd className="font-display text-xl leading-none whitespace-nowrap tabular-nums sm:text-3xl">0.586 → 0.864</dd>
+            </div>
+            <div className="flex flex-col-reverse">
+              <dt className="mt-1 text-xs leading-snug text-ink-foreground/60">Over a single agent, 52 fresh cases</dt>
+              <dd className="font-display text-xl leading-none text-brand-soft tabular-nums sm:text-3xl">+0.146</dd>
+            </div>
+            <div className="flex flex-col-reverse">
+              <dt className="mt-1 text-xs leading-snug text-ink-foreground/60">Planted faults caught</dt>
+              <dd className="font-display text-xl leading-none tabular-nums sm:text-3xl">48/48</dd>
+            </div>
+          </dl>
         </div>
         <p className="absolute right-5 bottom-4 hidden text-[0.7rem] text-ink-foreground/50 sm:block">
           Joseph Wright of Derby, An Experiment on a Bird in the Air Pump (1768). Public domain.
         </p>
+      </section>
+
+      {/* Results */}
+      <section aria-labelledby="results-heading">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h2 id="results-heading" className="font-display text-3xl sm:text-4xl">
+            Where it stands: 52 fresh cases
+          </h2>
+          <div className="flex flex-wrap items-center gap-5 text-sm">
+            <Link href="/app/graded" className="font-medium underline decoration-border underline-offset-4 hover:decoration-foreground">
+              Watch a graded run
+            </Link>
+            <Link href="/#results" className="text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground">
+              Caveats and earlier batches
+            </Link>
+          </div>
+        </div>
+        <Scoreboard compact className="mt-6" />
+      </section>
+
+      {/* How far it came */}
+      <section aria-labelledby="growth-heading" className="grid items-center gap-8 rounded-3xl border bg-card p-6 sm:p-8 lg:grid-cols-[0.8fr_1.2fr]">
+        <div>
+          <h2 id="growth-heading" className="font-display text-3xl sm:text-4xl">
+            How far it came
+          </h2>
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            The swarm&apos;s first graded run scored 0.586 on the clean case, behind a single frontier agent. Four fixes, each
+            from a failure in its own logs, brought it to 0.864. On cases it had never seen, it now scores 0.817 against
+            0.671 and catches every planted fault.
+          </p>
+          <Link
+            href="/#improves"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium underline decoration-border underline-offset-4 hover:decoration-foreground"
+          >
+            What changed at each step
+            <ArrowRightIcon className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <GrowthChart />
       </section>
 
       {/* Start here */}
@@ -139,24 +194,6 @@ export default async function HomePage() {
             </Link>
           </li>
         </ul>
-      </section>
-
-      {/* Results */}
-      <section aria-labelledby="results-heading">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 id="results-heading" className="font-display text-3xl sm:text-4xl">
-            Latest result
-          </h2>
-          <div className="flex flex-wrap items-center gap-5 text-sm">
-            <Link href="/app/graded" className="font-medium underline decoration-border underline-offset-4 hover:decoration-foreground">
-              Watch a graded run
-            </Link>
-            <Link href="/#results" className="text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground">
-              Caveats and earlier batches
-            </Link>
-          </div>
-        </div>
-        <Scoreboard compact className="mt-6" />
       </section>
 
       {/* Papers */}

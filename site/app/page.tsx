@@ -6,6 +6,7 @@ import { Domains } from "@/components/landing/domains";
 import { Loop } from "@/components/landing/loop";
 import { Plate } from "@/components/landing/plate";
 import { Sponsors } from "@/components/landing/sponsors";
+import { GrowthChart } from "@/components/growth-chart";
 import { Scoreboard } from "@/components/scoreboard";
 import { SiteFooter } from "@/components/site-footer";
 import { AnnouncementBar, SiteHeader } from "@/components/site-header";
@@ -207,18 +208,18 @@ export default function Home() {
       <SiteHeader />
       <main id="main" className="flex-1">
         {/* Hero */}
-        <section className={`${WRAP} grid items-center gap-12 pt-14 pb-20 sm:pt-20 lg:min-h-[calc(100svh-7rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:pb-24`}>
+        <section className={`${WRAP} grid items-center gap-12 pt-12 pb-20 sm:pt-14 lg:min-h-[calc(100svh-7rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:pb-20`}>
           <div>
-            <h1 className="font-display text-[3.4rem] leading-[0.98] sm:text-[5.2rem] lg:text-[5.6rem] xl:text-[6.4rem]">
+            <h1 className="font-display text-[3.4rem] leading-[0.98] sm:text-[5rem] lg:text-[5rem] xl:text-[5.6rem]">
               <span className="block animate-rise">Settled by experiment,</span>
               <span className="block animate-rise text-subtle [animation-delay:80ms]">not by vote.</span>
             </h1>
-            <p className="mt-8 max-w-xl animate-rise text-lg leading-relaxed text-muted-foreground [animation-delay:140ms] sm:text-xl">
+            <p className="mt-6 max-w-xl animate-rise text-lg leading-relaxed text-muted-foreground [animation-delay:140ms] sm:text-xl">
               Crux is a team of AI scientists. When they disagree about an analysis, a formula or a statistical
               method, they run the experiment expected to tell them the most per dollar, and change their minds only
               on what it shows.
             </p>
-            <div className="mt-10 flex animate-rise flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:200ms]">
+            <div className="mt-8 flex animate-rise flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:200ms]">
               <Link href="/signup" className="pill">
                 Audit a paper
                 <CircleArrow />
@@ -231,8 +232,92 @@ export default function Home() {
                 <ArrowRightIcon className="size-4" aria-hidden="true" />
               </Link>
             </div>
+            <dl className="mt-10 grid max-w-xl animate-rise gap-x-8 gap-y-6 border-t pt-6 [animation-delay:260ms] sm:grid-cols-[1.4fr_1fr_1fr]">
+              <div className="flex flex-col-reverse">
+                <dt className="mt-1.5 text-sm leading-snug text-muted-foreground">Clean case, first run to now</dt>
+                <dd className="font-display text-[2.1rem] leading-none whitespace-nowrap tabular-nums">
+                  0.586<span className="text-subtle"> → </span>0.864
+                </dd>
+              </div>
+              <div className="flex flex-col-reverse">
+                <dt className="mt-1.5 text-sm leading-snug text-muted-foreground">Over a single gpt-5.5 agent, 52 fresh cases</dt>
+                <dd className="font-display text-[2.1rem] leading-none text-brand tabular-nums">+0.146</dd>
+              </div>
+              <div className="flex flex-col-reverse">
+                <dt className="mt-1.5 text-sm leading-snug text-muted-foreground">Planted faults caught (single agent: 14)</dt>
+                <dd className="font-display text-[2.1rem] leading-none tabular-nums">48/48</dd>
+              </div>
+            </dl>
+            <Link
+              href="#improves"
+              className="mt-5 inline-flex animate-rise items-center gap-1.5 text-sm text-muted-foreground underline decoration-border underline-offset-4 [animation-delay:300ms] hover:text-foreground"
+            >
+              How it got there
+              <ArrowRightIcon className="size-3.5" aria-hidden="true" />
+            </Link>
           </div>
           <Plate {...PLATES.hero} priority sizes="(min-width: 1024px) 55vw, 100vw" className="w-full" />
+        </section>
+
+        {/* How far it came (self-improvement) */}
+        <section id="improves" className="scroll-mt-24 border-t bg-card">
+          <div className={`${WRAP} py-24 sm:py-32`}>
+            <div className="grid items-center gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+              <div>
+                <p className="eyebrow">How far it came</p>
+                <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">
+                  From 0.586 to 0.864, then ahead on cases it had never seen
+                </h2>
+                <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+                  On its first graded run the swarm scored 0.586 on the clean case, well behind a single frontier agent.
+                  Each fix below came from a failure in its own logs, and each batch after it was pre-registered. It now
+                  matches the single agent on the clean case, and on 52 fresh cases with planted faults it scores 0.817
+                  against 0.671 and catches all 48 faults.
+                </p>
+              </div>
+              <div className="rounded-3xl border bg-background p-5 sm:p-8">
+                <GrowthChart />
+              </div>
+            </div>
+
+            <ol className="mt-12 grid gap-3 lg:grid-cols-4">
+              {FELL_SHORT.map((s, i) => (
+                <li key={s.from} className="flex flex-col rounded-2xl border bg-background p-6">
+                  <p className="text-sm text-muted-foreground">Step {i + 1} · {s.short}</p>
+                  <p className="mt-4 font-display text-4xl leading-none tabular-nums">
+                    <span className="text-subtle">{s.from}</span> <span className="text-subtle">→</span>{" "}
+                    <span className="text-foreground">{s.to}</span>
+                  </p>
+                  <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+                    <span className="font-medium text-foreground">The logs: </span>
+                    {s.logs}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    <span className="font-medium text-foreground">The change: </span>
+                    {s.change}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              We made these four fixes; the system did not change its own code. Inputs and the prompt changed along the way,
+              so this is not a learning curve. Now, on 52 fresh cases: +0.146, with 48 of 48 faults caught.
+            </p>
+
+            <h3 className="mt-16 font-display text-3xl">Loops that run on their own</h3>
+            <ul className="mt-6 grid gap-3 md:grid-cols-3">
+              {LOOPS.map((l) => (
+                <li key={l.title} className="flex flex-col rounded-2xl border bg-background p-6">
+                  <p className="text-sm text-muted-foreground">{l.title}</p>
+                  <p className="mt-3 font-display text-3xl leading-tight">{l.stat}</p>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{l.body}</p>
+                  <p className="mt-4">
+                    <Source path={l.path} />
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         {/* What it tests */}
@@ -381,58 +466,6 @@ export default function Home() {
               </Link>
               <Source path={RUN1} />
             </div>
-          </div>
-        </section>
-
-        {/* Where it fell short (self-improvement) */}
-        <section id="improves" className="scroll-mt-24 border-t bg-card">
-          <div className={`${WRAP} py-24 sm:py-32`}>
-            <div className="max-w-3xl">
-              <p className="eyebrow">Where it fell short</p>
-              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">It learns from its own results, and we say where it doesn&apos;t</h2>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                On the clean case the swarm started well behind a single agent. Each step below came from a failure in its
-                own logs, and each batch after it was pre-registered.
-              </p>
-            </div>
-
-            <ol className="mt-12 grid gap-3 lg:grid-cols-4">
-              {FELL_SHORT.map((s, i) => (
-                <li key={s.from} className="flex flex-col rounded-2xl border bg-background p-6">
-                  <p className="text-sm text-muted-foreground">Step {i + 1} · {s.short}</p>
-                  <p className="mt-4 font-display text-4xl leading-none tabular-nums">
-                    <span className="text-subtle">{s.from}</span> <span className="text-subtle">→</span>{" "}
-                    <span className="text-foreground">{s.to}</span>
-                  </p>
-                  <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
-                    <span className="font-medium text-foreground">The logs: </span>
-                    {s.logs}
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    <span className="font-medium text-foreground">The change: </span>
-                    {s.change}
-                  </p>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-              We made these four fixes; the system did not change its own code. Inputs and the prompt changed along the way,
-              so this is not a learning curve. Now, on 52 fresh cases: +0.146, with 48 of 48 faults caught.
-            </p>
-
-            <h3 className="mt-16 font-display text-3xl">Loops that run on their own</h3>
-            <ul className="mt-6 grid gap-3 md:grid-cols-3">
-              {LOOPS.map((l) => (
-                <li key={l.title} className="flex flex-col rounded-2xl border bg-background p-6">
-                  <p className="text-sm text-muted-foreground">{l.title}</p>
-                  <p className="mt-3 font-display text-3xl leading-tight">{l.stat}</p>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{l.body}</p>
-                  <p className="mt-4">
-                    <Source path={l.path} />
-                  </p>
-                </li>
-              ))}
-            </ul>
           </div>
         </section>
 
