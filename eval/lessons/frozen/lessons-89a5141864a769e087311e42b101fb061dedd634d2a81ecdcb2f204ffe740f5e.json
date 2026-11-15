@@ -1,0 +1,417 @@
+{
+  "manifest": {
+    "frozen_at": "2026-11-15T04:47:41.391469Z",
+    "held_out_case_ids": [
+      "case-01",
+      "case-02",
+      "case-03",
+      "case-04",
+      "case-07",
+      "case-08",
+      "case-10",
+      "case-11",
+      "case-13"
+    ],
+    "lessons": [
+      {
+        "approved": true,
+        "diagnostic": "Before returning the plan, scan every step for library(), require() and import calls beyond base R, DESeq2, pandas, numpy and the Python standard library, and for to_markdown(). An attempt that failed with \"there is no package called 'jsonlite'\" or \"Import tabulate failed\" is this mistake.",
+        "exceptions": [
+          "Observed on sandbox image im-oKU7URiND5MAa2kgh4vcOq; if the image changes, check the package once rather than assuming it is still missing."
+        ],
+        "excludes": [],
+        "id": "task9-sandbox-packages-v1",
+        "mistake": "Calling library(jsonlite) in R or DataFrame.to_markdown() in Python. Neither jsonlite nor tabulate is installed, so the step stops, the attempt is spent and the deliverables that step would have written are missing.",
+        "repair": "Pass data between steps as TSV or CSV files (read.delim and write.csv in R, pandas in Python). Write METHODS.md with plain string formatting or DataFrame.to_string(). After an import error, remove that dependency instead of retrying the same call.",
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          },
+          {
+            "key": "reader",
+            "value": "designer"
+          }
+        ],
+        "reviewed_at": "2026-11-15T04:47:40Z",
+        "reviewed_by": "Mian (mian-abd)",
+        "sources": [
+          {
+            "case_id": "case-05",
+            "code_hash": "db9f692ab1afeb76d0936d5876df3e94c0d5231ec52025257d79865aad45618b",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#e364137d64774601b35ce80d43e6a3c5",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": "d37b84e727f7bedaeaed89715514d4bfc429a467b694e17f6f2d7d8e3765f607",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#602067f4bc1742ad80c64294e333ee21",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": "9efd1371a484605cf9140a02f4f4f2970882a22b5f214afc2315cc411fd5be2e",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#c3f4b60eaac54586ba29484fa1683c8f",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-05-baseline-1/execution.jsonl#ef0194374937413aac3727043be3ccfe",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-05-baseline-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-05-baseline-1/execution.jsonl#818cd02c0eee45a1bae86cddfd9007a1",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-05-baseline-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-06",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-06-baseline-1/execution.jsonl#2dc7341aa39843ab8f21162da62374fd",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-06-baseline-1",
+            "split": "dev"
+          }
+        ],
+        "when": "Writing delivery code for the Task 9 sandbox (Python 3.12 with pandas and numpy; R with DESeq2)."
+      },
+      {
+        "approved": true,
+        "diagnostic": "Within that cell line, check that each library's nearest neighbour by Spearman correlation carries its condition label, and search for the single label exchange that most raises replicate correlation relative to the line's replicate-versus-condition gap (the labels_nearest_neighbour and labels_swap_search diagnostics).",
+        "exceptions": [
+          "A treatment can truly have little effect: act on the label check's result, never on the near-empty contrast alone.",
+          "The check needs at least two libraries per condition in that cell line."
+        ],
+        "excludes": [],
+        "id": "task9-empty-contrast-label-check-v1",
+        "mistake": "Accepting it as a treatment without effect after checking only that the sample-sheet IDs match the count-matrix column names. Name matching does not test whether the condition labels fit the libraries' expression, and labels exchanged between that treatment and its control can produce exactly this pattern.",
+        "repair": "If one exchange resolves the misplaced libraries with a clearly positive gain, exchange those labels and refit, and record the flagged libraries, the exchange and its gain in METHODS.md. If the checks are consistent, keep the labels and report the near-empty contrast as observed.",
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          }
+        ],
+        "reviewed_at": "2026-11-15T04:47:40Z",
+        "reviewed_by": "Mian (mian-abd)",
+        "sources": [
+          {
+            "case_id": "case-12",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-12-baseline-1/execution.jsonl#9d4bbdb1edcb4435ac4a43d41c25e4fd",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "kind": "observation",
+            "run_id": "batch-02-suite-case-12-baseline-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-12",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-12-baseline-1/baseline.json#summary",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "kind": "observation",
+            "run_id": "batch-02-suite-case-12-baseline-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-12",
+            "code_hash": "69b0e23bfd443bdeeb74851cc0a3660457f974a404cf2eaa01719cf7fd413ca9",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/events.jsonl#129",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-12",
+            "code_hash": "6633ba0cb344e3a705590116a6617c4c6177936736e582f8f076c2009c64507c",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/events.jsonl#201",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "split": "dev"
+          }
+        ],
+        "when": "One treatment-versus-control contrast in a cell line has no or almost no genes at padj < 0.05 while the other contrasts in the same cell line have hundreds or more."
+      },
+      {
+        "approved": true,
+        "diagnostic": "For every pair of count columns, compute the fraction of genes detected in either library that have identical counts (flag at 0.99 or above) and the correlation of log2 CPM over expressed genes (flag at 0.9999 or above). Distinct biological replicates reached a correlation of about 0.994 and an identical fraction under 0.09, so a high correlation alone is not duplication.",
+        "exceptions": [
+          "Technical replicates declared in the sample sheet are not accidental duplicates; follow the task's instructions for them.",
+          "If the two names carry different conditions or cell lines, the duplicate is also a labelling problem: run the label checks with each copy removed in turn before deciding which name to keep."
+        ],
+        "excludes": [],
+        "id": "task9-duplicate-library-v1",
+        "mistake": "Keeping two count columns that are the same library under two sample names. It inflates the replicate count and understates dispersion, and the pair look like perfect nearest neighbours, so label checks on that pair look clean for the wrong reason.",
+        "repair": "Keep one copy (the sample listed first) and drop the other from every model, refit with the reduced group, and state in METHODS.md that the group has one fewer replicate. Re-run any label check that used both copies.",
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          }
+        ],
+        "reviewed_at": "2026-11-15T04:47:40Z",
+        "reviewed_by": "Mian (mian-abd)",
+        "sources": [
+          {
+            "case_id": "case-06",
+            "code_hash": "a5a97346a40237767755a051435e6e565b9ce398bd47b79bd9ea42f236fc2cf0",
+            "evidence_id": "batch-02-suite-case-06-swarm-1/events.jsonl#132",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-06-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-06",
+            "code_hash": "8ada723dce3cf2f9c36dd3bf30c140a58a4d1126fe8347d3182c9f6cd143c2f7",
+            "evidence_id": "batch-02-suite-case-06-swarm-1/events.jsonl#203",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-06-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-06",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-06-baseline-1/execution.jsonl#9c18efd8857b4d92b98f0cd58a83bc0f",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "kind": "observation",
+            "run_id": "batch-02-suite-case-06-baseline-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": "a5a97346a40237767755a051435e6e565b9ce398bd47b79bd9ea42f236fc2cf0",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#142",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": "8ada723dce3cf2f9c36dd3bf30c140a58a4d1126fe8347d3182c9f6cd143c2f7",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#214",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          }
+        ],
+        "when": "Before the label, quality and replicate checks, and before fitting DESeq2 on a count matrix with biological replicates."
+      },
+      {
+        "approved": true,
+        "diagnostic": "Strip a numeric version that is followed by the end of the ID or by an underscore (for example re.sub(r'\\.\\d+(?=_|$)', '', gene_id)) and count the IDs changed, unchanged and colliding after stripping.",
+        "exceptions": [
+          "No collisions occurred in the development runs, so the collision handling is untested.",
+          "Where the task's contract is more specific about the exported gene_id, follow the contract."
+        ],
+        "excludes": [],
+        "id": "task9-mixed-gene-id-versions-v1",
+        "mistake": "Judging the ID namespace from a few example IDs or with an end-anchored version pattern. A minority of unversioned IDs (about 1,000 of 60,708) can sit among versioned ones, and a pattern such as \\.\\d+$ misses IDs whose version is followed by an underscore suffix such as _PAR_Y.",
+        "repair": "If versioned and unversioned IDs both occur, strip versions from every ID with that pattern, keep suffixes such as _PAR_Y, and map symbols on the stripped ID only when the mapping is unambiguous. If stripping makes two rows collide, keep them apart and report them rather than letting a join or index pick one.",
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          }
+        ],
+        "reviewed_at": "2026-11-15T04:47:40Z",
+        "reviewed_by": "Mian (mian-abd)",
+        "sources": [
+          {
+            "case_id": "case-09",
+            "code_hash": "d45f3ef4659b55fb77a6a45bc491c48c2e763ec659163bcaba46fa1c7d89f4e6",
+            "evidence_id": "batch-02-suite-case-09-swarm-1/events.jsonl#158",
+            "input_hash": "a26ba6fa0bc1b6c56bf85d796b2637710591ca923e33c5ff4c75e30997b4f3eb",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-09-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-09",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-09-swarm-1/events.jsonl#1",
+            "input_hash": "a26ba6fa0bc1b6c56bf85d796b2637710591ca923e33c5ff4c75e30997b4f3eb",
+            "kind": "observation",
+            "run_id": "batch-02-suite-case-09-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#1",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "observation",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": "d45f3ef4659b55fb77a6a45bc491c48c2e763ec659163bcaba46fa1c7d89f4e6",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#176",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "diagnostic",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          }
+        ],
+        "when": "Before stripping Ensembl version suffixes, joining gene symbols or writing gene_id columns."
+      },
+      {
+        "approved": true,
+        "diagnostic": "Before DESeqDataSetFromMatrix, assert that the subset has no NA sample IDs, that identical(colnames(cts), rownames(coldata)) holds, and that every condition to be contrasted is present among that line's retained samples; print resultsNames(dds) before calling results().",
+        "exceptions": [
+          "If count columns are not named exactly by sample ID, map them to sample IDs first and stop on any missing or duplicated match."
+        ],
+        "excludes": [],
+        "id": "task9-per-line-sample-alignment-v1",
+        "mistake": "Reordering a per-line metadata subset with positions from match() against the full matrix's columns, as in ss[match(ss$sample_id, colnames(counts)), ]. The positions refer to all libraries, so the subset gets NA or wrong rows; the code then fails with 'subscript out of bounds' or a missing contrast ('was expecting condition_X_vs_Ctrl to be present in resultsNames').",
+        "repair": "Select the line's rows from the sample sheet first, index count columns by those sample IDs (cts <- counts[, ss$sample_id, drop = FALSE]), build colData in the same order, and derive the contrast list from the conditions present in that line after any exclusions.",
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          },
+          {
+            "key": "reader",
+            "value": "designer"
+          }
+        ],
+        "reviewed_at": "2026-11-15T04:47:40Z",
+        "reviewed_by": "Mian (mian-abd)",
+        "sources": [
+          {
+            "case_id": "case-12",
+            "code_hash": "980634c254d6344e2b46347c17dabdd646db5f97c6787b8fd89f74ebe5e20ee5",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/execution.jsonl#c4545a9cc2784917a93621bb31ca1cb1",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": "b26230c477f73368bcddba7e8d9f1bf3477ca9400da0fbe1b42b5e187b619924",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#335085bed31146e4aaac4518935a2584",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          }
+        ],
+        "when": "Writing per-cell-line DESeq2 code that subsets the sample sheet and the count matrix."
+      },
+      {
+        "approved": true,
+        "diagnostic": "At the end of the last step, list the contract's files and check that each exists under /outputs with the contract's required columns, and that METHODS.md exists; print any that are missing.",
+        "exceptions": [
+          "An empty gene set is still a deliverable: write the file with its header."
+        ],
+        "excludes": [],
+        "id": "task9-contract-completeness-v1",
+        "mistake": "Ending an attempt with only the per-contrast tables written. The derived gene-set files (shared and cell-line-specific sets) were built in a later step that failed on a code error, the retries failed on other errors, and the critic blocked three missing deliverables, which cost a second delivery round.",
+        "repair": "Build the derived gene-set files from the per-contrast tables in the same step that writes those tables, or in a small final step that reads them back from /outputs, and keep fragile extras out of the steps that write deliverables. On a retry, fix the reported error and write every file again.",
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          },
+          {
+            "key": "reader",
+            "value": "designer"
+          }
+        ],
+        "reviewed_at": "2026-11-15T04:47:40Z",
+        "reviewed_by": "Mian (mian-abd)",
+        "sources": [
+          {
+            "case_id": "case-05",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#248",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "objection",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#249",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "objection",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": null,
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#250",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "objection",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          },
+          {
+            "case_id": "case-05",
+            "code_hash": "43bfc37705b776147df971c53be4f7dfb9891bdafc3282447c8c85b66cab382e",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#5e64c05d784a4748bc511f39e0bb5953",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "kind": "execution_failure",
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "split": "dev"
+          }
+        ],
+        "when": "Planning a delivery attempt, especially a retry after a failed step."
+      }
+    ],
+    "synthetic": false,
+    "version": 1
+  },
+  "sha256": "89a5141864a769e087311e42b101fb061dedd634d2a81ecdcb2f204ffe740f5e"
+}
