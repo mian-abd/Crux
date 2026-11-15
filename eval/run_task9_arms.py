@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import statistics
 import subprocess
 import sys
@@ -31,7 +32,19 @@ def git_commit() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
 
 
-def run_arm(arm: str, run_id: str, args: argparse.Namespace, logs: Path) -> dict:
+# Tool keys stripped from every run unless --with-tools: both arms then get the same tools
+# (no web search, no shared memory), and search or memory become separate, labelled runs.
+TOOL_KEYS = ("EXA_API_KEY", "PAST_API_KEY")
+
+
+def run_arm(
+    arm: str,
+    case: str,
+    manifest: Path,
+    run_id: str,
+    args: argparse.Namespace,
+    logs: Path,
+) -> dict:
     if arm == "swarm":
         command = [
             sys.executable,
@@ -40,7 +53,7 @@ def run_arm(arm: str, run_id: str, args: argparse.Namespace, logs: Path) -> dict
             "--lab",
             "bixbench3",
             "--manifest",
-            str(args.manifest),
+            str(manifest),
             "--runs-dir",
             "runs",
             "--run-id",
@@ -53,7 +66,7 @@ def run_arm(arm: str, run_id: str, args: argparse.Namespace, logs: Path) -> dict
             "-m",
             "eval.baseline_agent",
             "--manifest",
-            str(args.manifest),
+            str(manifest),
             "--run-id",
             run_id,
             "--model",
@@ -65,11 +78,16 @@ def run_arm(arm: str, run_id: str, args: argparse.Namespace, logs: Path) -> dict
         ]
     started = datetime.now()
     with (logs / f"{run_id}.log").open("w", encoding="utf-8") as log:
+        env = dict(os.environ)
+        if not args.with_tools:
+            for key in TOOL_KEYS:
+                env.pop(key, None)
         done = subprocess.run(
-            command, stdout=log, stderr=subprocess.STDOUT, check=False
+            command, stdout=log, stderr=subprocess.STDOUT, check=False, env=env
         )
     return {
         "arm": arm,
+        "case": case,
         "run_id": run_id,
         "exit_code": done.returncode,
         "seconds": (datetime.now() - started).total_seconds(),
@@ -210,7 +228,23 @@ def write_report(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--manifest", type=Path, help="one case (named 'clean')")
+    parser.add_argument(
+        "--case",
+        action="append",
+        default=[],
+        metavar="NAME=MANIFEST",
+        help="a named case; repeat for a suite (overrides --manifest)",
+    )
+    parser.add_argument(
+        "--with-tools", action="store_true", help="keep EXA/PAST keys (search, memory)"
+    )
+    parser.add_argument(
+        "--max-parallel",
+        type=int,
+        default=8,
+        help="runs at once; the baseline's client has no retries, so keep rate limits away",
+    )
     parser.add_argument("--evaluator", type=Path, required=True)
     parser.add_argument("--grader-repo", type=Path, required=True)
     parser.add_argument("--grader-python", type=Path, required=True)
@@ -231,14 +265,21 @@ def main() -> None:
     logs.mkdir(exist_ok=True)
     commit = git_commit()
     batch = args.out.name
+    cases = dict(item.split("=", 1) for item in args.case)
+    if not cases:
+        if args.manifest is None:
+            raise SystemExit("pass --manifest or one or more --case NAME=MANIFEST")
+        cases = {"clean": str(args.manifest)}
+    args.manifest = Path(next(iter(cases.values())))
     jobs = [
-        (arm, f"{batch}-{arm}-{i}")
+        (arm, case, Path(manifest), f"{batch}-{case}-{arm}-{i}")
+        for case, manifest in cases.items()
         for arm in args.arms
         for i in range(1, args.repeats + 1)
     ]
     print(f"starting {len(jobs)} runs at commit {commit[:10]}", flush=True)
-    with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
-        runs = list(pool.map(lambda job: run_arm(job[0], job[1], args, logs), jobs))
+    with ThreadPoolExecutor(max_workers=min(len(jobs), args.max_parallel)) as pool:
+        runs = list(pool.map(lambda job: run_arm(*job, args, logs), jobs))
     for r in runs:
         print(
             f"finished {r['run_id']}: exit {r['exit_code']}, {r['status']}, {r['seconds']:.0f}s",
