@@ -1,6 +1,7 @@
 import { ArrowRightIcon, ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
 
+import { GalleryStrip } from "@/components/landing/gallery-strip";
 import { Loop } from "@/components/landing/loop";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -245,6 +246,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <GalleryStrip />
 
         {/* Sponsors */}
         <section aria-labelledby="sponsors-heading" className="border-t">

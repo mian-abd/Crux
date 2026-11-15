@@ -34,7 +34,7 @@ const NAV = [
   { href: "/app", label: "Your papers", icon: FileTextIcon, match: (p: string) => p === "/app" || p.startsWith("/app/papers") },
   { href: "/app/upload", label: "Upload a paper", icon: UploadIcon, match: (p: string) => p === "/app/upload" },
   { href: "/app/runs/demo", label: "Claims audit run", icon: ActivityIcon, match: (p: string) => p.startsWith("/app/runs") },
-  { href: "/explore", label: "Explore: one letter", icon: DnaIcon, match: () => false },
+  { href: "/app/explore", label: "Explore", icon: DnaIcon, match: (p: string) => p.startsWith("/app/explore") },
 ];
 
 function initials(name: string, email: string): string {

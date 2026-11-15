@@ -36,7 +36,7 @@ function sources(id: string): { url: string; binary: boolean; label: string }[] 
   ];
 }
 
-function hexToInt(hex: string): number {
+export function hexToInt(hex: string): number {
   return parseInt(hex.replace("#", ""), 16);
 }
 
@@ -54,7 +54,7 @@ export class LoadError extends Error {
  * Fetch the entry ourselves (clear status codes, a real timeout), RCSB first
  * and PDBe second, and return the bytes for Mol* to parse.
  */
-async function fetchEntry(
+export async function fetchEntry(
   id: string,
   isCancelled: () => boolean,
 ): Promise<{ data: ArrayBuffer | string; label: string } | null> {
@@ -83,7 +83,7 @@ async function fetchEntry(
 }
 
 /** Canvas look: transparent background, soft occlusion, a hairline outline. */
-async function styleCanvas(
+export async function styleCanvas(
   plugin: PluginContext,
   mode: ColorMode,
   reduced: boolean,

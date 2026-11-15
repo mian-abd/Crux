@@ -42,6 +42,26 @@ export {
   type Base,
 } from "./theme";
 
+export { MoleculeView, type MoleculeViewProps } from "./gallery/MoleculeView";
+export { MoleculePoster, type MoleculePosterProps } from "./gallery/MoleculePoster";
+export {
+  StructureView,
+  type StructureViewProps,
+  type StructureAccent,
+  type StructureTone,
+} from "./gallery/StructureView";
+export { useLiveSlot, MAX_LIVE_VIEWS } from "./gallery/slots";
+export {
+  GENOMICS,
+  PROTEINS,
+  DRUG_COMPLEX,
+  MOLECULES,
+  sourceOf,
+  type GalleryItem,
+  type StructureItem,
+  type MoleculeItem,
+} from "./gallery/catalog";
+
 export {
   HBB_ACCESSION,
   HBB_FIRST_27,

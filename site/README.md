@@ -50,7 +50,8 @@ httpOnly session cookies. No third-party service holds an account.
 | Route | What it is |
 | --- | --- |
 | `/` | Landing page. Every number carries the repo path it comes from. |
-| `/explore` | One Letter: the sickle-cell change, from the DNA letter to the protein. |
+| `/explore` | The 3D gallery: the sickle-cell change from the DNA letter to the protein, then DNA, protein and small-molecule structures. Public. |
+| `/app/explore` | The same gallery inside the signed-in app shell, so the sidebar stays. Both pages render `components/explore/explore-content.tsx`. |
 | `/signup`, `/login` | Accounts. |
 | `/app` | Your papers. `/app/upload` uploads a PDF and extracts its text on the server. |
 | `/app/papers/[id]` | The paper's claims, split into "Checkable now" and "Not yet checkable". |
@@ -85,6 +86,9 @@ for word.
 
 Pages import `HeroScene`, `DNAHelix`, `ProteinViewer` and `EvidenceGraph3D` from
 `@/components/viz`, lazily and client-side only (`components/viz-lazy.tsx`).
+The Explore gallery adds `MoleculeView`, `MoleculePoster` and `StructureView` from
+`components/viz/gallery/`; its cards mount a live view only while they hold one of three
+page-wide WebGL slots and show a still otherwise (see `components/viz/README.md`).
 `components/viz/placeholder.tsx` holds flat stand-ins with the same names and props until
 the 3D library lands in that folder.
 
@@ -107,10 +111,13 @@ package's `package.json` or repository.
 | [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) | SQLite driver | MIT |
 | [unpdf](https://github.com/unjs/unpdf) (bundles PDF.js, Apache-2.0) | PDF text extraction | MIT |
 | [three](https://threejs.org), [@react-three/fiber](https://github.com/pmndrs/react-three-fiber), [@react-three/drei](https://github.com/pmndrs/drei), [react-force-graph-3d](https://github.com/vasturiano/react-force-graph), [Mol*](https://molstar.org) | Dependencies of the 3D library | MIT |
+| [three.js molecules example](https://threejs.org/examples/#webgl_loader_pdb) (`examples/webgl_loader_pdb.html`, `PDBLoader`, and nine files from `examples/models/pdb/`, tag r187) | The small-molecule views and `public/molecules/*.pdb` | MIT |
 | [Geist](https://vercel.com/font), [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif) | Typefaces, loaded with `next/font` | SIL Open Font License 1.1 |
 
 Content credits: the claims audit uses Love MI, Huber W, Anders S, "Moderated estimation
 of fold change and dispersion for RNA-seq data with DESeq2", Genome Biology 15, 550
 (2014), [doi:10.1186/s13059-014-0550-8](https://doi.org/10.1186/s13059-014-0550-8),
-CC BY 4.0. The Explore page uses NCBI RefSeq NM_000518.5 and PDB entries 2HBS and 1A3N.
+CC BY 4.0. The Explore page uses NCBI RefSeq NM_000518.5 and PDB entries 2HBS and 1A3N; its gallery
+loads PDB entries 1BNA, 1YTB, 4OO8, 4HHB, 1EMA, 4INS, 6VXX and 1HSG from RCSB PDB at run
+time (wwPDB data, CC0 1.0) and links each small molecule to its PubChem compound page.
 The design takes no code, logo, typeface or text from any other organisation's site.

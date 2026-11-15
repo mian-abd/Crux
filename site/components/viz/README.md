@@ -15,6 +15,35 @@ Also exported: `buildGraph` and `parseEventLog` (the pure event-to-graph reducer
 `sequence.ts` (`HBB_FIRST_27`, `SICKLE_HIGHLIGHT`, `describeHighlight`, ...). `theme.ts`,
 `graph.ts` and `sequence.ts` have no browser code and are safe in server components.
 
+## The gallery (`gallery/`)
+
+The Explore page's views. Pages load them through `components/viz-lazy.tsx`.
+
+| Export | Props | What it draws |
+| --- | --- | --- |
+| `MoleculeView` | `name`, `labels?`, `onReady?`, `className?` | A small molecule from `/public/molecules/<name>.pdb` as ball-and-stick: CPK colours tuned to the site tokens, studio lighting, slow auto-rotate, drag to orbit (mouse and pen; on touch it only turns, so a swipe scrolls the page). Nitrogen, oxygen and other heteroatoms carry their letter as DOM labels on the shared label system (`ScreenLabels.tsx`); letters on the far side fade. |
+| `MoleculePoster` | `name`, `className?` | The same molecule in the same opening pose as SVG. No WebGL context. |
+| `StructureView` | `pdbId`, `accents?`, `turn?`, `onReady?`, `className?` | A PDB entry through the headless Mol* setup of `ProteinViewer` (it reuses its fetch and canvas styling): protein chains as grey cartoon, nucleic acids in the accent, other ligands as thin sticks, and each `accents` entry (component ids such as `HEM`, `MK1`, `CRO`, `ZN`) as ball-and-stick or spheres in a status colour. It turns slowly; the wheel is left to the page. |
+| `useLiveSlot`, `MAX_LIVE_VIEWS` | `(ref, pinned?)` | The page-wide budget of live WebGL views (`slots.ts`). At most three are mounted. Order: pinned views (the hero molecule and the two story figures), then the card last hovered, clicked or focused, then cards already live, then page order. A view that leaves the screen is unmounted and its context released. |
+| `GENOMICS`, `PROTEINS`, `DRUG_COMPLEX`, `MOLECULES`, `sourceOf` | | The catalogue (`catalog.ts`): ids, titles, one fact each, and the source link. |
+
+A card that is not live shows a still: `MoleculePoster` for molecules, and for structures a WebP
+in `public/gallery/posters/<id>-<light|dark>.webp`. Those 16 files are the live view's own
+first frame, captured from this code in headless Chrome at reduced motion (so no spin) on a
+transparent background; recapture them if the styling in `StructureView` changes.
+
+What is shown, and where it comes from:
+
+| Item | Source | Licence |
+| --- | --- | --- |
+| 1BNA B-DNA dodecamer, 1YTB TATA-binding protein on DNA, 4OO8 Cas9 with guide RNA and target DNA, 4HHB deoxyhaemoglobin, 1EMA green fluorescent protein, 4INS 2Zn pig insulin, 6VXX SARS-CoV-2 spike (closed), 1HSG HIV protease with L-735,524 | RCSB PDB (`models.rcsb.org`), PDBe as fallback, fetched at run time | wwPDB data, CC0 1.0 |
+| caffeine, aspirin, glucose, nicotine, cholesterol, ethanol, cubane, buckyball (C60), graphite | `examples/models/pdb/` in three.js r187, copied unchanged to `public/molecules/` | MIT (three.js) |
+
+Each structure's caption was checked against the entry's title, method and resolution on
+rcsb.org. Each molecule's formula was checked against the atoms in its file and against the
+PubChem compound the card links to (CIDs 2519, 2244, 5793, 89594, 5997, 702, 136090, 123591,
+5462310).
+
 ## Conventions
 
 * **Highlight index.** `highlights[].index` is 0-based into `sequence`; `from`/`to` are single bases
@@ -72,6 +101,7 @@ no Mol* UI is mounted). React 19 is required by `@react-three/fiber` 9.
 | `@react-three/drei` | 10.7.9 | MIT |
 | `react-force-graph-3d` | 1.29.2 (brings `3d-force-graph` 1.80.2, `three-forcegraph` 1.43.6) | MIT |
 | `molstar` | 5.13.1 | MIT |
+| three.js example files (`public/molecules/*.pdb`) | r187 (three 0.187.0) | MIT |
 
 `react-force-graph-3d` reads `window` at import time and Mol* is large, so both are imported inside
 effects; the rest of the folder is safe to import on the server.
@@ -104,6 +134,13 @@ compositing cost what an empty R3F canvas with the same settings costs (1.6 ms a
 | `EvidenceGraph3D`, 124 nodes | 2 (drawn at 1.75) | 4.0 / 4.4 ms | 0.95 ms | about 1.3 ms |
 | `ProteinViewer` 2HBS, 720×460 | 2 (drawn at 1.5) | 7.0 / 7.9 ms | under 0.1 ms | about 5.3 ms |
 
+The gallery was checked in the same headless Chrome setup at 1440×900: a molecule is two
+instanced draw calls (atoms, half-bonds) at a device pixel ratio capped at 1.5, with no
+post-processing; `StructureView` keeps `ProteinViewer`'s 1.5× buffer cap and 0.6-resolution
+ambient occlusion. No more than three contexts exist at once, off-screen views are unmounted,
+and with `prefers-reduced-motion` nothing turns. Per-frame timings for the gallery views were
+not measured.
+
 The hero uses instancing (beads and bonds are one draw call each, plus two backbone tubes, the
 highlighted pair and one particle system) and no post-processing. Mol*'s ambient occlusion runs at 0.6 resolution and the viewer caps its drawing
 buffer at 1.5× device pixels; it only redraws while rocking or interacting.
@@ -119,6 +156,11 @@ what their APIs require.
 * [three.js](https://github.com/mrdoob/three.js) (MIT): `InstancedMesh` for beads and bonds,
   `TubeGeometry` backbones, `RoomEnvironment` and `PMREMGenerator` for the graph's lighting,
   `CSS2DRenderer` for the graph captions.
+* three.js [molecules example](https://threejs.org/examples/#webgl_loader_pdb)
+  (`examples/webgl_loader_pdb.html`, MIT) and its `PDBLoader` addon: the gallery's small molecules
+  start from it. The loader is used as shipped; the example's per-atom meshes and CSS2D labels
+  became two instanced meshes and the shared DOM labels, and nine of its PDB files are in
+  `public/molecules/`.
 * [react-three-fiber](https://github.com/pmndrs/react-three-fiber) and
   [drei](https://github.com/pmndrs/drei) by Poimandres (MIT): `Canvas` with on-demand frame loops,
   `Environment` with `Lightformer`s (the procedural studio lighting from the pmndrs examples, so
@@ -135,5 +177,6 @@ what their APIs require.
   `web/src/components/oneletter/StructurePanel.tsx` setup informed the residue and chain choices; it
   is not a dependency here.
 * Data: NCBI RefSeq NM_000518.5 (HBB coding sequence; the same values as `web/src/lib/hbb.ts`);
-  PDB entries 2HBS and 1A3N from RCSB PDB and PDBe (wwPDB data, CC0 1.0). B-DNA geometry uses the
+  PDB entries 2HBS and 1A3N, and the gallery's 1BNA, 1YTB, 4OO8, 4HHB, 1EMA, 4INS, 6VXX and 1HSG,
+  from RCSB PDB and PDBe (wwPDB data, CC0 1.0). B-DNA geometry uses the
   textbook values (about 10.5 bp per turn, 3.4 Å rise, unequal grooves).
