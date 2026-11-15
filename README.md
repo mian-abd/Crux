@@ -27,7 +27,7 @@ Built at the SF AI Research Hackathon, Track 3 (AI Scientist Swarms). The submis
 
 | | Link | What you can do |
 | --- | --- | --- |
-| Site | https://crux-site-production-95830f5f.up.railway.app | Sign up, upload a paper, watch [graded Task 9 runs](https://crux-site-production-95830f5f.up.railway.app/runs), run the free claims audit, explore live figures and 3D structures |
+| Site | https://crux-site-production-95830f5f.up.railway.app | Sign up and **start a live Task 9 run** (Live run: about 6 minutes, real models and Modal sandboxes), upload a paper, watch [graded Task 9 runs](https://crux-site-production-95830f5f.up.railway.app/runs), run the free claims audit, explore live figures and 3D structures |
 | Run viewer | https://crux-viewer-production.up.railway.app | Replay graded Task 9 runs from their event logs: [run 1](https://crux-viewer-production.up.railway.app/?apireplay=task9_real_swarm_run1.jsonl&speed=8) (rankings, referee, Bayes updates, rejected ledger) and [tools-run-02](https://crux-viewer-production.up.railway.app/?apireplay=task9_tools_run2.jsonl&speed=8) (Exa searches and past.dev memory in the loop) |
 | Engine API | https://crux-api-production-fef3e0e8.up.railway.app | `/health`, `/replays` (recorded runs as Server-Sent Events), `POST /runs {"lab": "claims"}` (about 10 s, $0) |
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActivityIcon, ChevronsUpDownIcon, DnaIcon, HomeIcon, LogOutIcon, PlayCircleIcon, UploadIcon } from "lucide-react";
+import { ActivityIcon, ChevronsUpDownIcon, DnaIcon, HomeIcon, LogOutIcon, PlayCircleIcon, RadioIcon, UploadIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,6 +33,7 @@ import { authClient } from "@/lib/auth-client";
 
 const NAV = [
   { href: "/app", label: "Home", icon: HomeIcon, match: (p: string) => p === "/app" || p.startsWith("/app/papers") },
+  { href: "/app/live", label: "Live run", icon: RadioIcon, match: (p: string) => p.startsWith("/app/live") },
   { href: "/app/explore", label: "Explore", icon: DnaIcon, match: (p: string) => p.startsWith("/app/explore") },
   { href: "/app/graded", label: "Graded runs", icon: PlayCircleIcon, match: (p: string) => p.startsWith("/app/graded") },
   { href: "/app/upload", label: "Upload a paper", icon: UploadIcon, match: (p: string) => p === "/app/upload" },

@@ -57,6 +57,15 @@ function init(db: Db): Db {
       quote_found INTEGER NOT NULL DEFAULT 0
     );
     CREATE INDEX IF NOT EXISTS paper_claim_paper ON paper_claim (paper_id, idx);
+    CREATE TABLE IF NOT EXISTS live_run (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      run_id TEXT,
+      case_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS live_run_user ON live_run (user_id, created_at);
+    CREATE INDEX IF NOT EXISTS live_run_time ON live_run (created_at);
   `);
   db.exec("PRAGMA foreign_keys = ON;");
   return db;

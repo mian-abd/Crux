@@ -245,12 +245,19 @@ export default function Home() {
 
             <Scoreboard className="mt-14" />
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href="/runs" className="pill">
-                Watch a graded run
+              <Link href="/app/live" className="pill">
+                Start a live run
                 <CircleArrow />
               </Link>
+              <Link
+                href="/runs"
+                className="inline-flex items-center gap-1.5 text-[0.95rem] font-medium underline decoration-border underline-offset-[6px] transition-colors hover:decoration-foreground"
+              >
+                Watch a graded run
+                <ArrowRightIcon className="size-4" aria-hidden="true" />
+              </Link>
               <p className="text-sm text-muted-foreground">
-                Replays of real task 9 runs: every check, referee verdict, belief update and rejection.
+                Sign in to run the swarm on a real task 9 case (about 6 minutes), or replay graded runs: every check, referee verdict, belief update and rejection.
               </p>
             </div>
 

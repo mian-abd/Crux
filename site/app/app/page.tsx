@@ -67,18 +67,18 @@ export default async function HomePage() {
           <p className="text-[0.95rem] text-ink-foreground/70">Workspace</p>
           <h1 className="mt-3 font-display text-5xl leading-[1.02] sm:text-6xl">Good to see you, {firstName}.</h1>
           <p className="mt-4 max-w-lg text-lg leading-relaxed text-ink-foreground/75">
-            Audit a paper&apos;s claims, watch the engine settle them by experiment, or explore what it can test.
+            Start the swarm on a real BixBench3 case and watch it work, audit a paper&apos;s claims, or explore what it can test.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/app/upload" className="pill-light">
-              Upload a paper
+            <Link href="/app/live" className="pill-light">
+              Start a live run
               <ArrowRightIcon className="size-4" aria-hidden="true" />
             </Link>
             <Link
-              href="/app/runs/demo"
+              href="/app/upload"
               className="inline-flex h-11 items-center rounded-full border border-ink-foreground/30 px-5 text-[0.925rem] font-medium transition-colors hover:bg-ink-foreground/10"
             >
-              Watch a recorded audit
+              Upload a paper
             </Link>
           </div>
         </div>

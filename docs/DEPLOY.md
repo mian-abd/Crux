@@ -20,7 +20,9 @@ Task 9 runs execute R and DESeq2 in network-blocked Modal sandboxes, which Railw
 curl -X POST https://crux-api-production-fef3e0e8.up.railway.app/runs -H "Content-Type: application/json" \n  -H "X-Crux-Run-Token: $CRUX_RUN_TOKEN" -d '{"lab": "bixbench3", "overrides": {"case": "task9-clean"}}'
 ```
 
-Watch it at `https://crux-viewer-production.up.railway.app/?run=<run_id>`. Each run is capped at $2 of model spend, plus Modal compute. Rotate every key after the event, and delete these variables to go back to the safe defaults above.
+Watch it at `https://crux-viewer-production.up.railway.app/?run=<run_id>`.
+
+**From the site.** `crux-site` also holds `CRUX_RUN_TOKEN` (server-only), so a signed-in user can start the same run from **Live run** (`/app/live`) and watch it at `/app/live/<run_id>`: a status panel that polls the API, and the viewer embedded below it. The site's server adds the token; it never reaches the browser. Fair-use limits are checked and a slot reserved in one SQLite transaction before the API is called: 3 runs per account per day, 20 per day across the site and 2 at once (`LIVE_RUNS_PER_USER_PER_DAY`, `LIVE_RUNS_PER_DAY`, `LIVE_RUNS_CONCURRENT`; `site/lib/server/live-runs.ts`). Worst case at those limits: 20 runs, about $40 of model spend a day, plus Modal compute. Each run is capped at $2 of model spend, plus Modal compute. Rotate every key after the event, and delete these variables to go back to the safe defaults above.
 
 ## Variables
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/server/auth";
+import { startLiveRun } from "@/lib/server/live-runs";
 import { ExtractionError, extractClaims, hasOpenAiKey } from "@/lib/server/openai";
 import {
   deletePaper,
@@ -48,4 +49,14 @@ export async function deletePaperAction(paperId: string): Promise<void> {
   if (ID_RE.test(paperId)) await deletePaper(user.id, paperId);
   revalidatePath("/app");
   redirect("/app");
+}
+
+export type LiveRunActionResult = { ok: true; runId: string } | { ok: false; error: string };
+
+/** Starts a live Task 9 run for the signed-in user, within the site's fair-use limits. */
+export async function startLiveRunAction(caseId: string): Promise<LiveRunActionResult> {
+  const user = await requireUser("/app/live");
+  const result = await startLiveRun(user.id, caseId);
+  if (result.ok) revalidatePath("/app/live");
+  return result;
 }
