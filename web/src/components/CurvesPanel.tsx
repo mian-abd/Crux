@@ -21,11 +21,11 @@ import { ACCENT, familyColors } from '../lib/palette';
 import { useRootPx } from '../lib/useRootPx';
 import { Empty, Panel } from './Panel';
 
-const GRID = '#1f2730';
-const AXIS = '#2e3843';
-const MUTE = '#707b88';
-const INK = '#eef2f6';
-const SURFACE = '#0d1116';
+const GRID = '#e9e6e0';
+const AXIS = '#d0cbc3';
+const MUTE = '#77736c';
+const INK = '#1b1916';
+const SURFACE = '#fefdfc';
 
 function shortName(statement: string): string {
   const i = statement.indexOf(':');
@@ -92,7 +92,7 @@ function Chart({
       return {
         id,
         key,
-        color: colors[id] ?? '#8a94a0',
+        color: colors[id] ?? '#8e897f',
         weight: curves.families[id]?.weight ?? 0,
         isNull: o?.isNull ?? id === 'h0',
         rejected: o?.status === 'rejected',
@@ -241,7 +241,7 @@ function Chart({
             )}
             <Tooltip
               cursor={{ stroke: AXIS }}
-              contentStyle={{ background: '#131920', border: `1px solid ${AXIS}`, borderRadius: 8, fontSize: font }}
+              contentStyle={{ background: '#fefdfc', border: `1px solid ${AXIS}`, borderRadius: 8, fontSize: font }}
               labelStyle={{ color: INK }}
               itemStyle={{ color: INK }}
               labelFormatter={(x) => `x = ${String(x)}`}
@@ -257,7 +257,7 @@ function Chart({
       </div>
       {acquisition.length > 1 && (
         <div className="mt-[0.2rem]">
-          <div className="flex items-baseline justify-between text-[0.7rem] uppercase tracking-[0.14em] text-mute">
+          <div className="flex items-baseline justify-between text-[0.7rem] text-mute">
             <span>Expected information gain per candidate design</span>
             {ranking && <span className="normal-case tracking-normal">round {ranking.round}</span>}
           </div>
@@ -268,7 +268,7 @@ function Chart({
                 <YAxis hide domain={[0, 'dataMax']} />
                 <Bar dataKey="eig" barSize={Math.max(4, Math.round(px * 0.55))} radius={[3, 3, 0, 0]} isAnimationActive={false}>
                   {acquisition.map((a) => (
-                    <Cell key={a.id} fill={a.id === chosenId ? ACCENT : '#3a4552'} />
+                    <Cell key={a.id} fill={a.id === chosenId ? ACCENT : '#d0cbc3'} />
                   ))}
                 </Bar>
               </BarChart>

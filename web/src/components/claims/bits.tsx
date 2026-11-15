@@ -39,11 +39,11 @@ export const TONE: Record<ClaimVerdict, Tone> = {
   },
   holds_if: {
     glyph: '◐',
-    chip: 'bg-[#6cb6ff] text-bg',
-    mark: 'bg-[#6cb6ff]/[0.17] border-[#6cb6ff]',
-    fill: 'bg-[#6cb6ff]',
-    text: 'text-[#6cb6ff]',
-    border: 'border-[#6cb6ff]/55',
+    chip: 'bg-[#6f655a] text-bg',
+    mark: 'bg-[#6f655a]/[0.17] border-[#6f655a]',
+    fill: 'bg-[#6f655a]',
+    text: 'text-[#6f655a]',
+    border: 'border-[#6f655a]/55',
   },
   refuted: {
     glyph: '✕',

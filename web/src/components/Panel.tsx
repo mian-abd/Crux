@@ -22,7 +22,7 @@ export function Panel({
       )}
     >
       <header className="flex min-w-0 items-baseline justify-between gap-3 px-[1.1rem] pb-[0.55rem] pt-[0.8rem]">
-        <h2 className="shrink-0 text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-mute">
+        <h2 className="shrink-0 text-[0.95rem] font-medium text-dim">
           {title}
         </h2>
         {meta !== undefined && (
@@ -59,7 +59,7 @@ export function Empty({ children }: { children: ReactNode }) {
 
 export function KindTag({ kind }: { kind: string }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-[0.3rem] border border-line-strong px-[0.4rem] py-[0.08rem] font-mono text-[0.7rem] uppercase tracking-[0.08em] text-dim">
+    <span className="inline-flex shrink-0 items-center rounded-[0.3rem] border border-line-strong px-[0.4rem] py-[0.08rem] font-mono text-[0.7rem] text-dim">
       {kind}
     </span>
   );

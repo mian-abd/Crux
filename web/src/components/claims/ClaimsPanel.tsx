@@ -68,7 +68,7 @@ function OptionPill({ o, accepted, size }: { o: OptionView; accepted: boolean; s
         <span className={cls('tabular shrink-0 font-bold', accepted ? tone.text : 'text-fg')}>{pct(shown)}</span>
       </div>
       <div className="absolute inset-x-0 bottom-0 h-[0.28rem] bg-track">
-        <div className={cls('bar-fill h-full', o.isNull ? 'null-fill' : rejected ? 'bg-[#323b46]' : tone.fill)} style={{ width }} />
+        <div className={cls('bar-fill h-full', o.isNull ? 'null-fill' : rejected ? 'bg-[#d9d4cc]' : tone.fill)} style={{ width }} />
       </div>
     </li>
   );

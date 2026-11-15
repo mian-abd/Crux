@@ -22,7 +22,7 @@ function Line({ line }: { line: ConsoleLine }) {
         >
           <span
             className={cls(
-              'mr-[0.5rem] text-[0.7rem] font-bold uppercase tracking-[0.14em]',
+              'mr-[0.5rem] text-[0.7rem] font-bold',
               line.valid ? 'text-accent' : 'text-bad',
             )}
           >
@@ -49,7 +49,7 @@ function Line({ line }: { line: ConsoleLine }) {
     case 'error':
       return (
         <div className="my-[0.25rem] rounded-[0.35rem] border-l-2 border-bad bg-bad/10 px-[0.6rem] py-[0.3rem] font-sans text-[0.88rem] text-bad">
-          <span className="mr-[0.5rem] text-[0.7rem] font-bold uppercase tracking-[0.14em]">Run error</span>
+          <span className="mr-[0.5rem] text-[0.7rem] font-bold">Run error</span>
           {line.text}
         </div>
       );

@@ -3,18 +3,18 @@
 // legend (validated for adjacent-pair and colour-vision separation on the
 // panel surface).
 
-export const ACCENT = '#46e0b4';
-export const NULL_COLOR = '#8a94a0';
+export const ACCENT = '#377249';
+export const NULL_COLOR = '#8e897f';
 
 export const SERIES = [
-  '#3987e5', // blue
-  '#d95926', // orange
-  '#199e70', // aqua
-  '#c98500', // yellow
-  '#d55181', // magenta
-  '#0ca30c', // green
-  '#9085e9', // violet
-  '#e66767', // red
+  '#a5492b', // oxide red
+  '#377249', // green
+  '#a06a20', // ochre
+  '#6f655a', // taupe
+  '#6b7a2e', // olive
+  '#c9744f', // terracotta
+  '#5a4636', // umber
+  '#b8932f', // gold
 ];
 
 /** Colour by proposal order among the non-null options, so it never changes with rank. */

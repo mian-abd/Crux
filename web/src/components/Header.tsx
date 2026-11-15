@@ -31,7 +31,7 @@ function StatusPill({ state }: { state: RunState }) {
   return (
     <span
       className={cls(
-        'inline-flex items-center gap-[0.45rem] rounded-full border px-[0.8rem] py-[0.3rem] text-[0.82rem] font-semibold uppercase tracking-[0.12em]',
+        'inline-flex items-center gap-[0.45rem] rounded-full border px-[0.8rem] py-[0.3rem] text-[0.82rem] font-semibold',
         tone,
       )}
     >
@@ -44,7 +44,7 @@ function StatusPill({ state }: { state: RunState }) {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col items-end leading-none">
-      <span className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-mute">{label}</span>
+      <span className="text-[0.66rem] font-semibold text-mute">{label}</span>
       <span className="tabular mt-[0.3rem] text-[1.45rem] font-semibold text-fg">{value}</span>
     </div>
   );
@@ -57,7 +57,7 @@ function SourceBadge({ source }: { source: SourceInfo }) {
     return (
       <span
         className={cls(
-          'inline-flex items-center gap-[0.4rem] rounded-[0.35rem] border px-[0.55rem] py-[0.2rem] text-[0.74rem] font-semibold uppercase tracking-[0.12em]',
+          'inline-flex items-center gap-[0.4rem] rounded-[0.35rem] border px-[0.55rem] py-[0.2rem] text-[0.74rem] font-semibold',
           reconnecting ? 'border-warn/50 text-warn' : 'border-line-strong text-dim',
         )}
         title={source.status.detail}
@@ -68,7 +68,7 @@ function SourceBadge({ source }: { source: SourceInfo }) {
   }
   const paused = source.status.state === 'paused';
   return (
-    <span className="inline-flex items-center gap-[0.4rem] rounded-[0.35rem] border border-line-strong px-[0.55rem] py-[0.2rem] text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-dim">
+    <span className="inline-flex items-center gap-[0.4rem] rounded-[0.35rem] border border-line-strong px-[0.55rem] py-[0.2rem] text-[0.74rem] font-semibold text-dim">
       Replay ×{source.speed}
       {paused && <span className="text-warn">· paused</span>}
     </span>
@@ -91,14 +91,14 @@ export function Header({
     <header className="flex min-w-0 items-center gap-[1.4rem] px-[0.3rem]">
       <div className="flex shrink-0 items-center gap-[0.6rem]">
         <svg viewBox="0 0 32 32" className="h-[1.9rem] w-[1.9rem]" aria-hidden>
-          <rect width="32" height="32" rx="7" fill="#131920" />
-          <path d="M9 22h14M9 16h9M9 10h5" stroke="#46e0b4" strokeWidth="3" strokeLinecap="round" />
+          <rect width="32" height="32" rx="7" fill="#1b1916" />
+          <path d="M9 22h14M9 16h9M9 10h5" stroke="#d0896a" strokeWidth="3" strokeLinecap="round" />
         </svg>
-        <span className="text-[1.35rem] font-bold tracking-[0.08em] text-fg">CRUX</span>
+        <span className="font-display text-[1.7rem] leading-none text-fg">Crux</span>
       </div>
       <div className="h-[2.2rem] w-px shrink-0 bg-line-strong" />
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-[0.6rem] text-[0.78rem] uppercase tracking-[0.14em] text-mute">
+        <div className="flex items-center gap-[0.6rem] text-[0.85rem] text-mute">
           <span className="font-semibold text-dim">{state.lab || 'no run'}</span>
           {state.runId && <span className="truncate font-mono normal-case tracking-normal">{state.runId}</span>}
         </div>

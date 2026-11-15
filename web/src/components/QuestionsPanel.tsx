@@ -41,7 +41,7 @@ type Density = keyof typeof SIZES;
 
 function StatusBadge({ q, testing }: { q: QuestionView; testing: boolean }) {
   const base =
-    'inline-flex items-center gap-[0.4rem] rounded-[0.35rem] px-[0.55rem] py-[0.15rem] text-[0.72rem] font-bold uppercase tracking-[0.14em]';
+    'inline-flex items-center gap-[0.4rem] rounded-[0.35rem] px-[0.55rem] py-[0.15rem] text-[0.72rem] font-bold';
   switch (q.status) {
     case 'settled':
       return <span className={cls(base, 'bg-accent text-bg')}>Settled</span>;
@@ -69,7 +69,7 @@ function Tag({ children, tone }: { children: string; tone: 'warn' | 'mute' | 'ba
   return (
     <span
       className={cls(
-        'shrink-0 self-center rounded-[0.3rem] border px-[0.35rem] py-[0.02rem] text-[0.64rem] font-bold uppercase tracking-[0.12em]',
+        'shrink-0 self-center rounded-[0.3rem] border px-[0.35rem] py-[0.02rem] text-[0.64rem] font-bold',
         tones[tone],
       )}
     >
@@ -102,7 +102,7 @@ function OptionRow({
   const strong = leader && !rejected;
 
   let fill = 'bg-neutral';
-  if (rejected) fill = 'bg-[#323b46]';
+  if (rejected) fill = 'bg-[#d9d4cc]';
   else if (o.isNull) fill = 'null-fill';
   else if (leader) fill = 'bg-accent';
 
@@ -138,7 +138,7 @@ function OptionRow({
             key={o.updateSeq}
             className={cls(
               'tabular shrink-0 text-[0.85rem] font-semibold animate-delta',
-              delta > 0 ? 'text-accent' : 'text-[#e38b8b]',
+              delta > 0 ? 'text-accent' : 'text-bad',
             )}
           >
             {delta > 0 ? '+' : '−'}
@@ -236,7 +236,7 @@ function QuestionCard({
 
       {surprise && live && (
         <div className="mt-[0.55rem] flex gap-[0.6rem] rounded-[0.5rem] border border-warn/45 bg-warn/10 px-[0.75rem] py-[0.5rem] text-[0.92rem] leading-snug animate-fade-up">
-          <span className="shrink-0 pt-[0.1rem] text-[0.7rem] font-bold uppercase tracking-[0.14em] text-warn">
+          <span className="shrink-0 pt-[0.1rem] text-[0.7rem] font-bold text-warn">
             Surprise
           </span>
           <span className="text-fg/90">

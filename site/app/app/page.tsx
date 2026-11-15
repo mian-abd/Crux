@@ -147,9 +147,14 @@ export default async function HomePage() {
           <h2 id="results-heading" className="font-display text-3xl sm:text-4xl">
             Latest result
           </h2>
-          <Link href="/#results" className="text-sm text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground">
-            Caveats and earlier batches
-          </Link>
+          <div className="flex flex-wrap items-center gap-5 text-sm">
+            <Link href="/app/graded" className="font-medium underline decoration-border underline-offset-4 hover:decoration-foreground">
+              Watch a graded run
+            </Link>
+            <Link href="/#results" className="text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground">
+              Caveats and earlier batches
+            </Link>
+          </div>
         </div>
         <Scoreboard compact className="mt-6" />
       </section>

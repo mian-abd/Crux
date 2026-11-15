@@ -5,7 +5,7 @@ import { Empty, Panel } from './Panel';
 
 function StateChip({ state }: { state: CheckState }) {
   const base =
-    'shrink-0 rounded-[0.3rem] px-[0.5rem] py-[0.1rem] text-[0.68rem] font-bold uppercase tracking-[0.14em]';
+    'shrink-0 rounded-[0.3rem] px-[0.5rem] py-[0.1rem] text-[0.68rem] font-bold';
   switch (state) {
     case 'pass':
       return <span className={cls(base, 'bg-accent text-bg')}>Pass</span>;

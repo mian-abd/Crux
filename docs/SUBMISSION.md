@@ -4,7 +4,7 @@ SF AI Research Hackathon, Track 3 (AI Scientist Swarms). Benchmark: Edison Scien
 
 **Sponsor challenges entered:** Exa (search runs inside the experiment loop), past.dev (multi-agent memory) and Modal (sandboxes and the cloud evaluation runner).
 
-**Live:** site https://crux-site-production-95830f5f.up.railway.app · run viewer https://crux-viewer-production.up.railway.app · engine API https://crux-api-production-fef3e0e8.up.railway.app
+**Live:** site https://crux-site-production-95830f5f.up.railway.app · graded runs, replayed inside the site https://crux-site-production-95830f5f.up.railway.app/runs · run viewer https://crux-viewer-production.up.railway.app · engine API https://crux-api-production-fef3e0e8.up.railway.app
 
 Every number below comes from a file in this repository, cited next to it. Where we have no measurement we say "not measured". Task 9 results are a pilot: one task of 20, from published counts.
 

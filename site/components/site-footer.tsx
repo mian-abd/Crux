@@ -19,6 +19,7 @@ function Ext({ href, children }: { href: string; children: React.ReactNode }) {
 
 const LINKS = [
   { href: "/explore", label: "Explore" },
+  { href: "/runs", label: "Graded runs" },
   { href: "/#domains", label: "What it tests" },
   { href: "/#results", label: "Results" },
   { href: "/#how", label: "How it works" },

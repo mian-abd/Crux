@@ -19,7 +19,7 @@ function Meter({
   return (
     <div className="min-w-0">
       <div className="flex items-baseline justify-between gap-2 text-[0.74rem]">
-        <span className="uppercase tracking-[0.12em] text-mute">{label}</span>
+        <span className=" text-mute">{label}</span>
         <span className={cls('tabular font-semibold', on ? 'text-fg' : 'text-dim')}>{text}</span>
       </div>
       <div className="mt-[0.25rem] h-[0.42rem] overflow-hidden rounded-full bg-track">
@@ -34,7 +34,7 @@ function Meter({
 
 function PhaseChip({ r }: { r: RankingView }) {
   const base =
-    'inline-flex shrink-0 items-center gap-[0.35rem] rounded-[0.3rem] px-[0.45rem] py-[0.1rem] text-[0.68rem] font-bold uppercase tracking-[0.12em]';
+    'inline-flex shrink-0 items-center gap-[0.35rem] rounded-[0.3rem] px-[0.45rem] py-[0.1rem] text-[0.68rem] font-bold';
   switch (r.phase) {
     case 'running':
       return (
@@ -124,7 +124,7 @@ function Row({
         <div className="mt-[0.5rem] flex min-w-0 flex-wrap items-center gap-[0.35rem] pl-[1.65rem]">
           <span
             className={cls(
-              'mr-[0.15rem] text-[0.66rem] font-bold uppercase tracking-[0.14em]',
+              'mr-[0.15rem] text-[0.66rem] font-bold',
               observed !== null ? 'text-accent' : 'text-mute',
             )}
           >
@@ -155,7 +155,7 @@ function Row({
       )}
       {chosen && bins.length === 0 && observed !== null && (
         <div className="mt-[0.5rem] flex min-w-0 items-baseline gap-[0.5rem] pl-[1.65rem] text-[0.9rem] animate-fade-up">
-          <span className="shrink-0 text-[0.66rem] font-bold uppercase tracking-[0.14em] text-accent">Observed</span>
+          <span className="shrink-0 text-[0.66rem] font-bold text-accent">Observed</span>
           <span className="min-w-0 truncate text-fg">{desc ?? value(observed)}</span>
           {r.verdict && <Verdict valid={r.verdict.valid} />}
         </div>
@@ -206,7 +206,7 @@ export function RankingPanel({ state }: { state: RunState }) {
       </ol>
       {done.length > 0 && (
         <div className="mt-auto pt-[0.7rem]">
-          <div className="mb-[0.3rem] text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-mute">
+          <div className="mb-[0.3rem] text-[0.68rem] font-semibold text-mute">
             Checks run
           </div>
           <ul className="flex flex-wrap gap-x-[1rem] gap-y-[0.2rem] font-mono text-[0.78rem] text-dim">

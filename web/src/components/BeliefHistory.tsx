@@ -37,7 +37,7 @@ export function BeliefHistory({ q, threshold }: { q: QuestionView; threshold: nu
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-[0.8rem] border border-line bg-raised/40 px-[1rem] pb-[0.5rem] pt-[0.7rem]">
-      <div className="flex items-baseline justify-between text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-mute">
+      <div className="flex items-baseline justify-between text-[0.7rem] font-semibold text-mute">
         <span>Belief after each measurement</span>
         <span className="normal-case tracking-normal">settles at {Math.round(threshold * 100)}%</span>
       </div>

@@ -244,6 +244,15 @@ export default function Home() {
             </div>
 
             <Scoreboard className="mt-14" />
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Link href="/runs" className="pill">
+                Watch a graded run
+                <CircleArrow />
+              </Link>
+              <p className="text-sm text-muted-foreground">
+                Replays of real task 9 runs: every check, referee verdict, belief update and rejection.
+              </p>
+            </div>
 
             <div className="mt-16">
               <h3 className="font-display text-3xl">What it does not show</h3>
