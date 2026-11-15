@@ -5,7 +5,9 @@
   proposer runs with a silent bus and ``null_hypothesis`` off; question ids it assigns are
   kept by the orchestrator. Each proposer recalls from the run's shared memory under the
   real run id (``run_id``) and its own role; records it already has in ``evidence`` (the
-  profile) are dropped from that recall, so nothing reaches its prompt twice.
+  profile) are dropped from that recall, so nothing reaches its prompt twice. With
+  ``lessons`` (``memory.lessons.RunLessons``, loaded by the orchestrator before this call)
+  each persona also gets the reviewed lessons it recalled, as a delimited prompt block.
 * ``design``: stand-in until DU-10's designer lands. It returns the library diagnostics
   the proposer attached to the question, plus the pre-registered search diagnostics
   (``search.task9.search_diagnostics``) for questions that documentation can decide, such
@@ -95,10 +97,12 @@ class SwarmRoles:
         run_dir: Callable[[], Path | None] | None = None,
         search_library: Callable[[list[Question]], dict[str, list[Experiment]]]
         | None = None,
+        lessons: Any = None,
     ) -> None:
         self.llm = llm
         self.config = config
         self.memory = memory or NullMemory()
+        self.lessons = lessons
         self.run_id = run_id
         self.library = library
         self.search_library = search_library
@@ -134,6 +138,15 @@ class SwarmRoles:
         cfg = self.config.model_copy(update={"null_hypothesis": False})
         # The proposer recalls under ``bus.run_id``; run-scoped memory needs the real one.
         run_id = (self.run_id() if self.run_id is not None else None) or f"round{self.rounds}"
+        # Reviewed lessons, recalled per persona when the run started; passed only when the
+        # run has a corpus, so a run without one calls the proposer exactly as before.
+        extra: dict[str, Any] = {}
+        if self.lessons is not None:
+            extra["lessons"] = {
+                role: self.lessons.for_role(role)
+                for role in self.lessons.readers
+                if role != "designer"
+            }
         # The library's forks are pre-registered: fixed options, answer keys and
         # diagnostics. On the first real Task 9 run the merge model folded five of them and
         # unrelated questions into one 20-option question, so they skip the merge and are
@@ -146,6 +159,7 @@ class SwarmRoles:
             bus=SilentBus(run_id),
             config=cfg,
             library=[],
+            **extra,
         )
         questions = list(result.questions)
         hypotheses = [h for h in result.hypotheses if not h.is_null]

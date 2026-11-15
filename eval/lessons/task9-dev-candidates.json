@@ -1,0 +1,512 @@
+{
+  "version": 1,
+  "status": "unapproved candidates drafted from development runs; not reviewed",
+  "task": "bixbench3-task9",
+  "development_case_ids": [
+    "case-05",
+    "case-06",
+    "case-09",
+    "case-12"
+  ],
+  "source_runs": "Crux-eval2/runs/batch-02-suite-case-{05,06,09,12}-{swarm,baseline}-1",
+  "public_context": {
+    "task": "bixbench3-task9",
+    "analysis": "de_from_counts",
+    "reader": "statistician, bioinformatician, sceptic or designer (the delivery planner)"
+  },
+  "review": [
+    "Each candidate's 'lesson' becomes a ReviewedLesson once approved; 'title' and 'drafting_notes' are for the reviewer and are dropped when freezing.",
+    "Check every source against the run folder it names, and that no text carries grades, scores, reference files or anything from a held-out case.",
+    "Edit the procedure text as needed. To approve, set approved to true, reviewed_by to your name and reviewed_at to an ISO time with a timezone. Leave approved false to reject a candidate; the freeze script skips it.",
+    "Freeze with: uv run python -m eval.lessons.freeze_task9 eval/lessons/task9-dev-candidates.json --out runs/frozen-lessons"
+  ],
+  "candidates": [
+    {
+      "title": "Use only packages the sandbox has: no R jsonlite, no pandas to_markdown",
+      "drafting_notes": "Six failed code steps across three dev runs, in both arms: jsonlite missing in R twice in the case-05 swarm and once in the case-05 baseline; tabulate (needed by DataFrame.to_markdown) missing in the case-05 swarm and both baselines that hit the spend limit (case-05, case-06). Each failure spent an attempt and its model call. Environment fact, not science; designer only.",
+      "lesson": {
+        "id": "task9-sandbox-packages-v1",
+        "when": "Writing delivery code for the Task 9 sandbox (Python 3.12 with pandas and numpy; R with DESeq2).",
+        "mistake": "Calling library(jsonlite) in R or DataFrame.to_markdown() in Python. Neither jsonlite nor tabulate is installed, so the step stops, the attempt is spent and the deliverables that step would have written are missing.",
+        "diagnostic": "Before returning the plan, scan every step for library(), require() and import calls beyond base R, DESeq2, pandas, numpy and the Python standard library, and for to_markdown(). An attempt that failed with \"there is no package called 'jsonlite'\" or \"Import tabulate failed\" is this mistake.",
+        "repair": "Pass data between steps as TSV or CSV files (read.delim and write.csv in R, pandas in Python). Write METHODS.md with plain string formatting or DataFrame.to_string(). After an import error, remove that dependency instead of retrying the same call.",
+        "exceptions": [
+          "Observed on sandbox image im-oKU7URiND5MAa2kgh4vcOq; if the image changes, check the package once rather than assuming it is still missing."
+        ],
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          },
+          {
+            "key": "reader",
+            "value": "designer"
+          }
+        ],
+        "excludes": [],
+        "sources": [
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#e364137d64774601b35ce80d43e6a3c5",
+            "kind": "execution_failure",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "db9f692ab1afeb76d0936d5876df3e94c0d5231ec52025257d79865aad45618b"
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#602067f4bc1742ad80c64294e333ee21",
+            "kind": "execution_failure",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "d37b84e727f7bedaeaed89715514d4bfc429a467b694e17f6f2d7d8e3765f607"
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#c3f4b60eaac54586ba29484fa1683c8f",
+            "kind": "execution_failure",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "9efd1371a484605cf9140a02f4f4f2970882a22b5f214afc2315cc411fd5be2e"
+          },
+          {
+            "run_id": "batch-02-suite-case-05-baseline-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-baseline-1/execution.jsonl#ef0194374937413aac3727043be3ccfe",
+            "kind": "execution_failure",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-05-baseline-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-baseline-1/execution.jsonl#818cd02c0eee45a1bae86cddfd9007a1",
+            "kind": "execution_failure",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-06-baseline-1",
+            "case_id": "case-06",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-06-baseline-1/execution.jsonl#2dc7341aa39843ab8f21162da62374fd",
+            "kind": "execution_failure",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "code_hash": null
+          }
+        ],
+        "approved": false,
+        "reviewed_by": "",
+        "reviewed_at": null
+      }
+    },
+    {
+      "title": "A near-empty contrast calls for the expression-based label check",
+      "drafting_notes": "case-12 baseline: one treatment-vs-control contrast had 0 genes at padj < 0.05 while its siblings had many; it checked only that sample-sheet IDs matched the matrix columns and rejected a label problem (execution log and its summary). case-12 swarm, same inputs: labels_nearest_neighbour flagged four misplaced libraries resolved by an exchange and labels_swap_search found an exchange with gain 2.40 (ratio 1.95). The lesson tells agents to run the check; it does not say which labels were right. Sample and group names are left out on purpose, because the held-out cases share the same sample sheet.",
+      "lesson": {
+        "id": "task9-empty-contrast-label-check-v1",
+        "when": "One treatment-versus-control contrast in a cell line has no or almost no genes at padj < 0.05 while the other contrasts in the same cell line have hundreds or more.",
+        "mistake": "Accepting it as a treatment without effect after checking only that the sample-sheet IDs match the count-matrix column names. Name matching does not test whether the condition labels fit the libraries' expression, and labels exchanged between that treatment and its control can produce exactly this pattern.",
+        "diagnostic": "Within that cell line, check that each library's nearest neighbour by Spearman correlation carries its condition label, and search for the single label exchange that most raises replicate correlation relative to the line's replicate-versus-condition gap (the labels_nearest_neighbour and labels_swap_search diagnostics).",
+        "repair": "If one exchange resolves the misplaced libraries with a clearly positive gain, exchange those labels and refit, and record the flagged libraries, the exchange and its gain in METHODS.md. If the checks are consistent, keep the labels and report the near-empty contrast as observed.",
+        "exceptions": [
+          "A treatment can truly have little effect: act on the label check's result, never on the near-empty contrast alone.",
+          "The check needs at least two libraries per condition in that cell line."
+        ],
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          }
+        ],
+        "excludes": [],
+        "sources": [
+          {
+            "run_id": "batch-02-suite-case-12-baseline-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-baseline-1/execution.jsonl#9d4bbdb1edcb4435ac4a43d41c25e4fd",
+            "kind": "observation",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-12-baseline-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-baseline-1/baseline.json#summary",
+            "kind": "observation",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/events.jsonl#129",
+            "kind": "diagnostic",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": "69b0e23bfd443bdeeb74851cc0a3660457f974a404cf2eaa01719cf7fd413ca9"
+          },
+          {
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/events.jsonl#201",
+            "kind": "diagnostic",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": "6633ba0cb344e3a705590116a6617c4c6177936736e582f8f076c2009c64507c"
+          }
+        ],
+        "approved": false,
+        "reviewed_by": "",
+        "reviewed_at": null
+      }
+    },
+    {
+      "title": "Two equivalent label exchanges: settle the direction before applying one",
+      "drafting_notes": "case-12 swarm: labels_nearest_neighbour listed two resolving swaps and labels_swap_search reported a candidate pair different from its preferred pair; both exchanges are between the same two groups, which with two libraries per group gives the same partition with opposite labels. The direction check ran before the exchange and came back unclear (min cross-line correlation -0.012, against 0.19 in the case-05 run where no exchange was flagged). The delivery applied the preferred exchange. I cannot tell from the runs whether that choice was right, and the procedure here (re-score direction under each exchange) was not tried in any run. Review carefully or reject.",
+      "lesson": {
+        "id": "task9-ambiguous-exchange-direction-v1",
+        "when": "The label checks flag a swap within one cell line and report two different exchanges between the same two condition groups that both resolve the misplaced libraries (two resolving swaps, or a candidate pair that differs from the preferred or alternative pair).",
+        "mistake": "Applying whichever exchange the search prefers. With two libraries per group the two exchanges give the same partition of libraries with opposite labels, so replicate correlation cannot say which group is the control. A direction check computed before the exchange compares against a mixed control group, so its low scores do not decide it either.",
+        "diagnostic": "Apply each candidate exchange in turn and recompute the direction check for the affected groups: each treated group's fold change over control, correlated with the other cell line's treated groups (as the direction_signature diagnostic does). Compare the scores under the two exchanges.",
+        "repair": "Apply the exchange under which the affected groups' fold changes agree better with the other cell line's treatment signatures. If the scores do not separate the two, apply the search's preferred exchange and state in METHODS.md that the direction is uncertain, listing both exchanges and their scores.",
+        "exceptions": [
+          "Only for two exchanges between the same pair of groups; exchanges that involve different groups are not ambiguous in this way.",
+          "It relies on a treatment signature shared across cell lines; without one the direction stays uncertain and should be reported as such."
+        ],
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          }
+        ],
+        "excludes": [],
+        "sources": [
+          {
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/events.jsonl#129",
+            "kind": "diagnostic",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": "69b0e23bfd443bdeeb74851cc0a3660457f974a404cf2eaa01719cf7fd413ca9"
+          },
+          {
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/events.jsonl#201",
+            "kind": "diagnostic",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": "6633ba0cb344e3a705590116a6617c4c6177936736e582f8f076c2009c64507c"
+          },
+          {
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/events.jsonl#184",
+            "kind": "diagnostic",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": "1e82ffe953a9f97a53117d05b25e1e8a0c987563894d1df8254a9454cfa2431c"
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#188",
+            "kind": "diagnostic",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "1e82ffe953a9f97a53117d05b25e1e8a0c987563894d1df8254a9454cfa2431c"
+          }
+        ],
+        "approved": false,
+        "reviewed_by": "",
+        "reviewed_at": null
+      }
+    },
+    {
+      "title": "Find exact duplicate libraries first and keep one copy",
+      "drafting_notes": "case-06 swarm: duplicates_identical (identical fraction 1.0) and duplicates_correlation (r = 1.0) flagged one pair; the question settled and the delivery dropped the second copy, leaving that group with one replicate. The case-06 baseline found the same pair but hit the spend limit before writing METHODS.md. Thresholds and the 0.994 / 0.088 figures for distinct libraries come from the case-05 swarm diagnostics. The exception about names that carry different labels is my addition and untested.",
+      "lesson": {
+        "id": "task9-duplicate-library-v1",
+        "when": "Before the label, quality and replicate checks, and before fitting DESeq2 on a count matrix with biological replicates.",
+        "mistake": "Keeping two count columns that are the same library under two sample names. It inflates the replicate count and understates dispersion, and the pair look like perfect nearest neighbours, so label checks on that pair look clean for the wrong reason.",
+        "diagnostic": "For every pair of count columns, compute the fraction of genes detected in either library that have identical counts (flag at 0.99 or above) and the correlation of log2 CPM over expressed genes (flag at 0.9999 or above). Distinct biological replicates reached a correlation of about 0.994 and an identical fraction under 0.09, so a high correlation alone is not duplication.",
+        "repair": "Keep one copy (the sample listed first) and drop the other from every model, refit with the reduced group, and state in METHODS.md that the group has one fewer replicate. Re-run any label check that used both copies.",
+        "exceptions": [
+          "Technical replicates declared in the sample sheet are not accidental duplicates; follow the task's instructions for them.",
+          "If the two names carry different conditions or cell lines, the duplicate is also a labelling problem: run the label checks with each copy removed in turn before deciding which name to keep."
+        ],
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          }
+        ],
+        "excludes": [],
+        "sources": [
+          {
+            "run_id": "batch-02-suite-case-06-swarm-1",
+            "case_id": "case-06",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-06-swarm-1/events.jsonl#132",
+            "kind": "diagnostic",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "code_hash": "a5a97346a40237767755a051435e6e565b9ce398bd47b79bd9ea42f236fc2cf0"
+          },
+          {
+            "run_id": "batch-02-suite-case-06-swarm-1",
+            "case_id": "case-06",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-06-swarm-1/events.jsonl#203",
+            "kind": "diagnostic",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "code_hash": "8ada723dce3cf2f9c36dd3bf30c140a58a4d1126fe8347d3182c9f6cd143c2f7"
+          },
+          {
+            "run_id": "batch-02-suite-case-06-baseline-1",
+            "case_id": "case-06",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-06-baseline-1/execution.jsonl#9c18efd8857b4d92b98f0cd58a83bc0f",
+            "kind": "observation",
+            "input_hash": "ecb4c0292421adc39fa290d43c1f3024f77625f8544abc5803d0d9dcc94d965e",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#142",
+            "kind": "diagnostic",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "a5a97346a40237767755a051435e6e565b9ce398bd47b79bd9ea42f236fc2cf0"
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#214",
+            "kind": "diagnostic",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "8ada723dce3cf2f9c36dd3bf30c140a58a4d1126fe8347d3182c9f6cd143c2f7"
+          }
+        ],
+        "approved": false,
+        "reviewed_by": "",
+        "reviewed_at": null
+      }
+    },
+    {
+      "title": "Count versioned and unversioned gene IDs before stripping or joining",
+      "drafting_notes": "case-09 swarm: gene_strip_check found 59,708 versioned and 1,000 unversioned IDs with no collisions; the question settled on mixed versions. In case-05 and case-09 the run profile's end-anchored pattern (ENSG\\d+\\.\\d+$) counted 44 fewer versioned IDs than the strip check's \\.\\d+(?=$|_); the 44 are IDs with an underscore suffix after the version (_PAR_Y, which the contract and the runs' METHODS.md mention). No run had collisions, so that branch is untested.",
+      "lesson": {
+        "id": "task9-mixed-gene-id-versions-v1",
+        "when": "Before stripping Ensembl version suffixes, joining gene symbols or writing gene_id columns.",
+        "mistake": "Judging the ID namespace from a few example IDs or with an end-anchored version pattern. A minority of unversioned IDs (about 1,000 of 60,708) can sit among versioned ones, and a pattern such as \\.\\d+$ misses IDs whose version is followed by an underscore suffix such as _PAR_Y.",
+        "diagnostic": "Strip a numeric version that is followed by the end of the ID or by an underscore (for example re.sub(r'\\.\\d+(?=_|$)', '', gene_id)) and count the IDs changed, unchanged and colliding after stripping.",
+        "repair": "If versioned and unversioned IDs both occur, strip versions from every ID with that pattern, keep suffixes such as _PAR_Y, and map symbols on the stripped ID only when the mapping is unambiguous. If stripping makes two rows collide, keep them apart and report them rather than letting a join or index pick one.",
+        "exceptions": [
+          "No collisions occurred in the development runs, so the collision handling is untested.",
+          "Where the task's contract is more specific about the exported gene_id, follow the contract."
+        ],
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          }
+        ],
+        "excludes": [],
+        "sources": [
+          {
+            "run_id": "batch-02-suite-case-09-swarm-1",
+            "case_id": "case-09",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-09-swarm-1/events.jsonl#158",
+            "kind": "diagnostic",
+            "input_hash": "a26ba6fa0bc1b6c56bf85d796b2637710591ca923e33c5ff4c75e30997b4f3eb",
+            "code_hash": "d45f3ef4659b55fb77a6a45bc491c48c2e763ec659163bcaba46fa1c7d89f4e6"
+          },
+          {
+            "run_id": "batch-02-suite-case-09-swarm-1",
+            "case_id": "case-09",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-09-swarm-1/events.jsonl#1",
+            "kind": "observation",
+            "input_hash": "a26ba6fa0bc1b6c56bf85d796b2637710591ca923e33c5ff4c75e30997b4f3eb",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#1",
+            "kind": "observation",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#176",
+            "kind": "diagnostic",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "d45f3ef4659b55fb77a6a45bc491c48c2e763ec659163bcaba46fa1c7d89f4e6"
+          }
+        ],
+        "approved": false,
+        "reviewed_by": "",
+        "reviewed_at": null
+      }
+    },
+    {
+      "title": "Subset metadata per cell line first, then index counts by those IDs",
+      "drafting_notes": "The same code bug failed two dev swarm deliveries with different errors: case-12 round 1 attempt 1 (R 'subscript out of bounds') and case-05 round 1 attempt 3 (DESeq2 'was expecting condition_D4_vs_Ctrl to be present in resultsNames'). Both reordered a per-line subset with match() positions from the full sample list. The case-12 retry repaired it by matching columns to sample IDs and asserting the match. Designer only.",
+      "lesson": {
+        "id": "task9-per-line-sample-alignment-v1",
+        "when": "Writing per-cell-line DESeq2 code that subsets the sample sheet and the count matrix.",
+        "mistake": "Reordering a per-line metadata subset with positions from match() against the full matrix's columns, as in ss[match(ss$sample_id, colnames(counts)), ]. The positions refer to all libraries, so the subset gets NA or wrong rows; the code then fails with 'subscript out of bounds' or a missing contrast ('was expecting condition_X_vs_Ctrl to be present in resultsNames').",
+        "diagnostic": "Before DESeqDataSetFromMatrix, assert that the subset has no NA sample IDs, that identical(colnames(cts), rownames(coldata)) holds, and that every condition to be contrasted is present among that line's retained samples; print resultsNames(dds) before calling results().",
+        "repair": "Select the line's rows from the sample sheet first, index count columns by those sample IDs (cts <- counts[, ss$sample_id, drop = FALSE]), build colData in the same order, and derive the contrast list from the conditions present in that line after any exclusions.",
+        "exceptions": [
+          "If count columns are not named exactly by sample ID, map them to sample IDs first and stop on any missing or duplicated match."
+        ],
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          },
+          {
+            "key": "reader",
+            "value": "designer"
+          }
+        ],
+        "excludes": [],
+        "sources": [
+          {
+            "run_id": "batch-02-suite-case-12-swarm-1",
+            "case_id": "case-12",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-12-swarm-1/execution.jsonl#c4545a9cc2784917a93621bb31ca1cb1",
+            "kind": "execution_failure",
+            "input_hash": "8f086cf04505d5f486f54448cae60e6edfdad9d244d888d58c936a7ce3f1ab34",
+            "code_hash": "980634c254d6344e2b46347c17dabdd646db5f97c6787b8fd89f74ebe5e20ee5"
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#335085bed31146e4aaac4518935a2584",
+            "kind": "execution_failure",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "b26230c477f73368bcddba7e8d9f1bf3477ca9400da0fbe1b42b5e187b619924"
+          }
+        ],
+        "approved": false,
+        "reviewed_by": "",
+        "reviewed_at": null
+      }
+    },
+    {
+      "title": "Write every contract file in each attempt; derived gene sets were missed",
+      "drafting_notes": "case-05 swarm round 1: the step building the shared and specific gene sets failed (R 'invalid subscript type list' in make_shared), the two retries failed on other errors, so the round ended with only the per-contrast tables and the critic blocked three missing deliverables. A second delivery round was needed. Designer only.",
+      "lesson": {
+        "id": "task9-contract-completeness-v1",
+        "when": "Planning a delivery attempt, especially a retry after a failed step.",
+        "mistake": "Ending an attempt with only the per-contrast tables written. The derived gene-set files (shared and cell-line-specific sets) were built in a later step that failed on a code error, the retries failed on other errors, and the critic blocked three missing deliverables, which cost a second delivery round.",
+        "diagnostic": "At the end of the last step, list the contract's files and check that each exists under /outputs with the contract's required columns, and that METHODS.md exists; print any that are missing.",
+        "repair": "Build the derived gene-set files from the per-contrast tables in the same step that writes those tables, or in a small final step that reads them back from /outputs, and keep fragile extras out of the steps that write deliverables. On a retry, fix the reported error and write every file again.",
+        "exceptions": [
+          "An empty gene set is still a deliverable: write the file with its header."
+        ],
+        "requires": [
+          {
+            "key": "task",
+            "value": "bixbench3-task9"
+          },
+          {
+            "key": "analysis",
+            "value": "de_from_counts"
+          },
+          {
+            "key": "reader",
+            "value": "designer"
+          }
+        ],
+        "excludes": [],
+        "sources": [
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#248",
+            "kind": "objection",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#249",
+            "kind": "objection",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/events.jsonl#250",
+            "kind": "objection",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": null
+          },
+          {
+            "run_id": "batch-02-suite-case-05-swarm-1",
+            "case_id": "case-05",
+            "split": "dev",
+            "evidence_id": "batch-02-suite-case-05-swarm-1/execution.jsonl#5e64c05d784a4748bc511f39e0bb5953",
+            "kind": "execution_failure",
+            "input_hash": "8906d4906978b3a6a1489301964ffb6a3fa7b5d73461e1d9c6490fd091c944b7",
+            "code_hash": "43bfc37705b776147df971c53be4f7dfb9891bdafc3282447c8c85b66cab382e"
+          }
+        ],
+        "approved": false,
+        "reviewed_by": "",
+        "reviewed_at": null
+      }
+    }
+  ]
+}

@@ -11,6 +11,8 @@ Wraps ``Task9Lab`` (DU-13) without changing it:
   or failed executions up to ``max_attempts`` times per delivery round. Generated code
   is kept under ``delivery/`` in the run folder.
 * ``memory``, when set, is the run's memory; ``close`` closes it after the sandbox.
+* ``lessons``, when set, is the run's reviewed lesson corpus (see ``build_task9_run``):
+  ``deliver`` gives the planner the designer's lessons and ``close`` closes their ledger.
 """
 
 from __future__ import annotations
@@ -87,6 +89,9 @@ class SwarmTask9Lab:
         self.owns_search = owns_search
         # Likewise the run's memory, when build_task9_run built it.
         self.memory: Any = None
+        # The run's reviewed lessons (``memory.lessons.RunLessons``) when it has a corpus:
+        # the delivery planner reads the designer's, and ``close`` closes their ledger.
+        self.lessons: Any = None
 
     # --- Lab -------------------------------------------------------------------------
 
@@ -117,11 +122,15 @@ class SwarmTask9Lab:
         from core.schemas import Artifact
 
         await self._open()
+        # Only a run with a lesson corpus passes lessons, so other runs plan exactly as before.
+        extra = {}
+        if self.lessons is not None:
+            extra["lessons"] = self.lessons.for_role("designer")
         error: str | None = None
         for attempt in range(1, self.max_attempts + 1):
             try:
                 steps = await self.planner(
-                    self.llm, state, last_error=error, profile=self.profile_facts
+                    self.llm, state, last_error=error, profile=self.profile_facts, **extra
                 )
             except LLMOutputError:
                 if attempt == self.max_attempts:
@@ -178,9 +187,13 @@ class SwarmTask9Lab:
                     self.owns_search = False
                     await search.aclose()
             finally:
-                memory, self.memory = self.memory, None
-                if memory is not None and hasattr(memory, "aclose"):
-                    await memory.aclose()
+                try:
+                    memory, self.memory = self.memory, None
+                    if memory is not None and hasattr(memory, "aclose"):
+                        await memory.aclose()
+                finally:
+                    if self.lessons is not None:
+                        await self.lessons.aclose()
 
     # --- helpers ---------------------------------------------------------------------
 
@@ -280,7 +293,22 @@ def build_task9_run(
     role-only local ledger for ``local_role_only``, otherwise none. A built memory is scoped
     to the run id on first use and closed with the lab. The proposers, the designer and the
     critic read it; the experimenter (profile and search results), the referee, the critic
-    and, with ``cfg.lessons``, the reporter write it.
+    and, with ``cfg.lessons``, the reporter write it (candidate lessons, never reused here).
+
+    Reviewed lessons: with ``cfg.lessons_corpus`` (a corpus saved by ``FrozenLessons.save``)
+    and ``cfg.lessons_case_id`` (the held-out case this run declares), the run recalls that
+    frozen corpus at its start: ``task9_lessons`` builds a ``memory.lessons.RunLessons`` on
+    the local lesson ledger (no key, no network, every applicable lesson in corpus order) and
+    it goes to ``Deps.lessons``, the swarm roles and the lab. The orchestrator loads it after
+    the profile and before the proposals, emitting one ``memory.recalled`` per reader; the
+    ledger under ``<run>/lessons/`` keeps the ``lesson.written`` and ``memory.recalled``
+    audit rows. Each proposer persona's prompt and the delivery planner's prompt (it reads
+    the designer's lessons, since the designer step is a code stand-in with no prompt) get
+    their lessons as a delimited block. The public context for the ``requires``/``excludes``
+    gates is ``{"task": TASK_ID, "analysis": "de_from_counts", "reader": <role>}``. A corpus
+    that does not load or verify, a synthetic or empty corpus, or a case outside its held-out
+    cohort raises here, before anything runs. Without a corpus nothing changes: no ledger,
+    no recall and the same prompts.
     """
     from agents.llm import LLM, STRONG_MODEL, LLMConfig
     from agents.predictor import SampledPredictor
@@ -288,6 +316,9 @@ def build_task9_run(
     from core.orchestrator import Deps
     from execution.staging import COUNTS
     from memory.run import memory_from_config
+
+    # Fail on a bad corpus or case before building anything that opens files or clients.
+    lessons = task9_lessons(cfg)
 
     owns_search = False
     if not getattr(cfg, "search", False):
@@ -328,7 +359,9 @@ def build_task9_run(
         run_id=lambda: lab.run_id,
         counts_path=counts,
         run_dir=lambda: lab.run_dir,
+        lessons=lessons,
     )
+    lab.lessons = lessons
     predictor: Any = SampledPredictor(llm, n=cfg.n_predictor_samples, eps=cfg.eps)
     if getattr(cfg, "predictor", None) == "tinker":
         from agents.tinker_predictor import TinkerPredictor, load_model_path
@@ -353,8 +386,33 @@ def build_task9_run(
         memory=memory,
         search=search,
         llm=llm,
+        lessons=lessons,
     )
     return lab, deps
+
+
+def task9_lessons(cfg: Any) -> Any:
+    """The run's ``RunLessons`` for ``cfg.lessons_corpus``, or ``None`` when no corpus is set.
+
+    Readers are the proposer personas this config runs plus the designer. Raises when the
+    corpus does not load, or the declared case is missing or outside the held-out cohort.
+    """
+    corpus = getattr(cfg, "lessons_corpus", None)
+    case_id = getattr(cfg, "lessons_case_id", None)
+    if not corpus:
+        if case_id:
+            raise ValueError("lessons_case_id is set but lessons_corpus is not")
+        return None
+    from agents.proposer import ROLES
+    from memory.lessons import RunLessons
+
+    personas = ROLES[: getattr(cfg, "proposers", len(ROLES))]
+    return RunLessons(
+        corpus,
+        case_id,
+        readers=(*personas, "designer"),
+        context={"task": TASK_ID, "analysis": "de_from_counts"},
+    )
 
 
 def discover_cases(root: Path | None) -> dict[str, dict]:

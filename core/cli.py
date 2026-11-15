@@ -3,6 +3,7 @@
     python -m core.cli --lab fake|fake-surprise|fake-numeric --config default --seed 0 --runs-dir runs
     python -m core.cli --lab bixbench3 --manifest case-manifest.json   # Modal sandbox
     python -m core.cli --lab bixbench3 --case path/to/case             # this machine, dev only
+    python -m core.cli --lab bixbench3 --manifest m.json --lessons corpus.json --lessons-case-id case-01
 
 Prints the run id, the number of events, which questions settled (or ended robust or
 unresolved) and the path of the events file. The fakes need no network access and no API
@@ -80,9 +81,27 @@ def main(argv: list[str] | None = None) -> int:
     where.add_argument(
         "--case", type=Path, help="bixbench3: case folder run on this machine (dev only)"
     )
+    parser.add_argument(
+        "--lessons",
+        type=Path,
+        metavar="CORPUS",
+        help="bixbench3: frozen lesson corpus (FrozenLessons.save) recalled at the run's start",
+    )
+    parser.add_argument(
+        "--lessons-case-id",
+        metavar="CASE",
+        help="bixbench3 with --lessons: the held-out case id this run declares",
+    )
     args = parser.parse_args(argv)
 
-    cfg = load_config(args.config, seed=args.seed, runs_dir=args.runs_dir)
+    lessons: dict[str, str] = {}
+    if args.lessons is not None or args.lessons_case_id is not None:
+        if args.lab != "bixbench3":
+            parser.error("--lessons is for --lab bixbench3")
+        if args.lessons is None or not args.lessons_case_id:
+            parser.error("--lessons and --lessons-case-id go together")
+        lessons = {"lessons_corpus": str(args.lessons), "lessons_case_id": args.lessons_case_id}
+    cfg = load_config(args.config, seed=args.seed, runs_dir=args.runs_dir, **lessons)
     if args.lab == "bixbench3":
         if args.manifest is None and args.case is None:
             parser.error("--lab bixbench3 needs --manifest or --case")

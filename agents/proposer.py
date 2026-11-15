@@ -12,6 +12,7 @@ from core.events import EventBus
 from core.interfaces import LLM, Memory
 from core.model_sandbox import validate_model_source
 from core.schemas import Evidence, Experiment, Hypothesis, Question
+from memory.lessons import format_lessons
 
 ROLES = ("statistician", "bioinformatician", "sceptic")
 PROMPTS = Path(__file__).parent / "prompts"
@@ -121,12 +122,16 @@ async def propose(
     bus: EventBus,
     config: RunConfig,
     library: list[LibraryQuestion] | None = None,
+    lessons: dict[str, list[Evidence]] | None = None,
 ) -> Proposals:
     """Return merged questions after independent role calls and one merge call.
 
     Local source IDs encode role and position. The merge model can group existing
     IDs, while code owns IDs, content, provenance, and prior normalization.
     Call once per proposal round. Event IDs include the current event sequence.
+    ``lessons`` maps a proposer role to the reviewed lessons it recalled before this round;
+    they are appended to that role's system prompt as a delimited block. Without lessons
+    for a role its prompt is unchanged, and the merge prompt never gets lessons.
     """
     roles = ROLES[: config.proposers]
 
@@ -137,14 +142,15 @@ async def propose(
             "profile": [ev.model_dump() for ev in profile],
             "recalled": [ev.model_dump() for ev in evidence],
         }
+        system = (PROMPTS / f"{role}.md").read_text(encoding="utf-8")
+        block = format_lessons((lessons or {}).get(role, []))
+        if block:
+            system = f"{system}\n\n{block}"
         [batch] = await llm.structured(
             "proposer",
             ProposalBatch,
             [
-                {
-                    "role": "system",
-                    "content": (PROMPTS / f"{role}.md").read_text(encoding="utf-8"),
-                },
+                {"role": "system", "content": system},
                 {"role": "user", "content": json.dumps(context)},
             ],
         )

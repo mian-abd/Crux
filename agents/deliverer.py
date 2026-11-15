@@ -14,7 +14,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from core.schemas import EngineState
+from core.schemas import EngineState, Evidence
+from memory.lessons import format_lessons
 
 _SYSTEM = """You write the analysis code that produces a study's deliverables in a sandbox.
 
@@ -88,7 +89,14 @@ async def plan_delivery(
     *,
     last_error: str | None = None,
     profile: list[dict] | None = None,
+    lessons: list[Evidence] | None = None,
 ) -> list[tuple[str, str]]:
+    """The delivery code as ordered ``(language, code)`` steps.
+
+    ``lessons`` are the reviewed lessons the run recalled for the designer at its start;
+    in Task 9 the delivery planner designs the analysis code, so it reads them, appended
+    to the system prompt as a delimited block. Without lessons the prompt is unchanged.
+    """
     brief = state.brief or {}
     findings = [f.model_dump(mode="json") for f in state.findings][-20:]
     payload = {
@@ -100,8 +108,9 @@ async def plan_delivery(
         "critic_findings": findings,
         "last_execution_error": (last_error or "")[-4000:],
     }
+    block = format_lessons(lessons or [])
     messages = [
-        {"role": "system", "content": _SYSTEM},
+        {"role": "system", "content": f"{_SYSTEM}\n\n{block}" if block else _SYSTEM},
         {"role": "user", "content": json.dumps(payload, default=str)},
     ]
     [plan] = await llm.structured("deliverer", DeliveryPlan, messages)

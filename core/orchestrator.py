@@ -2,7 +2,8 @@
 
 ``await run(lab, cfg, deps)`` drives one run end to end and returns its ``Report``:
 
-1. ``run.started``, ``lab.profile()`` (``profile.done``), ``agents.propose`` and the option set
+1. ``run.started``, ``lab.profile()`` (``profile.done``), the reviewed lessons when
+   ``Deps.lessons`` is set (``memory.recalled`` per reader), ``agents.propose`` and the option set
    of every question: exact duplicates merged (weights summed), priors normalised, and a
    "none of these" option ``<question>.h0`` with prior ``cfg.null_prior`` added.
 2. Numeric labs (``lab.candidate_designs()`` returns a grid): a ``ParticleBelief`` over the
@@ -102,6 +103,10 @@ class Deps:
     is called as ``bus_factory(run_id, Path(cfg.runs_dir), clock=clock)`` and returns a
     ``core.events.EventBus`` (the default is the class itself). ``clock`` returns Unix seconds
     for event timestamps, budgets and latencies; tests pass a fake.
+
+    ``lessons`` (``memory.lessons.RunLessons``, default ``None``) is a frozen, reviewed lesson
+    corpus. When set, it is loaded after the profile and before any proposal, with one
+    ``memory.recalled`` event per reader; the agents that share it read their lessons from it.
     """
 
     agents: AgentRoles
@@ -112,6 +117,7 @@ class Deps:
     llm: Any = None
     bus_factory: Callable[..., EventBus] = EventBus
     clock: Callable[[], float] = time.time
+    lessons: Any = None
 
 
 async def run(lab: Lab, cfg: EngineConfig, deps: Deps, *, run_id: str | None = None) -> Report:
@@ -314,6 +320,10 @@ class _Run:
         await self._emit(E.PROFILE_DONE, evidence=profile)
         await self._memory_write(profile)
 
+        if self.deps.lessons is not None:
+            self._where = "lessons"
+            await self._load_lessons()
+
         self._where = "propose"
         questions, hypotheses = await self.deps.agents.propose(self.state.brief, list(profile))
         await self._open_questions(list(questions), list(hypotheses))
@@ -489,6 +499,28 @@ class _Run:
             latency_ms=round(latency_ms, 3),
         )
         return recalled
+
+    async def _load_lessons(self) -> None:
+        """Recall the frozen lesson corpus for every reader before independent proposals.
+
+        A failure to load or prepare it raises: the run fails rather than going on with no
+        lessons. Lessons only reach prompts; they never touch beliefs or the run's memory.
+        """
+        audits = await self.deps.lessons.load(
+            str(self.state.brief.get("goal", "")), self.run_dir / "lessons"
+        )
+        for audit in audits:
+            await self._emit(
+                E.MEMORY_RECALLED,
+                reader_role=audit["reader_role"],
+                query=audit["query"],
+                evidence_ids=audit["evidence_ids"],
+                authors=audit["authors"],
+                backend=audit["backend"],
+                latency_ms=round(audit["latency_ms"], 3),
+                corpus_sha256=audit["corpus_sha256"],
+                case_id=audit["case_id"],
+            )
 
     def _context_evidence(self, recalled: list[Evidence]) -> list[Evidence]:
         """The run's evidence plus recalled records not already in it (never counted twice)."""

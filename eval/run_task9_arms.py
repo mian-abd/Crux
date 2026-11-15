@@ -11,6 +11,12 @@ The swarm uses the run configuration in ``core.config``; the baseline uses ``--b
 at the given list prices. Grades land in ``--out``, which must be evaluator storage outside
 the repo and outside every run folder. ``results.md`` and ``results.json`` there hold every
 run (failed ones included) and each arm's mean and spread.
+
+Lessons on/off: ``--arms swarm swarm-lessons --lessons CORPUS`` runs, per case, the plain
+swarm and the swarm that recalls the frozen lesson corpus at its start (``core.cli
+--lessons CORPUS --lessons-case-id <case name>``), and adds a paired on-minus-off table.
+Every case name must be in the corpus's held-out cohort; that and the corpus are checked
+before any run starts. The baseline never gets lessons.
 """
 
 from __future__ import annotations
@@ -35,6 +41,47 @@ def git_commit() -> str:
 # Tool keys stripped from every run unless --with-tools: both arms then get the same tools
 # (no web search, no shared memory), and search or memory become separate, labelled runs.
 TOOL_KEYS = ("EXA_API_KEY", "PAST_API_KEY")
+# ``swarm-lessons`` is the swarm with a frozen lesson corpus (--lessons) recalled at the
+# start of each run; it needs no tool key, and ``swarm`` and ``baseline`` stay unchanged.
+SWARM_ARMS = ("swarm", "swarm-lessons")
+ARMS = (*SWARM_ARMS, "baseline")
+
+
+def check_lessons(args: argparse.Namespace, cases: dict[str, str]) -> dict | None:
+    """Validate --lessons against the arms and cases before any run starts.
+
+    Returns the corpus record for the report, or ``None`` without lessons. Exits when the
+    corpus does not load or verify, is synthetic or empty, or a case is not in its held-out
+    cohort, so no run is launched that would fail, or run with no lessons, later.
+    """
+    wants = "swarm-lessons" in args.arms
+    if args.lessons is None:
+        if wants:
+            raise SystemExit("the swarm-lessons arm needs --lessons CORPUS")
+        return None
+    if not wants:
+        raise SystemExit("--lessons applies to the swarm-lessons arm; add it to --arms")
+    from memory.lessons import FrozenLessons
+
+    try:
+        corpus = FrozenLessons.load(args.lessons)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"cannot load the lesson corpus {args.lessons}: {exc}") from exc
+    if corpus.synthetic or not corpus.lessons:
+        raise SystemExit("the lesson corpus must be a real, non-empty reviewed corpus")
+    outside = sorted(set(cases) - set(corpus.held_out_case_ids))
+    if outside:
+        raise SystemExit(
+            f"cases not in the corpus's held-out cohort: {', '.join(outside)} "
+            f"(cohort: {', '.join(corpus.held_out_case_ids)})"
+        )
+    return {
+        "path": str(args.lessons),
+        "sha256": corpus.digest,
+        "frozen_at": corpus.frozen_at.isoformat(),
+        "lesson_ids": [lesson.id for lesson in corpus.lessons],
+        "held_out_case_ids": list(corpus.held_out_case_ids),
+    }
 
 
 def run_arm(
@@ -45,7 +92,7 @@ def run_arm(
     args: argparse.Namespace,
     logs: Path,
 ) -> dict:
-    if arm == "swarm":
+    if arm in SWARM_ARMS:
         command = [
             sys.executable,
             "-m",
@@ -59,6 +106,9 @@ def run_arm(
             "--run-id",
             run_id,
         ]
+        if arm == "swarm-lessons":
+            # The case name is the held-out case id the run declares to the corpus.
+            command += ["--lessons", str(args.lessons), "--lessons-case-id", case]
     else:
         rate_in, rate_out = PRICES[args.baseline_model]
         command = [
@@ -186,8 +236,37 @@ def summarise(rows: list[dict]) -> dict:
     return out
 
 
+def paired_lessons(rows: list[dict]) -> list[dict]:
+    """Per case with both swarm arms: mean score with lessons minus without (failed = 0)."""
+    out = []
+    for case in sorted({r["case"] for r in rows}):
+        means = {}
+        for arm in SWARM_ARMS:
+            scores = [
+                r["mean"] if r["mean"] is not None else 0.0
+                for r in rows
+                if r["case"] == case and r["arm"] == arm
+            ]
+            if scores:
+                means[arm] = statistics.mean(scores)
+        if len(means) == 2:
+            out.append(
+                {
+                    "case": case,
+                    "swarm": means["swarm"],
+                    "swarm_lessons": means["swarm-lessons"],
+                    "delta_on_minus_off": means["swarm-lessons"] - means["swarm"],
+                }
+            )
+    return out
+
+
 def write_report(
-    rows: list[dict], summary: dict, args: argparse.Namespace, commit: str
+    rows: list[dict],
+    summary: dict,
+    args: argparse.Namespace,
+    commit: str,
+    lessons: dict | None = None,
 ) -> None:
     lines = [
         f"# Task 9: swarm vs single-agent baseline ({args.out.name})",
@@ -219,11 +298,34 @@ def write_report(
             f"| {r['run_id']} | {r['arm']} | {r['status']} | {score} | {passed} | "
             f"{cost} | {r['model_calls']} | {r['seconds']:.0f} |"
         )
+    paired = paired_lessons(rows)
+    if lessons is not None:
+        lines += [
+            "",
+            (
+                f"The swarm-lessons arm recalled the frozen lesson corpus `{lessons['sha256']}` "
+                f"({len(lessons['lesson_ids'])} lessons, frozen {lessons['frozen_at']}) at the "
+                "start of each run. The swarm and baseline arms ran without it."
+            ),
+        ]
+    if paired:
+        lines += [
+            "",
+            "| Case | Swarm | Swarm + lessons | On minus off |",
+            "| --- | --- | --- | --- |",
+        ]
+        lines += [
+            f"| {p['case']} | {p['swarm']:.3f} | {p['swarm_lessons']:.3f} | "
+            f"{p['delta_on_minus_off']:+.3f} |"
+            for p in paired
+        ]
     (args.out / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (args.out / "results.json").write_text(
-        json.dumps({"commit": commit, "summary": summary, "runs": rows}, indent=2),
-        encoding="utf-8",
-    )
+    record = {"commit": commit, "summary": summary, "runs": rows}
+    if lessons is not None:
+        record["lessons"] = lessons
+    if paired:
+        record["paired_lessons"] = paired
+    (args.out / "results.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
 
 
 def main() -> None:
@@ -250,9 +352,17 @@ def main() -> None:
     parser.add_argument("--grader-python", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--repeats", type=int, default=3)
-    parser.add_argument("--arms", nargs="+", default=["swarm", "baseline"])
+    parser.add_argument("--arms", nargs="+", default=["swarm", "baseline"], choices=ARMS)
     parser.add_argument("--baseline-model", default="gpt-5.5", choices=sorted(PRICES))
+    parser.add_argument(
+        "--lessons",
+        type=Path,
+        metavar="CORPUS",
+        help="frozen lesson corpus for the swarm-lessons arm; every case must be held out",
+    )
     args = parser.parse_args()
+    if args.lessons is not None:
+        args.lessons = args.lessons.resolve()
     args.out = args.out.resolve()
     if args.out.is_relative_to(Path("runs").resolve()) or args.out.is_relative_to(
         Path.cwd()
@@ -271,6 +381,7 @@ def main() -> None:
             raise SystemExit("pass --manifest or one or more --case NAME=MANIFEST")
         cases = {"clean": str(args.manifest)}
     args.manifest = Path(next(iter(cases.values())))
+    lessons = check_lessons(args, cases)
     jobs = [
         (arm, case, Path(manifest), f"{batch}-{case}-{arm}-{i}")
         for case, manifest in cases.items()
@@ -287,7 +398,7 @@ def main() -> None:
         )
     rows = [grade(r, args) for r in runs]
     summary = summarise(rows)
-    write_report(rows, summary, args, commit)
+    write_report(rows, summary, args, commit, lessons)
     for arm, s in summary.items():
         print(
             f"{arm}: mean {s['mean']:.3f} ± {s['sd']:.3f} over {s['runs']} runs",

@@ -67,11 +67,75 @@ final filtered recall is audited with writer/reader roles, corpus hash, case ID,
 and labeled prompt-size estimates. Lessons must be loaded before independent proposals,
 without sharing one proposer's current proposals with another.
 
-The Task 9 run does not load a reviewed corpus yet: that waits for real lessons reviewed
-from development runs. In a run, `lessons=True` (off by default) only makes the
-orchestrator write each settled or robust question's lesson, authored by the reporter, to
-the run's own memory and emit `lesson.written`. Those are candidates for review. They are
-never reused unreviewed, and the run-scoped audience keeps them out of later runs.
+## Task 9 runs
+
+A Task 9 swarm run recalls a frozen corpus when its config names one:
+`lessons_corpus` (a file saved by `FrozenLessons.save`) and `lessons_case_id` (the held-out
+case the run declares). On the command line:
+
+```sh
+uv run python -m core.cli --lab bixbench3 --manifest case-01.json \
+  --lessons runs/frozen-lessons/lessons-<sha256>.json --lessons-case-id case-01
+```
+
+`build_task9_run` then builds a `RunLessons` before anything else. It loads and verifies
+the corpus and raises if the file is missing or tampered, the corpus is synthetic or
+empty, or the case is not in its held-out cohort, so a run never goes on with zero
+lessons by accident. The orchestrator loads it after the profile and before any proposal:
+`prepare()`, then one recall per reader, each emitting `memory.recalled` (with the corpus
+hash and case id) to the run's events. The readers are the proposer personas the config
+runs and the designer. Each persona gets its own recall, from the frozen corpus only, so no
+proposer sees another's current proposals. The Task 9 designer step is a code stand-in
+with no prompt, so the delivery planner, which designs the analysis code, reads the
+designer's lessons. Lessons go at the end of each system prompt as one block between
+`=== BEGIN REVIEWED LESSONS` and `=== END REVIEWED LESSONS ===`; the data in the user
+message is unchanged, and the merge prompt gets none.
+
+Recall uses `LessonLedger`, a local backend under `<run>/lessons/`: no key, no network and
+no ranking. It returns every lesson and the applicability gates choose, so each reader gets
+every lesson that applies to it. Its journal keeps the `lesson.written` and
+`memory.recalled` audit rows. The public context for `requires`/`excludes` is
+`{"task": "bixbench3-task9", "analysis": "de_from_counts", "reader": <role>}`; a
+`reader` gate limits a lesson to, say, the designer.
+
+Without a corpus nothing changes: no ledger, no recall, the same prompts, and the unset
+fields are left out of `run.started` and `manifest.json`. Separately, `lessons=True` (off
+by default) only makes the orchestrator write each settled or robust question's lesson,
+authored by the reporter, to the run's own memory and emit `lesson.written`. Those are
+candidates for review. They are never reused unreviewed, and the run-scoped audience keeps
+them out of later runs.
+
+### Candidates, review and freeze
+
+`eval/lessons/task9-dev-candidates.json` holds unapproved candidates drafted from the
+development cases' batch-02 runs (case-05, case-06, case-09, case-12; swarm and baseline).
+Each cites the event or execution-log entries it rests on: diagnostics, critic objections,
+execution failures and repairs. None carries a grade, score, reference file or held-out
+case. Each candidate's `lesson` turns into a `ReviewedLesson` once a reviewer sets
+`approved`, `reviewed_by` and a timezone-aware `reviewed_at`; `title` and `drafting_notes`
+are dropped when freezing. Then:
+
+```sh
+uv run python -m eval.lessons.freeze_task9 eval/lessons/task9-dev-candidates.json \
+  --out runs/frozen-lessons
+```
+
+It keeps the approved candidates, declares the nine non-development cases as the held-out
+cohort (`--held-out` overrides), saves the corpus and prints its path and SHA-256.
+
+### The paired on/off runs
+
+```sh
+uv run python -m eval.run_task9_arms --arms swarm swarm-lessons \
+  --lessons runs/frozen-lessons/lessons-<sha256>.json \
+  --case case-01=<manifest> ... --evaluator ... --grader-repo ... --grader-python ... \
+  --out <evaluator storage> --repeats 1
+```
+
+`swarm-lessons` is the swarm with `--lessons <corpus> --lessons-case-id <case name>`;
+`swarm` and `baseline` are unchanged. The corpus and every case name are checked against
+the cohort before any run starts. `results.md` and `results.json` record the corpus hash
+and a per-case on-minus-off table.
 
 ## Paired comparison
 
@@ -117,10 +181,11 @@ the on-arm context is empty or the off-arm context contains lessons.
 ## Remaining validation
 
 DU-30's real before/after requires reviewed lessons from actual development cases and a
-held-out case runner with external grading. The planned scientific comparison follows the
-development/overnight results; this branch prepares that path now. The optional predictor
-self-calibration/Brier-score experiment is not implemented. Report real gains, no gains
-and failures alike; synthetic retrieval success alone is not evidence of self-improvement.
+held-out case runner with external grading. The candidates and the Task 9 recall path are
+in place; the comparison runs once a person has reviewed and frozen the lessons. The
+optional predictor self-calibration/Brier-score experiment is not implemented. Report real
+gains, no gains and failures alike; synthetic retrieval success alone is not evidence of
+self-improvement.
 
 The implementation uses existing Pydantic and past.dev dependencies plus Python's
 standard library. Dependency credits are in the README and existing memory documentation.

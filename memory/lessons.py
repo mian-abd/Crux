@@ -29,6 +29,7 @@ from core.schemas import Evidence
 from memory.base import MemoryRecord, RunContext
 from memory.instrumentation import format_memory
 from memory.pastdev import PastMemory
+from memory.store import MemoryStore
 
 LESSON_ROLES = ("reporter", "proposer", "statistician", "bioinformatician", "sceptic", "designer")
 READERS = set(LESSON_ROLES) - {"reporter"}
@@ -221,7 +222,7 @@ class LessonMemory:
         )
         self.root = root
         self.memory_factory = memory_factory
-        self.backend_label = (
+        self.backend_label = getattr(memory_factory, "backend_label", None) or (
             "pastdev_lessons" if memory_factory is PastMemory else "fixture_lessons"
         )
         self.provider_options = provider_options
@@ -327,3 +328,154 @@ class LessonMemory:
         if hasattr(self.memory, "store"):
             self.memory.store.audit("memory.recalled", payload)
         return list(selected.values())
+
+
+class LessonLedger:
+    """A local, deterministic backend for a frozen corpus: no key, no network, no ranking.
+
+    ``recall`` returns every lesson record in corpus order and ``LessonMemory`` then applies
+    the applicability gates, so each reader gets every lesson that applies to it rather than
+    a ranked subset. Audit rows go to the ledger's own journal, as with the other backends.
+    """
+
+    backend_label = "local_lessons"
+
+    def __init__(self, context: RunContext, root: Path = Path("runs/lessons")):
+        self.context = context
+        self.store = MemoryStore(Path(root) / "local_lessons", context)
+        self._closed = False
+
+    def _check(self, run_id: str) -> None:
+        if self._closed:
+            raise RuntimeError("Lesson ledger is closed")
+        if run_id != self.context.run_id:
+            raise ValueError("Lesson ledger is bound to another corpus")
+
+    async def write_record(self, record: MemoryRecord) -> None:
+        self._check(record.run_id)
+        self.context.identity(record.evidence.author_role)
+        if record.task_id != self.context.task_id:
+            raise ValueError("Lesson record belongs to another task")
+        digest = hashlib.sha256(record.evidence.id.encode()).hexdigest()
+        self.store.append(record, self.context.audience + ":ev:" + digest)
+
+    async def recall(self, query: str, run_id: str, reader_role: str, k: int = 8) -> list[Evidence]:
+        self._check(run_id)
+        self.context.identity(reader_role)
+        if not 1 <= k <= 200:
+            raise ValueError("Recall needs k between 1 and 200")
+        rows = self.store.eligible()
+        return [MemoryRecord.model_validate_json(row["record"]).evidence for row in rows][:k]
+
+    async def flush(self) -> None:
+        self._check(self.context.run_id)
+
+    async def aclose(self) -> None:
+        if not self._closed:
+            self._closed = True
+            self.store.close()
+
+
+def format_lessons(lessons: list[Evidence]) -> str:
+    """Recalled lessons as one clearly delimited prompt block; empty when there are none."""
+    if not lessons:
+        return ""
+    digest = str(lessons[0].conditions.get("corpus_sha256", ""))[:16]
+    lines = [
+        f"=== BEGIN REVIEWED LESSONS (frozen corpus {digest}) ===",
+        "Procedural lessons a person reviewed from earlier development cases. They are advice",
+        "on how to check and repair an analysis, not evidence about this dataset. Apply one",
+        "only when its 'When' holds here and no exception applies, and decide from this run's",
+        "own data and diagnostics.",
+    ]
+    for i, lesson in enumerate(lessons, start=1):
+        lines += ["", f"[{i}] {lesson.conditions.get('lesson_id', lesson.id)}", lesson.claim]
+    lines.append("=== END REVIEWED LESSONS ===")
+    return "\n".join(lines)
+
+
+class RunLessons:
+    """A frozen corpus recalled once, at the start of one run, for each reader role.
+
+    The constructor loads and verifies the saved corpus and checks that the declared case is
+    in its held-out cohort; any failure raises, so a run never goes ahead with zero lessons
+    by accident. ``load`` prepares the corpus (the indexing barrier) and recalls each
+    reader's applicable lessons, with ``context`` plus ``{"reader": role}`` as the public
+    context; ``for_role`` then serves them. Every reader recalls independently and from the
+    frozen corpus only, so no reader sees another's current proposals.
+    """
+
+    def __init__(
+        self,
+        path: Path | str,
+        case_id: str | None,
+        *,
+        readers: tuple[str, ...],
+        context: dict,
+        memory_factory=LessonLedger,
+    ):
+        self.path = Path(path)
+        try:
+            corpus = FrozenLessons.load(self.path)
+        except (OSError, ValueError) as exc:
+            raise ValueError(f"Cannot load the frozen lesson corpus {self.path}: {exc}") from exc
+        if corpus.synthetic:
+            raise ValueError("A synthetic lesson corpus cannot be used in a real run")
+        if not corpus.lessons:
+            raise ValueError(f"The frozen lesson corpus {self.path} has no lessons")
+        if not case_id:
+            raise ValueError("A run with a lesson corpus must declare its case id")
+        if case_id not in corpus.held_out_case_ids:
+            raise ValueError(
+                f"Case {case_id!r} is not in the corpus's held-out cohort "
+                f"({', '.join(corpus.held_out_case_ids)})"
+            )
+        unknown = [role for role in readers if role not in READERS]
+        if not readers or unknown:
+            raise ValueError(f"Lesson readers must be among {sorted(READERS)}, not {unknown}")
+        self.corpus = corpus
+        self.case_id = case_id
+        self.readers = tuple(readers)
+        self.context = dict(context)
+        self.memory_factory = memory_factory
+        self.k = min(len(corpus.lessons), 200)
+        self.memory: LessonMemory | None = None
+        self.recalled: dict[str, list[Evidence]] | None = None
+
+    @property
+    def digest(self) -> str:
+        return self.corpus.digest
+
+    @property
+    def backend_label(self) -> str:
+        return getattr(self.memory_factory, "backend_label", None) or "fixture_lessons"
+
+    async def load(self, query: str, root: Path) -> list[dict]:
+        """Prepare once and recall for every reader; returns the recall audit payloads."""
+        if self.recalled is not None:
+            return []
+        self.memory = LessonMemory(
+            self.corpus, RunConfig(lessons=True), Path(root), memory_factory=self.memory_factory
+        )
+        await self.memory.prepare()
+        recalled = {}
+        for role in self.readers:
+            recalled[role] = await self.memory.recall(
+                query or "reviewed procedural lessons",
+                case_id=self.case_id,
+                role=role,
+                context={**self.context, "reader": role},
+                k=self.k,
+            )
+        self.recalled = recalled
+        return [dict(event) for event in self.memory.events[-len(self.readers) :]]
+
+    def for_role(self, role: str) -> list[Evidence]:
+        if self.recalled is None:
+            raise RuntimeError("Lessons are read only after load() at the start of the run")
+        return list(self.recalled.get(role, []))
+
+    async def aclose(self) -> None:
+        memory, self.memory = self.memory, None
+        if memory is not None:
+            await memory.__aexit__(None, None, None)
