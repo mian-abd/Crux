@@ -7,9 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import type * as THREE from "three";
 import { HelixModel } from "./HelixModel";
+import { LabelAnchor, LabelLayer, LabelProjector, ScreenLabel, useLabelStore } from "./ScreenLabels";
 import { StudioLights } from "./StudioLights";
 import { useColorMode, useInView, useReducedMotion, useSurfaceColor } from "./hooks";
 import {
@@ -111,53 +112,53 @@ function Codon({ codon, other, color }: { codon: string; other: string; color: s
   );
 }
 
-function HighlightLabel({ x, radius, info, mode }: { x: number; radius: number; info: HighlightInfo; mode: ColorMode }) {
+// The labels below are plain DOM laid over the canvas (ScreenLabels.tsx), in
+// this React tree, rather than drei <Html> roots of their own.
+
+/** Sits above its anchor: the box, then a leader line down to the pair. */
+function HighlightLabel({ info, mode }: { info: HighlightInfo; mode: ColorMode }) {
   const p = PALETTE[mode];
   return (
-    <Html position={[x, radius + 0.3, 0]} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        transform: "translateY(-50%)",
+      }}
+    >
+      <div style={labelBox(mode)}>
+        <span style={{ color: p.accent }}>●</span> codon {info.codon}:{" "}
+        <Codon codon={info.fromCodon} other={info.toCodon} color={p.ink} /> →{" "}
+        <Codon codon={info.toCodon} other={info.fromCodon} color={p.accent} />
+        <div style={{ fontFamily: SANS_FONT, fontSize: 11, color: p.muted, marginTop: 1 }}>{info.detail}</div>
+      </div>
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          transform: "translateY(-50%)",
+          width: 1,
+          height: 20,
+          background: `linear-gradient(${p.accent}, transparent)`,
+          opacity: 0.8,
         }}
-      >
-        <div style={labelBox(mode)}>
-          <span style={{ color: p.accent }}>●</span> codon {info.codon}:{" "}
-          <Codon codon={info.fromCodon} other={info.toCodon} color={p.ink} /> →{" "}
-          <Codon codon={info.toCodon} other={info.fromCodon} color={p.accent} />
-          <div style={{ fontFamily: SANS_FONT, fontSize: 11, color: p.muted, marginTop: 1 }}>{info.detail}</div>
-        </div>
-        <div
-          style={{
-            width: 1,
-            height: 20,
-            background: `linear-gradient(${p.accent}, transparent)`,
-            opacity: 0.8,
-          }}
-        />
-      </div>
-    </Html>
+      />
+    </div>
   );
 }
 
-function EndLabel({ x, text, mode }: { x: number; text: string; mode: ColorMode }) {
+function EndLabel({ text, mode }: { text: string; mode: ColorMode }) {
   const p = PALETTE[mode];
   return (
-    <Html position={[x, 0, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
-      <div
-        style={{
-          fontFamily: MONO_FONT,
-          fontSize: 11,
-          color: p.muted,
-          userSelect: "none",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {text}
-      </div>
-    </Html>
+    <div
+      style={{
+        fontFamily: MONO_FONT,
+        fontSize: 11,
+        color: p.muted,
+        userSelect: "none",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {text}
+    </div>
   );
 }
 
@@ -186,6 +187,7 @@ export function DNAHelix({ sequence, highlights, autoRotate = true, className }:
   const idleTimer = useRef<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [ready, setReady] = useState(false);
+  const labels = useLabelStore();
 
   const onStart = useCallback(() => {
     setInteracting(true);
@@ -209,6 +211,11 @@ export function DNAHelix({ sequence, highlights, autoRotate = true, className }:
   const hovered = hover !== null ? layout.pairs[hover] : undefined;
   const half = layout.length / 2;
   const fogFar = layout.length + 14;
+  const highlightLabels = infos.map(({ h, info }) => ({
+    id: `hl-${h.index}-${h.to}`,
+    x: layout.pairs[info.indices[0] ?? h.index]?.mid[0] ?? 0,
+    info,
+  }));
 
   return (
     <div
@@ -254,42 +261,17 @@ export function DNAHelix({ sequence, highlights, autoRotate = true, className }:
               onHoverPair={setHover}
             />
           </Rig>
-          {infos.map(({ h, info }) => {
-            const x = layout.pairs[info.indices[0] ?? h.index]?.mid[0] ?? 0;
-            return (
-              <HighlightLabel
-                key={`${h.index}-${h.to}`}
-                x={x}
-                radius={layout.params.radius}
-                info={info}
-                mode={mode}
-              />
-            );
-          })}
-          <EndLabel x={-half - 0.95} text="5′" mode={mode} />
-          <EndLabel x={half + 0.95} text="3′" mode={mode} />
-          {/* Kept mounted (drei Html owns a React root); hidden when nothing is hovered. */}
-          <Html
+          {/* Label anchors sit outside the Rig, so labels stay put while the helix turns. */}
+          {highlightLabels.map(({ id, x }) => (
+            <LabelAnchor key={id} store={labels} id={id} position={[x, layout.params.radius + 0.3, 0]} />
+          ))}
+          <LabelAnchor store={labels} id="end-5" position={[-half - 0.95, 0, 0]} />
+          <LabelAnchor store={labels} id="end-3" position={[half + 0.95, 0, 0]} />
+          <LabelAnchor
+            store={labels}
+            id="hover"
             position={[hovered?.mid[0] ?? 0, -layout.params.radius - 0.7, 0]}
-            center
-            zIndexRange={[30, 0]}
-            style={{ pointerEvents: "none" }}
-          >
-            <div style={{ ...labelBox(mode), opacity: hovered ? 1 : 0, transition: "opacity 120ms ease" }}>
-              {hovered ? (
-                <>
-                  nt {hovered.index + 1} · {hovered.base}–{hovered.partner}
-                  <span style={{ color: p.muted }}>
-                    {" "}
-                    · codon {Math.floor(hovered.index / 3)}{" "}
-                    {seq.slice(Math.floor(hovered.index / 3) * 3, Math.floor(hovered.index / 3) * 3 + 3)}
-                  </span>
-                </>
-              ) : (
-                " "
-              )}
-            </div>
-          </Html>
+          />
         </group>
         <OrbitControls
           makeDefault
@@ -303,7 +285,38 @@ export function DNAHelix({ sequence, highlights, autoRotate = true, className }:
           onStart={onStart}
           onEnd={onEnd}
         />
+        <LabelProjector store={labels} />
       </Canvas>
+      <LabelLayer>
+        {highlightLabels.map(({ id, info }) => (
+          <ScreenLabel key={id} store={labels} id={id} zIndexRange={[20, 0]}>
+            <HighlightLabel info={info} mode={mode} />
+          </ScreenLabel>
+        ))}
+        <ScreenLabel store={labels} id="end-5" zIndexRange={[10, 0]}>
+          <EndLabel text="5′" mode={mode} />
+        </ScreenLabel>
+        <ScreenLabel store={labels} id="end-3" zIndexRange={[10, 0]}>
+          <EndLabel text="3′" mode={mode} />
+        </ScreenLabel>
+        {/* Kept mounted so it fades out; transparent when nothing is hovered. */}
+        <ScreenLabel store={labels} id="hover" zIndexRange={[30, 0]}>
+          <div style={{ ...labelBox(mode), opacity: hovered ? 1 : 0, transition: "opacity 120ms ease" }}>
+            {hovered ? (
+              <>
+                nt {hovered.index + 1} · {hovered.base}–{hovered.partner}
+                <span style={{ color: p.muted }}>
+                  {" "}
+                  · codon {Math.floor(hovered.index / 3)}{" "}
+                  {seq.slice(Math.floor(hovered.index / 3) * 3, Math.floor(hovered.index / 3) * 3 + 3)}
+                </span>
+              </>
+            ) : (
+              " "
+            )}
+          </div>
+        </ScreenLabel>
+      </LabelLayer>
     </div>
   );
 }

@@ -33,6 +33,11 @@ Also exported: `buildGraph` and `parseEventLog` (the pure event-to-graph reducer
   tab is hidden (IntersectionObserver plus `visibilitychange`).
 * **Cleanup.** Each view releases its WebGL context on unmount (R3F does it for the two helices; the
   graph and Mol* force it), and resizes with its container.
+* **Helix labels.** `DNAHelix`'s labels are ordinary DOM in the page's React tree, laid over the
+  canvas (`ScreenLabels.tsx`). An empty group in the scene marks each anchor, and one frame callback
+  projects the anchors and writes each label's transform, z-index and visibility (`labelStore.ts`,
+  the same maths as drei's `Html`). drei's `Html` is not used: it renders into a React root of its
+  own and unmounts it synchronously, which React 19 reports as an error under StrictMode.
 
 ## The evidence graph
 
@@ -103,9 +108,8 @@ The hero uses instancing (beads and bonds are one draw call each, plus two backb
 highlighted pair and one particle system) and no post-processing. Mol*'s ambient occlusion runs at 0.6 resolution and the viewer caps its drawing
 buffer at 1.5× device pixels; it only redraws while rocking or interacting.
 
-Known development-only console noise: drei `Html` logs "Attempted to synchronously unmount a root"
-under React StrictMode's double mount, and three 0.187 warns that `THREE.Clock` (used inside R3F)
-is deprecated. Neither appears in production builds or affects behaviour.
+Known development-only console noise: three 0.187 warns that `THREE.Clock` (used inside R3F) is
+deprecated. It does not appear in production builds or affect behaviour.
 
 ## Sources and credits
 
@@ -118,7 +122,7 @@ what their APIs require.
 * [react-three-fiber](https://github.com/pmndrs/react-three-fiber) and
   [drei](https://github.com/pmndrs/drei) by Poimandres (MIT): `Canvas` with on-demand frame loops,
   `Environment` with `Lightformer`s (the procedural studio lighting from the pmndrs examples, so
-  nothing is downloaded), `Sparkles`, `Float`, `OrbitControls` and `Html`.
+  nothing is downloaded), `Sparkles`, `Float` and `OrbitControls`.
 * [react-force-graph-3d](https://github.com/vasturiano/react-force-graph),
   [3d-force-graph](https://github.com/vasturiano/3d-force-graph) and
   [three-forcegraph](https://github.com/vasturiano/three-forcegraph) by Vasco Asturiano (MIT): the
