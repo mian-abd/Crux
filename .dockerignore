@@ -1,0 +1,29 @@
+# Keep secrets, local data and everything the API image doesn't need out of the build context.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+*ground-truth*
+*ground_truth*
+*truth-table*
+*truth_table*
+truth.json
+
+.git/
+.cl*/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+node_modules/
+
+# The UIs are separate services (or not deployed); the API image needs neither.
+site/
+web/
+
+# Only the recorded demo runs ship; local run folders stay local.
+runs/*
+!runs/demo/

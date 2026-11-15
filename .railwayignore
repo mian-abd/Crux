@@ -1,0 +1,14 @@
+# What `railway up` must not upload (it also honours .gitignore).
+.env
+.env.*
+!.env.example
+.cl*/
+.venv/
+node_modules/
+site/node_modules/
+site/.next/
+site/.data/
+web/node_modules/
+web/dist/
+runs/*
+!runs/demo/
