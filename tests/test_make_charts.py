@@ -3,24 +3,31 @@ import json
 from eval import make_charts as mc
 
 
-def _results(tmp_path, name, with_baseline=True):
+def _suite(tmp_path, with_baseline=True):
+    """Two fault cases and one clean case; the baseline crashes on case-02."""
     runs = []
-    for arm, base in (("swarm", 0.8), ("baseline", 0.4)):
-        if arm == "baseline" and not with_baseline:
-            continue
-        for i in (1, 2):
-            runs.append({
-                "arm": arm, "run_id": f"{arm}-{i}", "status": "ok",
-                "mean": base + 0.02 * i,
-                "artifacts": {"a_degs": base, "b_degs": base + 0.05 * i},
-            })
-    if with_baseline:
-        runs.append({"arm": "baseline", "run_id": "bad", "status": "no record",
-                     "mean": None, "artifacts": {}})
-    p = tmp_path / name / "results.json"
-    p.parent.mkdir()
-    p.write_text(json.dumps({"runs": runs}), encoding="utf-8")
-    return p
+    for case, swarm, base in (("case-01", 0.86, 0.57), ("case-02", 0.80, None), ("case-03", 0.83, 0.87)):
+        runs.append({"case": case, "arm": "swarm", "run_id": f"{case}-swarm", "status": "ok",
+                     "mean": swarm, "artifacts": {"a_degs": swarm}})
+        if with_baseline:
+            runs.append({"case": case, "arm": "baseline", "run_id": f"{case}-baseline",
+                         "status": "error" if base is None else "finished", "mean": base,
+                         "artifacts": {} if base is None else {"a_degs": base}})
+    return _write(tmp_path / "suite.json", {"runs": runs})
+
+
+def _write(path, data):
+    path.write_text(json.dumps(data), encoding="utf-8")
+    return path
+
+
+def _faults(tmp_path, with_baseline=True):
+    rows = [{"case": c, "arm": a, "run_id": f"{c}-{a}", "fault": f, "split": "test",
+             "verdict": v, "quote": "", "reason": ""}
+            for c, f in (("case-01", "sample_swap"), ("case-02", "low_depth"))
+            for a, v in (("swarm", "caught"), ("baseline", "missed"))
+            if with_baseline or a == "swarm"]
+    return _write(tmp_path / "faults.json", rows)
 
 
 def _calibration(tmp_path):
@@ -29,18 +36,25 @@ def _calibration(tmp_path):
             for s in ("test", "shift")}
         for m, v in (("library", 0.55), ("sampled", 0.6), ("base", 0.6), ("finetuned", 0.47))
     }
-    p = tmp_path / "cal.json"
-    p.write_text(json.dumps({"methods": methods}), encoding="utf-8")
-    return p
+    return _write(tmp_path / "cal.json", {"methods": methods})
 
 
-def test_all_charts_written(tmp_path):
+STEMS = ("task9_swarm_vs_baseline", "task9_swarm_vs_baseline_per_case", "task9_fault_detection",
+         "fault_detection_real_data", "airway_label_swap", "predictor_calibration")
+
+
+def test_all_charts_written_with_reruns(tmp_path):
     out = tmp_path / "figs"
-    made = mc.build([_results(tmp_path, "c1"), _results(tmp_path, "c2")],
-                    _calibration(tmp_path), out)
+    reruns = _write(tmp_path / "reruns.json", {"runs": [
+        {"case": "case-02", "arm": "baseline", "run_id": "r-case-02", "status": "finished",
+         "mean": 0.84, "artifacts": {"a_degs": 0.84}}]})
+    rerun_faults = _write(tmp_path / "rerun_faults.json", [
+        {"case": "case-02", "arm": "baseline", "run_id": "r-case-02", "fault": "low_depth",
+         "split": "test", "verdict": "caught", "quote": "", "reason": ""}])
+    made = mc.build([_suite(tmp_path)], _calibration(tmp_path), out, _faults(tmp_path),
+                    [reruns], rerun_faults)
     names = {p.name for p in made}
-    for stem in ("task9_swarm_vs_baseline", "task9_swarm_vs_baseline_per_case",
-                 "fault_detection_real_data", "airway_label_swap", "predictor_calibration"):
+    for stem in STEMS:
         for ext in ("png", "svg"):
             assert f"{stem}.{ext}" in names
             assert (out / f"{stem}.{ext}").stat().st_size > 0
@@ -48,21 +62,34 @@ def test_all_charts_written(tmp_path):
 
 def test_swarm_only_results_work(tmp_path):
     out = tmp_path / "figs"
-    mc.build([_results(tmp_path, "c1", with_baseline=False)], _calibration(tmp_path), out)
+    mc.build([_suite(tmp_path, with_baseline=False)], _calibration(tmp_path), out,
+             _faults(tmp_path, with_baseline=False))
     assert (out / "task9_swarm_vs_baseline.png").is_file()
+    assert (out / "task9_fault_detection.png").is_file()
 
 
 def test_missing_inputs_are_skipped(tmp_path, capsys):
     out = tmp_path / "figs"
-    made = mc.build([tmp_path / "nope.json"], tmp_path / "nope_cal.json", out)
+    made = mc.build([tmp_path / "nope.json"], tmp_path / "nope_cal.json", out,
+                    tmp_path / "nope_faults.json")
     printed = capsys.readouterr().out
-    assert "skipped task9_swarm_vs_baseline" in printed
+    assert "skipped the task9 charts" in printed
     assert "skipped predictor_calibration" in printed
     assert not (out / "task9_swarm_vs_baseline.png").exists()
-    assert not (out / "predictor_calibration.png").exists()
     assert (out / "fault_detection_real_data.png").is_file()
-    assert (out / "airway_label_swap.png").is_file()
     assert len(made) == 4
+
+
+def test_crash_and_case_names():
+    assert mc._crashed({"status": "error", "mean": 0.5})
+    assert mc._crashed({"status": "finished", "mean": None})
+    # A spend-limited run that was graded is not a failure.
+    assert not mc._crashed({"status": "spend_limit", "mean": 0.84})
+    names = mc._case_names({"case-09": "gene_version", "case-01": "label_inversion",
+                            "case-04": "label_inversion", "case-07": "sample_swap"})
+    assert list(names.values()) == ["Sample swap 1", "Label inversion 1", "Label inversion 2",
+                                    "Gene version 1"]
+    assert names["case-04"] == "Label inversion 2"
 
 
 def test_hardcoded_totals():

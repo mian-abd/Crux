@@ -1,0 +1,98 @@
+{
+  "commit": "eda5b0d0ad66524470756205be62fac7da158fd3",
+  "note": "Single-agent runs repeated after the harness fix (PR #40); a labelled deviation, not pre-registered.",
+  "runs": [
+    {
+      "arm": "baseline",
+      "case": "case-02",
+      "run_id": "batch-02-rerun-case-02-baseline-1",
+      "exit_code": 0,
+      "seconds": 1355.54925,
+      "cost_usd": 1.242625,
+      "model_calls": 21,
+      "status": "finished",
+      "mean": 0.8414277900013581,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609057,
+        "t98g_g2_vs_control_degs": 0.9084537888742882,
+        "t98g_slow_shared_degs": 0.8717310087173101,
+        "hek293_d10_vs_control_degs": 0.9345546432713889,
+        "hek293_e6_vs_control_degs": 0.8425426460690613,
+        "hek293_shared_degs": 0.8831168831168832,
+        "t98g_d4_vs_control_degs": 0.9041095890410958,
+        "t98g_d4_specific_upregulated_genes": 0.41935483870967744
+      }
+    },
+    {
+      "arm": "baseline",
+      "case": "case-03",
+      "run_id": "batch-02-rerun-case-03-baseline-1",
+      "exit_code": 0,
+      "seconds": 658.337417,
+      "cost_usd": 1.559585,
+      "model_calls": 22,
+      "status": "spend_limit",
+      "mean": 0.8599038059733494,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9013568023469013,
+        "t98g_f7_vs_control_degs": 0.9010624169986721,
+        "t98g_g2_vs_control_degs": 0.9031116354519982,
+        "t98g_slow_shared_degs": 0.8653366583541147,
+        "hek293_d10_vs_control_degs": 0.9632446134347274,
+        "hek293_e6_vs_control_degs": 0.9643705463182898,
+        "hek293_shared_degs": 0.943231441048035,
+        "t98g_d4_vs_control_degs": 0.9003478616738286,
+        "t98g_d4_specific_upregulated_genes": 0.39707227813357737
+      }
+    },
+    {
+      "arm": "baseline",
+      "case": "case-08",
+      "run_id": "batch-02-rerun-case-08-baseline-1",
+      "exit_code": 0,
+      "seconds": 421.428387,
+      "cost_usd": 1.16294,
+      "model_calls": 19,
+      "status": "finished",
+      "mean": 0.8691288129857728,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609057,
+        "t98g_g2_vs_control_degs": 0.9084537888742882,
+        "t98g_slow_shared_degs": 0.8717310087173101,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9836829836829836,
+        "hek293_shared_degs": 0.9613733905579399,
+        "t98g_d4_vs_control_degs": 0.9041095890410958,
+        "t98g_d4_specific_upregulated_genes": 0.41935483870967744
+      }
+    },
+    {
+      "arm": "baseline",
+      "case": "case-13",
+      "run_id": "batch-02-rerun-13-case-13-baseline-1",
+      "exit_code": 0,
+      "seconds": 1208.038214,
+      "cost_usd": 1.172275,
+      "model_calls": 19,
+      "status": "finished",
+      "mean": 0.7643113064586883,
+      "passed": 0.5555555555555556,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609057,
+        "t98g_g2_vs_control_degs": 0.9048669313336274,
+        "t98g_slow_shared_degs": 0.8689138576779026,
+        "hek293_d10_vs_control_degs": 0.7224076234378292,
+        "hek293_e6_vs_control_degs": 0.5784793866618879,
+        "hek293_shared_degs": 0.7032967032967034,
+        "t98g_d4_vs_control_degs": 0.896608091540662,
+        "t98g_d4_specific_upregulated_genes": 0.39524245196706315
+      }
+    }
+  ]
+}

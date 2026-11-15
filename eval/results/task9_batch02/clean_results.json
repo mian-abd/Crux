@@ -1,0 +1,115 @@
+{
+  "commit": "799febd83d159e904137c170d91a454b691ee8af",
+  "summary": {
+    "baseline": {
+      "runs": 2,
+      "mean": 0.8675615392485193,
+      "sd": 0.002216459775175089,
+      "min": 0.8659942655112658,
+      "max": 0.8691288129857728,
+      "mean_cost_usd": 1.237185
+    },
+    "swarm": {
+      "runs": 2,
+      "mean": 0.8253139595011816,
+      "sd": 0.050104235416662916,
+      "min": 0.789884914871892,
+      "max": 0.8607430041304711,
+      "mean_cost_usd": 0.8316561
+    }
+  },
+  "runs": [
+    {
+      "arm": "swarm",
+      "case": "clean",
+      "run_id": "batch-02-clean-clean-swarm-1",
+      "exit_code": 0,
+      "seconds": 350.473776,
+      "cost_usd": 0.8241766,
+      "model_calls": 18,
+      "status": "ok",
+      "mean": 0.789884914871892,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.8556102566247252,
+        "t98g_f7_vs_control_degs": 0.8469972226035617,
+        "t98g_g2_vs_control_degs": 0.8551800902799949,
+        "t98g_slow_shared_degs": 0.8148148148148147,
+        "hek293_d10_vs_control_degs": 0.8025798338284355,
+        "hek293_e6_vs_control_degs": 0.8477128816679309,
+        "hek293_shared_degs": 0.8365019011406843,
+        "t98g_d4_vs_control_degs": 0.8609248193997471,
+        "t98g_d4_specific_upregulated_genes": 0.38864241348713396
+      }
+    },
+    {
+      "arm": "swarm",
+      "case": "clean",
+      "run_id": "batch-02-clean-clean-swarm-2",
+      "exit_code": 0,
+      "seconds": 461.614516,
+      "cost_usd": 0.8391356,
+      "model_calls": 18,
+      "status": "ok",
+      "mean": 0.8607430041304711,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609056,
+        "t98g_g2_vs_control_degs": 0.9048669313336272,
+        "t98g_slow_shared_degs": 0.8689138576779026,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9643705463182897,
+        "hek293_shared_degs": 0.943231441048035,
+        "t98g_d4_vs_control_degs": 0.896608091540662,
+        "t98g_d4_specific_upregulated_genes": 0.39524245196706315
+      }
+    },
+    {
+      "arm": "baseline",
+      "case": "clean",
+      "run_id": "batch-02-clean-clean-baseline-1",
+      "exit_code": 0,
+      "seconds": 951.983471,
+      "cost_usd": 1.63919,
+      "model_calls": 23,
+      "status": "spend_limit",
+      "mean": 0.8659942655112658,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609056,
+        "t98g_g2_vs_control_degs": 0.9084537888742882,
+        "t98g_slow_shared_degs": 0.8717310087173101,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9836829836829836,
+        "hek293_shared_degs": 0.9613733905579399,
+        "t98g_d4_vs_control_degs": 0.9041095890410958,
+        "t98g_d4_specific_upregulated_genes": 0.39114391143911437
+      }
+    },
+    {
+      "arm": "baseline",
+      "case": "clean",
+      "run_id": "batch-02-clean-clean-baseline-2",
+      "exit_code": 0,
+      "seconds": 460.02543,
+      "cost_usd": 0.83518,
+      "model_calls": 13,
+      "status": "finished",
+      "mean": 0.8691288129857728,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609056,
+        "t98g_g2_vs_control_degs": 0.9084537888742882,
+        "t98g_slow_shared_degs": 0.8717310087173101,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9836829836829836,
+        "hek293_shared_degs": 0.9613733905579399,
+        "t98g_d4_vs_control_degs": 0.9041095890410958,
+        "t98g_d4_specific_upregulated_genes": 0.41935483870967744
+      }
+    }
+  ]
+}

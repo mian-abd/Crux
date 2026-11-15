@@ -1,0 +1,50 @@
+[
+  {
+    "case": "case-02",
+    "arm": "baseline",
+    "run_id": "batch-02-rerun-case-02-baseline-1",
+    "fault": "duplicate_library",
+    "split": "test",
+    "score": 0.8414277900013581,
+    "swarm_question": null,
+    "verdict": "missed",
+    "quote": "",
+    "reason": "The methods do not identify that S03 was a duplicated library whose counts were copied over its replicate; they state that correlation checks looked expected and that no labels or samples were changed/excluded."
+  },
+  {
+    "case": "case-03",
+    "arm": "baseline",
+    "run_id": "batch-02-rerun-case-03-baseline-1",
+    "fault": "cell_line_swap",
+    "split": "test",
+    "score": 0.8599038059733494,
+    "swarm_question": null,
+    "verdict": "missed",
+    "quote": "",
+    "reason": "no METHODS.md"
+  },
+  {
+    "case": "case-08",
+    "arm": "baseline",
+    "run_id": "batch-02-rerun-case-08-baseline-1",
+    "fault": "gene_version",
+    "split": "test",
+    "score": 0.8691288129857728,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "Gene symbols were assigned from `/data/inputs_metadata.json` field `gene_symbol_by_gene_id`. Exact versioned-ID matches were used first. For non-exact matches, stable IDs were used only where the stable ID mapped unambiguously in the metadata.",
+    "reason": "The methods identify that some gene IDs did not match exactly at the versioned-Ensembl-ID level and handled this by stripping/normalizing version suffixes and using unambiguous stable-ID fallback mapping."
+  },
+  {
+    "case": "case-13",
+    "arm": "baseline",
+    "run_id": "batch-02-rerun-13-case-13-baseline-1",
+    "fault": "low_depth",
+    "split": "test",
+    "score": 0.7643113064586883,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "The major unresolved issue is that HEK293 E6 has only one retained biological replicate after excluding failed low-depth S04, so the E6 contrast relies on dispersion information estimated from the remaining HEK293 samples and should be interpreted cautiously.",
+    "reason": "The methods identify S04 as a failed low-depth library and state that it was excluded before modeling, which handles the planted fault."
+  }
+]
