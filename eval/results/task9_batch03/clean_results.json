@@ -1,0 +1,160 @@
+{
+  "commit": "19cd67c1a7ff0a88e6806bfd8b7f21f70212200e",
+  "complete": true,
+  "summary": {
+    "baseline": {
+      "runs": 2,
+      "not_run_budget": 0,
+      "mean": 0.8594244010359215,
+      "sd": 0.00929119144398503,
+      "min": 0.8528545365605773,
+      "max": 0.8659942655112658,
+      "mean_cost_usd": 1.3273975
+    },
+    "swarm": {
+      "runs": 2,
+      "not_run_budget": 0,
+      "mean": 0.8633686348208685,
+      "sd": 0.0037132025321429517,
+      "min": 0.8607430041304711,
+      "max": 0.8659942655112658,
+      "mean_cost_usd": 0.8971224
+    }
+  },
+  "runs": [
+    {
+      "arm": "swarm",
+      "case": "clean",
+      "run_id": "batch-03-clean-clean-swarm-1",
+      "exit_code": 0,
+      "seconds": 268.163474,
+      "cost_usd": 0.9074376,
+      "model_calls": 18,
+      "status": "ok",
+      "mean": 0.8607430041304711,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609056,
+        "t98g_g2_vs_control_degs": 0.9048669313336272,
+        "t98g_slow_shared_degs": 0.8689138576779026,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9643705463182897,
+        "hek293_shared_degs": 0.943231441048035,
+        "t98g_d4_vs_control_degs": 0.896608091540662,
+        "t98g_d4_specific_upregulated_genes": 0.39524245196706315
+      }
+    },
+    {
+      "arm": "swarm",
+      "case": "clean",
+      "run_id": "batch-03-clean-clean-swarm-2",
+      "exit_code": 0,
+      "seconds": 246.1819,
+      "cost_usd": 0.8868072,
+      "model_calls": 18,
+      "status": "ok",
+      "mean": 0.8659942655112658,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516127,
+        "t98g_f7_vs_control_degs": 0.9057609057609056,
+        "t98g_g2_vs_control_degs": 0.908453788874288,
+        "t98g_slow_shared_degs": 0.8717310087173101,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9836829836829836,
+        "hek293_shared_degs": 0.9613733905579399,
+        "t98g_d4_vs_control_degs": 0.9041095890410958,
+        "t98g_d4_specific_upregulated_genes": 0.39114391143911437
+      }
+    },
+    {
+      "arm": "baseline",
+      "case": "clean",
+      "run_id": "batch-03-clean-clean-baseline-1",
+      "exit_code": 0,
+      "seconds": 350.344658,
+      "cost_usd": 1.610755,
+      "model_calls": 23,
+      "status": "spend_limit",
+      "mean": 0.8659942655112658,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609056,
+        "t98g_g2_vs_control_degs": 0.9084537888742882,
+        "t98g_slow_shared_degs": 0.8717310087173101,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9836829836829836,
+        "hek293_shared_degs": 0.9613733905579399,
+        "t98g_d4_vs_control_degs": 0.9041095890410958,
+        "t98g_d4_specific_upregulated_genes": 0.39114391143911437
+      }
+    },
+    {
+      "arm": "baseline",
+      "case": "clean",
+      "run_id": "batch-03-clean-clean-baseline-2",
+      "exit_code": 0,
+      "seconds": 233.515757,
+      "cost_usd": 1.04404,
+      "model_calls": 14,
+      "status": "finished",
+      "mean": 0.8528545365605773,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.8909087180617168,
+        "t98g_f7_vs_control_degs": 0.8900557814963748,
+        "t98g_g2_vs_control_degs": 0.8979061195846402,
+        "t98g_slow_shared_degs": 0.8553921568627451,
+        "hek293_d10_vs_control_degs": 0.9330024734146171,
+        "hek293_e6_vs_control_degs": 0.9543377634285918,
+        "hek293_shared_degs": 0.9446808510638298,
+        "t98g_d4_vs_control_degs": 0.89800892417097,
+        "t98g_d4_specific_upregulated_genes": 0.41139804096170973
+      }
+    }
+  ],
+  "budget": {
+    "max_total_usd": 100.0,
+    "run_cap_usd": 2.0,
+    "spent_usd": 34.022404,
+    "reserved_usd": 0,
+    "stopped": false,
+    "finished": {
+      "batch-03-suite-case-04-swarm-1": 0.0135016,
+      "batch-03-suite-case-05-swarm-1": 0.0120036,
+      "batch-03-suite-case-02-swarm-1": 0.8764234,
+      "batch-03-suite-case-03-swarm-1": 0.9209586,
+      "batch-03-suite-case-05-baseline-1": 0.926185,
+      "batch-03-suite-case-02-baseline-1": 1.51997,
+      "batch-03-suite-case-01-swarm-1": 0.8853444,
+      "batch-03-suite-case-04-baseline-1": 1.632295,
+      "batch-03-suite-case-01-baseline-1": 1.619385,
+      "batch-03-suite-case-03-baseline-1": 1.61643,
+      "batch-03-suite-case-06-baseline-1": 0.473455,
+      "batch-03-suite-case-06-swarm-1": 0.9618614,
+      "batch-03-suite-case-08-baseline-1": 1.105,
+      "batch-03-suite-case-08-swarm-1": 0.847379,
+      "batch-03-suite-case-09-swarm-1": 0.922749,
+      "batch-03-suite-case-09-baseline-1": 1.576725,
+      "batch-03-suite-case-07-baseline-1": 1.170345,
+      "batch-03-suite-case-10-swarm-1": 1.2425392,
+      "batch-03-suite-case-11-swarm-1": 0.88748,
+      "batch-03-suite-case-11-baseline-1": 1.55391,
+      "batch-03-suite-case-10-baseline-1": 1.57987,
+      "batch-03-suite-case-12-baseline-1": 1.105445,
+      "batch-03-suite-case-07-swarm-1": 2.0077972,
+      "batch-03-suite-case-13-baseline-1": 1.54612,
+      "batch-03-suite-case-13-swarm-1": 1.186947,
+      "batch-03-suite-case-12-swarm-1": 1.3832446,
+      "batch-03-clean-clean-baseline-2": 1.04404,
+      "batch-03-clean-clean-swarm-2": 0.8868072,
+      "batch-03-clean-clean-swarm-1": 0.9074376,
+      "batch-03-clean-clean-baseline-1": 1.610755
+    },
+    "in_flight": {},
+    "skipped": [],
+    "updated_at": "2026-11-15T06:15:07+00:00"
+  }
+}

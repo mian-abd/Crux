@@ -1,0 +1,75 @@
+{
+  "commit": "8ffac7627527929500313136d57833c803432dcc",
+  "note": "The three crashed swarm runs repeated after PR #54 (merge-plan fallback); a labelled deviation, not pre-registered.",
+  "runs": [
+    {
+      "arm": "swarm",
+      "case": "case-04",
+      "run_id": "batch-03-rerun-suite-case-04-swarm-1",
+      "exit_code": 0,
+      "seconds": 434.864115,
+      "cost_usd": 1.4137226,
+      "model_calls": 20,
+      "status": "ok",
+      "mean": 0.8607430041304711,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609056,
+        "t98g_g2_vs_control_degs": 0.9048669313336274,
+        "t98g_slow_shared_degs": 0.8689138576779026,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9643705463182898,
+        "hek293_shared_degs": 0.943231441048035,
+        "t98g_d4_vs_control_degs": 0.896608091540662,
+        "t98g_d4_specific_upregulated_genes": 0.39524245196706315
+      }
+    },
+    {
+      "arm": "swarm",
+      "case": "case-05",
+      "run_id": "batch-03-rerun-suite-case-05-swarm-1",
+      "exit_code": 0,
+      "seconds": 346.86316,
+      "cost_usd": 1.1637596,
+      "model_calls": 19,
+      "status": "ok",
+      "mean": 0.8607430041304712,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609057,
+        "t98g_g2_vs_control_degs": 0.9048669313336274,
+        "t98g_slow_shared_degs": 0.8689138576779026,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9643705463182898,
+        "hek293_shared_degs": 0.943231441048035,
+        "t98g_d4_vs_control_degs": 0.896608091540662,
+        "t98g_d4_specific_upregulated_genes": 0.39524245196706315
+      }
+    },
+    {
+      "arm": "swarm-lessons",
+      "case": "case-07",
+      "run_id": "batch-03-rerun-lessons-case-07-swarm-lessons-1",
+      "exit_code": 0,
+      "seconds": 240.602892,
+      "cost_usd": 0.8510212,
+      "model_calls": 18,
+      "status": "ok",
+      "mean": 0.8607430041304712,
+      "passed": 0.8888888888888888,
+      "artifacts": {
+        "t98g_c10_vs_control_degs": 0.9032258064516129,
+        "t98g_f7_vs_control_degs": 0.9057609057609057,
+        "t98g_g2_vs_control_degs": 0.9048669313336274,
+        "t98g_slow_shared_degs": 0.8689138576779026,
+        "hek293_d10_vs_control_degs": 0.9644670050761421,
+        "hek293_e6_vs_control_degs": 0.9643705463182898,
+        "hek293_shared_degs": 0.943231441048035,
+        "t98g_d4_vs_control_degs": 0.896608091540662,
+        "t98g_d4_specific_upregulated_genes": 0.39524245196706315
+      }
+    }
+  ]
+}

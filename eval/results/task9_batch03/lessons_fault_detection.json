@@ -1,0 +1,110 @@
+[
+  {
+    "case": "case-01",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-01-swarm-lessons-1",
+    "fault": "label_inversion",
+    "split": "test",
+    "score": 0.8607430041304712,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "The direction-signature diagnostic flagged S03, S04, S05 and S06 and indicated an HEK293 Ctrl/E6 inversion; therefore HEK293 Ctrl and E6 group labels were exchanged before DESeq2 fitting (S03/S04 treated as E6; S05/S06 treated as Ctrl).",
+    "reason": "It specifically identifies the inverted HEK293 Ctrl/E6 condition labels affecting S03\u2013S06 and states that the groups were exchanged before DESeq2 fitting."
+  },
+  {
+    "case": "case-02",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-02-swarm-lessons-1",
+    "fault": "duplicate_library",
+    "split": "test",
+    "score": 0.7582985779733121,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "A duplicate library was removed before modelling.",
+    "reason": "The methods explicitly identify the planted duplicated-library problem as the S03|S04 pair with identical counts and state that one duplicate was excluded from all models, so the analysis changed to handle it."
+  },
+  {
+    "case": "case-03",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-03-swarm-lessons-1",
+    "fault": "cell_line_swap",
+    "split": "test",
+    "score": 0.8691288129857728,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "The centroid diagnostic flagged S05 and S09 with suggestions S05:HEK293 and S09:T98G; the unsupervised PC1 split independently flagged the same two samples.",
+    "reason": "The methods identify the specific swapped cell-line labels for S05 and S09 and state that S05 was reassigned to HEK293 and S09 to T98G before modelling, thereby handling the planted fault."
+  },
+  {
+    "case": "case-04",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-04-swarm-lessons-1",
+    "fault": "label_inversion",
+    "split": "test",
+    "score": 0.8659942655112658,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "Following the rule for tested unresolved questions, the first option was used because diagnostics moved support to it: the T98G control group and F7 group were exchanged before DESeq2.",
+    "reason": "The methods identify the inverted T98G Ctrl/F7 condition labels and state that the groups were exchanged before modeling, which repairs the affected samples."
+  },
+  {
+    "case": "case-07",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-07-swarm-lessons-1",
+    "fault": "sample_swap",
+    "split": "test",
+    "score": 0.0,
+    "swarm_question": null,
+    "verdict": "missed",
+    "quote": "",
+    "reason": "no METHODS.md"
+  },
+  {
+    "case": "case-08",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-08-swarm-lessons-1",
+    "fault": "gene_version",
+    "split": "test",
+    "score": 0.8607430041304712,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "Diagnostic gene_strip_check had settled that versioned and unversioned Ensembl IDs were mixed: n_changed=59708, n_unchanged=1000, n_stable_ids=60708, n_collisions=0.",
+    "reason": "The methods explicitly identify mixed versioned/unversioned Ensembl gene IDs and state that gene identifiers were normalized by stripping numeric version suffixes with no collisions, so the analysis repaired the affected IDs."
+  },
+  {
+    "case": "case-10",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-10-swarm-lessons-1",
+    "fault": "cell_line_swap",
+    "split": "test",
+    "score": 0.8659942655112658,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "Tested centroid and PC1 diagnostics both flagged S06 and S09 as mismatched; S06 was reassigned to HEK293 and S09 to T98G.",
+    "reason": "The methods identify the affected samples S06 and S09 as having mismatched cell-line labels and state that the labels were corrected before DESeq2 modelling."
+  },
+  {
+    "case": "case-11",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-11-swarm-lessons-1",
+    "fault": "low_depth",
+    "split": "test",
+    "score": 0.7027246211609799,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "Library-quality question: settled as degraded library present.",
+    "reason": "The methods identify a degraded low-depth library and state that S10 was excluded, which handles the planted fault."
+  },
+  {
+    "case": "case-13",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-lessons-case-13-swarm-lessons-1",
+    "fault": "low_depth",
+    "split": "test",
+    "score": 0.5845933845180059,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "S04 was excluded before DESeq2 fitting.",
+    "reason": "The methods explicitly identified a degraded/low-depth library, flagged S04 with depth and detected-gene diagnostics, and handled it by excluding S04 before DESeq2 fitting."
+  }
+]

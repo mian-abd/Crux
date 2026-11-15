@@ -1,0 +1,26 @@
+[
+  {
+    "case": "case-04",
+    "arm": "swarm",
+    "run_id": "batch-03-rerun-suite-case-04-swarm-1",
+    "fault": "label_inversion",
+    "split": "test",
+    "score": 0.8607430041304711,
+    "swarm_question": "open",
+    "verdict": "caught",
+    "quote": "Therefore T98G Ctrl and T98G F7 condition labels were exchanged before modeling: S09 and S15 were analyzed as Ctrl; S10 and S13 were analyzed as F7.",
+    "reason": "It specifically identifies the inverted control/treatment labels in the T98G Ctrl/F7 groups, names the affected samples, and states that the labels were exchanged before modeling."
+  },
+  {
+    "case": "case-07",
+    "arm": "swarm-lessons",
+    "run_id": "batch-03-rerun-lessons-case-07-swarm-lessons-1",
+    "fault": "sample_swap",
+    "split": "test",
+    "score": 0.8607430041304712,
+    "swarm_question": null,
+    "verdict": "caught",
+    "quote": "I exchanged the condition labels of S03 and S05 before fitting DESeq2.",
+    "reason": "The methods identify the affected samples S03 and S05 as a preferred condition-label exchange and state that the analysis corrected them before DESeq2 fitting."
+  }
+]

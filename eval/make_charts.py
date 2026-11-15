@@ -141,8 +141,11 @@ def _mean(xs: list[float]) -> float:
 TIE = 0.005  # score differences this small are ties, not wins
 
 
+CRASHED = ("error", "run.error")
+
+
 def _crashed(r: dict) -> bool:
-    return r.get("status") == "error" or r.get("mean") is None
+    return r.get("status") in CRASHED or r.get("mean") is None
 
 
 def _case_names(faults: dict[str, str]) -> dict[str, str]:
@@ -157,7 +160,7 @@ def _case_names(faults: dict[str, str]) -> dict[str, str]:
 
 
 def chart_task9_swarm_vs_baseline(runs: list[dict], faults: dict[str, str], out: Path,
-                                  reruns: list[dict] | None = None) -> list[Path]:
+                                  reruns: list[dict] | None = None, title_note: str = "") -> list[Path]:
     """The pre-registered summary: the clean case (all clean runs), the fault cases, all suite cases.
 
     ``faults`` maps each planted-fault case to its fault type; every other case is clean.
@@ -174,7 +177,7 @@ def chart_task9_swarm_vs_baseline(runs: list[dict], faults: dict[str, str], out:
         (f"{n_fault} planted-fault\ncases", lambda r: r["case"] in faults),
         (f"All {n_suite} suite\ncases", lambda r: id(r) in suite_ids),
     ]
-    fixed = {r["case"]: r for r in (reruns or [])}
+    fixed = {(r["case"], r["arm"]): r for r in (reruns or [])}
     fig, ax = plt.subplots(figsize=(13, 7.4))
     fig.subplots_adjust(left=0.20, right=0.93, top=0.70, bottom=0.11)
     bar_h = 0.36
@@ -187,8 +190,8 @@ def chart_task9_swarm_vs_baseline(runs: list[dict], faults: dict[str, str], out:
             m = _mean([_run_score(r) for r in group])
             crashed = sum(_crashed(r) for r in group)
             alt = None
-            if arm == "baseline" and crashed and fixed:
-                swapped = [fixed.get(r["case"], r) if _crashed(r) else r for r in group]
+            if crashed and any((r["case"], arm) in fixed for r in group if _crashed(r)):
+                swapped = [fixed.get((r["case"], arm), r) if _crashed(r) else r for r in group]
                 alt = _mean([_run_score(r) for r in swapped])
                 ax.barh(y, alt, height=bar_h, facecolor="none", edgecolor=colour, linewidth=2,
                         linestyle=(0, (4, 3)), zorder=1)
@@ -211,14 +214,14 @@ def chart_task9_swarm_vs_baseline(runs: list[dict], faults: dict[str, str], out:
     sub = ("Pilot: BixBench3 task 9 from published counts, Edison's grader, same inputs, budget "
            "($2, 40 calls) and sandbox for both arms. Pre-registered: crashed runs count as 0.")
     if fixed:
-        sub += (" Dashed outline: the same mean with the crashed single-agent runs repeated after "
-                "the harness fix (a labelled deviation, not pre-registered).")
-    _title(fig, "Task 9: swarm vs single agent, pre-registered measures", sub)
+        sub += (" Dashed outline: the same mean with the crashed runs repeated after the harness "
+                "fix (a labelled deviation, not pre-registered).")
+    _title(fig, f"Task 9{title_note}: swarm vs single agent, pre-registered measures", sub)
     return _save(fig, out, "task9_swarm_vs_baseline")
 
 
 def chart_task9_per_case(runs: list[dict], faults: dict[str, str], out: Path,
-                         reruns: list[dict] | None = None) -> list[Path]:
+                         reruns: list[dict] | None = None, title_note: str = "") -> list[Path]:
     """Mean score per case and arm; batch-02's clean repeats join the suite's clean case.
 
     A crashed run is an x at 0 (pre-registered); with ``reruns``, the repeated run's score is
@@ -283,7 +286,7 @@ def chart_task9_per_case(runs: list[dict], faults: dict[str, str], out: Path,
                               markeredgewidth=2.5, label="Run crashed (scored 0)"))
     if fixed:
         handles.append(plt.Line2D([], [], marker="o", linestyle="", markersize=13,
-                                  markerfacecolor=BG, markeredgecolor=OTHER, markeredgewidth=2.5,
+                                  markerfacecolor=BG, markeredgecolor=INK, markeredgewidth=2.5,
                                   label="Crashed run repeated after the fix"))
     ax.legend(handles=handles, loc="lower right", bbox_to_anchor=(1.0, 1.0), ncol=len(handles),
               fontsize=12, frameon=False)
@@ -292,13 +295,16 @@ def chart_task9_per_case(runs: list[dict], faults: dict[str, str], out: Path,
     wins, losses = sum(x > TIE for x in d), sum(x < -TIE for x in d)
     title = (f"The swarm scored higher on {wins} of {len(paired)} cases, lower on {losses}, "
              f"tied on {len(paired) - wins - losses}")
-    sub = (f"Pilot: BixBench3 task 9, one run per arm per fault case and {n_clean} on the clean "
+    sub = (f"Pilot{title_note}: BixBench3 task 9, one run per arm per fault case and {n_clean} on the clean "
            f"case. Differences under {TIE} count as ties. Crashed runs score 0, as pre-registered.")
     if fixed:
-        rescored = {o: means[(o, "swarm")] - (
-            _run_score(fixed[(c, "baseline")]) if (c := next(
-                (r["case"] for r in runs if name(r["case"]) == o), None)) and
-            (c, "baseline") in fixed else means[(o, "baseline")]) for o in paired}
+        def rerun_mean(o: str, a: str) -> float:
+            group = [r for r in runs if name(r["case"]) == o and r["arm"] == a]
+            vals = [_run_score(fixed.get((r["case"], a), r)) if _crashed(r) else _run_score(r)
+                    for r in group]
+            return _mean(vals)
+
+        rescored = {o: rerun_mean(o, "swarm") - rerun_mean(o, "baseline") for o in paired}
         w2 = sum(v > TIE for v in rescored.values())
         l2 = sum(v < -TIE for v in rescored.values())
         sub += (f" With the crashed runs repeated after the harness fix (hollow, a labelled "
@@ -368,7 +374,8 @@ FAULT_ORDER = [
 
 
 def chart_task9_fault_detection(rows: list[dict], runs: list[dict], out: Path,
-                                rerun_rows: list[dict] | None = None) -> list[Path]:
+                                rerun_rows: list[dict] | None = None, title_note: str = "",
+                                source: str = "eval/results/task9_batch02.md") -> list[Path]:
     """One dot per planted-fault case and arm: caught (filled), missed (hollow), crashed (x).
 
     With ``rerun_rows``, each crashed cell is annotated with the repeated run's verdict.
@@ -390,7 +397,7 @@ def chart_task9_fault_detection(rows: list[dict], runs: list[dict], out: Path,
             r = cell.get((case, arm))
             if r is None:
                 continue
-            if status.get(r["run_id"]) == "error":
+            if status.get(r["run_id"]) in CRASHED:
                 ax.scatter(x, y, marker="x", s=170, color=GREY, linewidths=2.5, zorder=3)
                 if (case, arm) in again:
                     ax.text(x, y + 0.2, f"rerun:\n{again[(case, arm)]}", ha="center", va="top",
@@ -422,20 +429,24 @@ def chart_task9_fault_detection(rows: list[dict], runs: list[dict], out: Path,
     ]
     fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False, fontsize=13,
                bbox_to_anchor=(0.55, 0.01))
-    n_crash = sum(1 for r in rows if status.get(r["run_id"]) == "error")
-    base_caught = sum(1 for r in rows if r["arm"] == "baseline" and r["verdict"] == "caught")
+    n_crash = sum(1 for r in rows if status.get(r["run_id"]) in CRASHED)
+    crashed_arms = sorted({r["arm"] for r in rows if status.get(r["run_id"]) in CRASHED})
+    who = crashed_arms[0] if crashed_arms else "baseline"
+    base_caught = sum(1 for r in rows if r["arm"] == who and r["verdict"] == "caught")
     rerun_caught = base_caught + sum(1 for (c, a), v in again.items()
-                                     if a == "baseline" and v == "caught")
+                                     if a == who and v == "caught")
+    who_label = {"swarm": "the swarm", "baseline": "the single agent"}.get(who, who)
     _title(
         fig,
-        "Planted faults caught on BixBench3 task 9",
+        f"Planted faults caught on BixBench3 task 9{title_note}",
         f"12 fault cases (6 types, 2 each), one run per arm, same inputs, budget and grader. A judge "
         f"model holding the truth key read each run's METHODS.md (rubric pre-registered). "
-        f"{n_crash} single-agent runs crashed on a harness bug, since fixed; as pre-registered they "
-        f"count as missed."
-        + (f" Repeated after the fix, the single agent caught {rerun_caught} of 12." if again
+        f"{n_crash} {who_label.replace('the ', '')} run{'s' if n_crash != 1 else ''} crashed on a "
+        f"harness bug, since fixed; as pre-registered {'they count' if n_crash != 1 else 'it counts'} "
+        f"as missed."
+        + (f" Repeated after the fix, {who_label} caught {rerun_caught} of 12." if again
            else "")
-        + " Source: eval/results/task9_batch02.md.",
+        + f" Source: {source}.",
     )
     return _save(fig, out, "task9_fault_detection")
 
@@ -526,7 +537,8 @@ def chart_predictor_calibration(path: Path, out: Path) -> list[Path]:
 
 def build(task9: list[Path], calibration: Path, out: Path,
           faults: Path = DEFAULT_FAULTS, reruns: list[Path] | None = None,
-          rerun_faults: Path = DEFAULT_RERUN_FAULTS) -> list[Path]:
+          rerun_faults: Path = DEFAULT_RERUN_FAULTS, title_note: str = "",
+          source: str = "eval/results/task9_batch02.md") -> list[Path]:
     _style()
     made: list[Path] = []
     runs, used = load_task9(task9)
@@ -537,9 +549,9 @@ def build(task9: list[Path], calibration: Path, out: Path,
                   if rerun_runs and rerun_faults.is_file() else None)
     if runs and fault_of:
         print(f"task9: using {', '.join(str(p) for p in used)} and {faults}")
-        made += chart_task9_swarm_vs_baseline(runs, fault_of, out, rerun_runs or None)
-        made += chart_task9_per_case(runs, fault_of, out, rerun_runs or None)
-        made += chart_task9_fault_detection(rows, runs, out, rerun_rows)
+        made += chart_task9_swarm_vs_baseline(runs, fault_of, out, rerun_runs or None, title_note)
+        made += chart_task9_per_case(runs, fault_of, out, rerun_runs or None, title_note)
+        made += chart_task9_fault_detection(rows, runs, out, rerun_rows, title_note, source)
     else:
         print("skipped the task9 charts: need results.json "
               f"({', '.join(str(p) for p in task9)}) and {faults}")
@@ -562,10 +574,16 @@ def main() -> None:
                     help="fault_detection.json from eval.suites.task9.score_faults")
     ap.add_argument("--reruns", nargs="*", type=Path, default=DEFAULT_RERUNS,
                     help="results.json of baseline runs repeated after a harness fix (shown apart)")
+    ap.add_argument("--rerun-faults", type=Path, default=DEFAULT_RERUN_FAULTS,
+                    help="fault_detection.json for the reruns")
+    ap.add_argument("--label", default="", help="text added to chart titles, e.g. ' (batch-03)'")
+    ap.add_argument("--source", default="eval/results/task9_batch02.md",
+                    help="results file the fault chart cites")
     ap.add_argument("--calibration", type=Path, default=DEFAULT_CALIBRATION)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args()
-    build(args.task9, args.calibration, args.out, args.faults, args.reruns)
+    build(args.task9, args.calibration, args.out, args.faults, args.reruns, args.rerun_faults,
+          args.label, args.source)
 
 
 if __name__ == "__main__":
