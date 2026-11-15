@@ -198,7 +198,7 @@ def chart_task9_swarm_vs_baseline(runs: list[dict], faults: dict[str, str], out:
                 ax.text(alt + 0.012, y, f"{alt:.2f} with the crashed runs rerun", va="center",
                         fontsize=12, color=INK)
             ax.barh(y, m, height=bar_h, color=colour, zorder=2)
-            note = f"{len(group)} runs" + (f", {crashed} crashed = 0" if crashed else "")
+            note = f"{len(group)} run{'s' if len(group) != 1 else ''}" + (f", {crashed} crashed = 0" if crashed else "")
             ax.text(0.012, y, note, va="center", fontsize=12, zorder=3,
                     color="white" if arm == "swarm" else INK)
             ax.text(m + 0.012, y, f"{m:.2f}", va="center", fontsize=15, fontweight="bold",
@@ -274,7 +274,7 @@ def chart_task9_per_case(runs: list[dict], faults: dict[str, str], out: Path,
         if all((label, a) in means for a, *_ in arms):
             ax.plot([x, x], [means[(label, "baseline")], means[(label, "swarm")]],
                     color="#CCCCC8", lw=2, zorder=1)
-    ticks = [f"Clean\n({n_clean} runs)" if o == "Clean" else o.replace(" ", "\n", 1) for o in order]
+    ticks = [f"Clean\n({n_clean} run{'s' if n_clean != 1 else ''})" if o == "Clean" else o.replace(" ", "\n", 1) for o in order]
     ax.set_xticks(range(len(order)))
     ax.set_xticklabels(ticks, fontsize=12)
     ax.set_xlim(-0.6, len(order) - 0.4)

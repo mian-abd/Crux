@@ -66,7 +66,28 @@ Two parts are still stand-ins, and we say so in every result. There is no `desig
 
 **Scope.** Everything in this section is BixBench3 task 9, one task of 20, starting from the published count matrix (Edison's artifact 1), not raw reads. Edison's deterministic grader at commit `d0e0bbb` scores the 9 required artifacts, and a run's score is their mean. These numbers are **not comparable** to the 0.523 full-suite record, which starts from raw data (`eval/results/task9_runs.md`). The comparison is a single ReAct agent on gpt-5.5 (`eval/baseline_agent.py`) with the same inputs, prompt, Modal image, grader, $2 cap and 40-call limit (`eval/results/task9_protocol.md`).
 
-### Batch-03 (latest)
+### Batch-04: a fresh held-out suite (latest)
+
+Pre-registered in PR #59 before any run (`eval/results/task9_protocol_batch04.md`). The first batch on cases nobody had run, graded or tuned on: `make_cases --seed 44`, 13 cases, no input bundle shared with the seed-43 suite. Both arms once each, in Modal at commit `95aaa11`; 26 runs, $33.14 of a $45 cap, **no crashes and no reruns** (`eval/results/task9_batch04.md`).
+
+| Measure | Swarm | Single agent (gpt-5.5) |
+| --- | --- | --- |
+| All 13 cases | **0.811 ± 0.078** | 0.608 ± 0.305 |
+| 12 fault cases | **0.807 ± 0.080** | 0.586 ± 0.307 |
+| Clean case, one run | 0.861 | 0.869 |
+| Paired difference, 13 cases (95% CI) | **+0.203 (+0.048 to +0.382)** | |
+| **Faults caught / noticed only / missed, of 12** | **12 / 0 / 0** | 3 / 2 / 7 |
+| Mean cost per run; runs stopped by the $2 cap | $1.17; 0 | $1.38; 7 |
+
+- **On cases nobody tuned on, the swarm scored higher, and the interval excludes zero.** It is the first batch where it does; batch-03, on the reused seed-43 suite, was tied.
+- **Two single-agent runs scored 0, both counted as pre-registered.** On `h44-case-01` the agent decided `/data` was empty. In our sandbox `/data` is a symlink to the mounted volume, and its listings didn't follow it, though the sandbox had verified every input before the run. On `h44-case-07` it hit the $2 cap without gradable outputs. Leaving `h44-case-01` out of both arms gives +0.147 (+0.025 to +0.299). Leaving both out, which can only favour the single agent, gives +0.089 (+0.002 to +0.189).
+- **The same caveat:** the swarm's library has checks for exactly these six fault types; these are new instances of them. One run per arm per case.
+
+![Pre-registered measures, batch-04](docs/figures/batch-04/task9_swarm_vs_baseline.png)
+
+![Faults caught, batch-04](docs/figures/batch-04/task9_fault_detection.png)
+
+### Batch-03 (the seed-43 suite)
 
 Pre-registered in PR #48 before any run (`eval/results/task9_protocol_batch03.md`). Code commit `19cd67c`, launch id `batch-03`, with orchestration, sandboxes and grading all in Modal (PR #49). The launch had 52 runs (`eval/results/task9_protocol_batch03.md`):
 
@@ -116,7 +137,7 @@ What these numbers say, and don't:
 - **Random experiment selection did as well as information-gain selection.** With the crashed runs rerun, scores were identical (0.810 vs 0.810), cost was the same ($1.14 vs $1.13 per run), and random caught 11 of 12 faults against 12 (11 pre-registered). Crux's selection rule showed no measurable advantage on this suite. With about a dozen library diagnostics and a $2 budget, random order still reaches the diagnostics that matter. The BoxingGym study (below) found no advantage either.
 - **Lessons on vs off had no measurable effect.** The difference was +0.010 on the 9 held-out cases (95% CI −0.059 to 0.089). The six lessons were drafted from the four dev cases' own runs, reviewed and frozen before the launch (`eval/lessons/`). The reviewer had seen batch-02's test-case results.
 - **Small samples.** One run per arm per fault case. The single agent hit the $2 cap in 6 of 13 suite runs and was still graded.
-- **The seed-43 cases have now been seen twice.** Batch-04, a fresh held-out suite (`make_cases` seed 44, 26 runs, $45 cap), was pre-registered in PR #59 before it ran (`eval/results/task9_protocol_batch04.md`). Its results are not in this write-up.
+- **The seed-43 cases have now been seen twice.** Batch-04, a fresh held-out suite (`make_cases` seed 44, 26 runs, $45 cap), was pre-registered in PR #59 before it ran (`eval/results/task9_protocol_batch04.md`); its results are above (`eval/results/task9_batch04.md`).
 
 ![Pre-registered measures, batch-03](docs/figures/batch-03/task9_swarm_vs_baseline.png)
 
@@ -138,7 +159,7 @@ Pre-registered before any run, at code commit `799febd` (`eval/results/task9_pro
 
 The four single-agent crashes were a bug in our harness: gpt-5.5 spent its whole 4,096-token output cap on reasoning, and the baseline loop did not catch `LengthFinishReasonError`. PR #40 fixed it (`eval/results/task9_batch02.md`). The batch-02 charts are in `docs/figures/task9_*.png`.
 
-### Progression: run 1 to batch-03
+### Progression: run 1 to batch-04
 
 The inputs and the prompt changed between these runs, so this is not a learning curve.
 
@@ -149,6 +170,7 @@ The inputs and the prompt changed between these runs, so this is not a learning 
 | Paired clean case (DU-22), 1 run per arm | Counts, sample sheet, GENCODE v43 symbol map; the shared rule was written after this pair was graded | 0.727 (3 of 9) | **0.862** (8 of 9) | `eval/results/task9_runs.md` |
 | batch-02 clean, 3 runs per arm | The task's own `gencode.v38` map; shared prompt rule (PR #30) | 0.833 ± 0.038 | **0.868 ± 0.002** | `eval/results/task9_batch02.md` |
 | batch-03 clean, 3 runs per arm | As batch-02, plus untested questions keep method defaults (PR #47) | 0.576 pre-registered; **0.862** with the crashed run rerun | 0.860 | `eval/results/task9_batch03.md` |
+| batch-04, 13 fresh cases (seed 44), 1 run per arm | As batch-03, plus the merge-plan fix (PR #54) | **0.811 ± 0.078**; clean case 0.861; 12 of 12 faults | 0.608 ± 0.305; clean case 0.869; 3 of 12 faults | `eval/results/task9_batch04.md` |
 
 - **No annotation meant two zeros.** In run 1 and batch-01, the two shared-gene lists scored 0 by construction. They are keyed by gene symbol, and those inputs had no annotation. Every run's METHODS.md said so before grading (`eval/results/task9_batch01.md`).
 - **Where the DU-22 gap came from.** On C10 versus control, the baseline fit one model across all T98G conditions and recovered all 1,232 reference significant genes; the swarm refit a model per treatment-control pair and recovered 427 (`eval/results/task9_runs.md`). The shared prompt rule "one DESeq2 fit per cell line" came out of this.

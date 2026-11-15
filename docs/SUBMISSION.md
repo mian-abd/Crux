@@ -6,9 +6,9 @@ Every number below comes from a file in this repository, cited next to it. Where
 
 ## Project description (150 words)
 
-Crux is a team of AI scientists that settles disagreements by running the most informative experiment instead of voting. Proposer agents and a library of pre-registered checks raise competing options, such as whether two samples were swapped. A predictor states what each option expects from each diagnostic. The orchestrator runs the diagnostic with the most expected information per cost in a network-blocked Modal sandbox, and a blind referee validates the result before a Bayes update. Questions settle only on evidence or are reported unresolved, and every rejected option keeps the evidence that rejected it. In a pilot on one BixBench3 task from published counts, the swarm matched a single GPT-5.5 agent on the clean case (0.862 vs 0.860, one crashed run rerun) and caught 12 of 12 planted faults (11 pre-registered) against 4. Overall scores are statistically tied, and random experiment selection did as well as information-gain selection.
+Crux is a team of AI scientists that settles disagreements by running the most informative experiment instead of voting. Proposer agents and a library of pre-registered checks raise competing options, such as whether two samples were swapped. A predictor states what each option expects from each diagnostic. The orchestrator runs the diagnostic with the most expected information per cost in a network-blocked Modal sandbox, and a blind referee validates the result before a Bayes update. Every rejected option keeps the evidence that rejected it. In a pilot on one BixBench3 task from published counts, on 13 fresh pre-registered cases, the swarm scored 0.811 against 0.608 for a single GPT-5.5 agent (paired difference +0.20, 95% CI 0.05 to 0.38) and caught 12 of 12 planted faults against 3. On a reused suite, scores were tied, and random experiment selection did as well.
 
-Sources: `eval/results/task9_batch03.md` for every number.
+Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
 
 ## Where to look
 
@@ -31,6 +31,19 @@ Sources: `eval/results/task9_batch03.md` for every number.
 **The record.** The 0.523 full-suite record covers all 20 tasks and starts from raw data. Our numbers are one task from counts, so they are not comparable to it, and we do not compare them (`eval/results/task9_runs.md`).
 
 **The baseline.** A single ReAct agent on gpt-5.5 that plans, runs code, checks and revises (`eval/baseline_agent.py`).
+
+**Batch-04: a fresh held-out suite** (`eval/results/task9_protocol_batch04.md`, `eval/results/task9_batch04.md`). Pre-registered in PR #59. 13 cases made fresh with `make_cases --seed 44` (no input bundle shared with the seed-43 suite), both arms once each, in Modal at commit `95aaa11`. 26 runs, $33.14 of a $45 cap, no crashes, no reruns.
+
+| Measure | Swarm | Single agent |
+| --- | --- | --- |
+| All 13 cases | **0.811 ± 0.078** | 0.608 ± 0.305 |
+| 12 fault cases | **0.807 ± 0.080** | 0.586 ± 0.307 |
+| Clean case, one run | 0.861 | 0.869 |
+| Paired difference, 13 cases (95% CI) | **+0.203 (+0.048 to +0.382)** | |
+| Faults caught / noticed only / missed, of 12 | **12 / 0 / 0** | 3 / 2 / 7 |
+| Mean cost per run; runs stopped by the $2 cap | $1.17; 0 | $1.38; 7 |
+
+Two single-agent runs scored 0 and count as pre-registered. On `h44-case-01` it concluded `/data` was empty: in our sandbox `/data` is a symlink, and its listings didn't follow it, though every input had been verified. On `h44-case-07` it hit the $2 cap. Sensitivity, not pre-registered: without `h44-case-01` in either arm, +0.147 (+0.025 to +0.299); without both, which can only favour the single agent, +0.089 (+0.002 to +0.189). The library-checks caveat applies: these are new instances of the six fault types the library was written for.
 
 **Batch-03 scope** (`eval/results/task9_protocol_batch03.md`, `eval/results/task9_batch03.md`). Pre-registered in PR #48 before any run. Code commit `19cd67c`, everything in Modal (PR #49). 52 runs: the 13-case suite for both arms (the clean case plus 2 each of six planted faults, `make_cases` seed 43, one run per arm per case), 2 more clean runs per arm, a lessons arm on the 9 held-out test cases and a random-selection arm on all 13. Inputs include the task's own `gencode.v38` symbol map. Exa and past.dev were stripped from every arm, and failed runs count as 0. The 52 runs cost $56.93 against a $100 cap, with no run skipped for budget.
 
@@ -79,7 +92,7 @@ Intervals are 95% bootstrap intervals over cases (10,000 resamples, seed 0).
 
 - **The clean-case gap closed.** On finished runs, 0.862 against 0.860. Pre-registered it did not, because one swarm clean run crashed and counts as 0. The fix (PR #47) was written after seeing clean-case grades, so clean-case scores count as tuned (`eval/results/task9_batch03.md`).
 - **Fault handling is the clear difference, with a caveat.** The swarm caught 12 of 12 (11 pre-registered), the single agent 4 plus 2 noticed. The swarm's library has checks for exactly the six fault types the suite plants, so this does not show detection of faults nobody wrote a check for.
-- **Overall scores are statistically tied.** Both paired intervals include zero. We claim no score win over the baseline.
+- **On this reused suite, overall scores are statistically tied.** Both paired intervals include zero. On the fresh seed-44 suite (batch-04, above) the swarm scored higher and the interval excludes zero.
 - **Random experiment selection matched information-gain selection** on score (0.810 vs 0.810), cost ($1.14 vs $1.13 per run) and faults (11 of 12 vs 12, or 11 pre-registered). Crux's selection rule showed no measurable advantage on this suite. With about a dozen library diagnostics and a $2 budget, random order still reaches the diagnostics that matter (`eval/results/task9_batch03.md`). The BoxingGym study found no advantage either (below).
 - **Lessons on vs off had no measurable effect:** +0.010 on 9 held-out cases (95% CI −0.059 to 0.089).
 - **Run 1 and batch-01 had two zeros by construction.** The shared-gene lists are keyed by gene symbol, and those inputs had no annotation (`eval/results/task9_batch01.md`).
@@ -127,7 +140,7 @@ Judges asked for this explicitly. A Crux run reports what it rejected and what i
 
 ### Rigour
 
-- **Pre-registration.** Each batch's protocol was committed before it ran: batch-01 (`eval/results/task9_protocol.md`), batch-02 (`eval/results/task9_protocol_batch02.md`, code commit `799febd`) and batch-03 (`eval/results/task9_protocol_batch03.md`, PR #48). Deviations are reported as deviations: the stopped batch-01 baseline runs (`eval/results/task9_batch01.md`), the four rerun single-agent crashes in batch-02 and the three rerun swarm crashes in batch-03, always next to the pre-registered numbers. Because the seed-43 cases had been run and graded twice by the end of batch-03, batch-04 was pre-registered on a fresh seed-44 suite in PR #59 before it ran (`eval/results/task9_protocol_batch04.md`); its results are not in this write-up.
+- **Pre-registration.** Each batch's protocol was committed before it ran: batch-01 (`eval/results/task9_protocol.md`), batch-02 (`eval/results/task9_protocol_batch02.md`, code commit `799febd`) and batch-03 (`eval/results/task9_protocol_batch03.md`, PR #48). Deviations are reported as deviations: the stopped batch-01 baseline runs (`eval/results/task9_batch01.md`), the four rerun single-agent crashes in batch-02 and the three rerun swarm crashes in batch-03, always next to the pre-registered numbers. Because the seed-43 cases had been run and graded twice by the end of batch-03, batch-04 was pre-registered on a fresh seed-44 suite in PR #59 before it ran (`eval/results/task9_protocol_batch04.md`); its results, with no crashes and no reruns, are in `eval/results/task9_batch04.md`.
 - **Failures count.** Failed or ungraded runs score 0 in every pre-registered mean, and every run is listed (`eval/run_task9_arms.py`, `summarise`; `eval/suites/task9/grade_suite.py`). Runs not started for budget would be listed as `not run: budget` (`docs/CLOUD.md`); in batch-03 there were none.
 - **Code decides outcomes.** A diagnostic prints one `RESULT:` line; bins are exhaustive, exclusive rules evaluated by code (`labs/bixbench3/bins.py`). The specification and its SHA-256 are saved before the run, and a spec cannot run twice in a run (`core/orchestrator.py`, `spec_hash`, `_prepare`; `docs/OBSERVABILITY.md`).
 - **A blind referee.** The referee's model sees only the experiment's kind, goal, language, code and query, the bin ids and rules, the observed bin, the result and a log tail. It never sees option statements, priors, posteriors or likelihoods (`agents/referee.py`, `SPEC_FIELDS`).
