@@ -11,75 +11,29 @@
 import { useEffect, useRef, useState } from "react";
 import type { PluginContext } from "molstar/lib/mol-plugin/context";
 import { useColorMode, useInView, useReducedMotion, useSurfaceColor } from "./hooks";
+import { LoadError, fetchEntry, prefetchEntry } from "./pdb";
 import { MONO_FONT, PALETTE, PROTEIN_COLORS, SANS_FONT, type ColorMode } from "./theme";
+
+export { LoadError, fetchEntry, prefetchEntry };
 
 export interface ProteinViewerProps {
   pdbId: string;
   /** Author chain id and author residue number, e.g. { chain: 'B', residue: 6 }. */
   highlightResidues?: { chain: string; residue: number }[];
+  /** Called once the entry is drawn. */
+  onReady?: () => void;
+  /**
+   * Called when the view cannot draw (no WebGL context, or the entry did not
+   * load). When set, the parent shows its own still and no message is drawn here.
+   */
+  onError?: () => void;
   className?: string;
 }
 
 type Status = "loading" | "ready" | "offline" | "error";
 
-const LOAD_TIMEOUT_MS = 25_000;
-
-function sources(id: string): { url: string; binary: boolean; label: string }[] {
-  const lower = id.toLowerCase();
-  return [
-    { url: `https://models.rcsb.org/${lower}.bcif`, binary: true, label: "RCSB PDB" },
-    {
-      url: `https://www.ebi.ac.uk/pdbe/entry-files/download/${lower}_updated.cif`,
-      binary: false,
-      label: "PDBe",
-    },
-  ];
-}
-
 export function hexToInt(hex: string): number {
   return parseInt(hex.replace("#", ""), 16);
-}
-
-/** Why a load failed, for the message shown in place of the structure. */
-export class LoadError extends Error {
-  constructor(
-    message: string,
-    readonly reason: "not-found" | "unreachable",
-  ) {
-    super(message);
-  }
-}
-
-/**
- * Fetch the entry ourselves (clear status codes, a real timeout), RCSB first
- * and PDBe second, and return the bytes for Mol* to parse.
- */
-export async function fetchEntry(
-  id: string,
-  isCancelled: () => boolean,
-): Promise<{ data: ArrayBuffer | string; label: string } | null> {
-  let notFound = 0;
-  const errors: string[] = [];
-  const list = sources(id);
-  for (const src of list) {
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), LOAD_TIMEOUT_MS);
-    try {
-      const res = await fetch(src.url, { signal: ctl.signal });
-      if (!res.ok) {
-        if (res.status === 404) notFound += 1;
-        errors.push(`${src.label} ${res.status}`);
-        continue;
-      }
-      const data = src.binary ? await res.arrayBuffer() : await res.text();
-      return isCancelled() ? null : { data, label: src.label };
-    } catch (e) {
-      errors.push(`${src.label}: ${e instanceof Error ? e.message : String(e)}`);
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-  throw new LoadError(errors.join("; "), notFound === list.length ? "not-found" : "unreachable");
 }
 
 /** Canvas look: transparent background, soft occlusion, a hairline outline. */
@@ -252,7 +206,7 @@ async function loadEntry(
   if (!focus) plugin.managers.camera.reset();
 }
 
-export function ProteinViewer({ pdbId, highlightResidues, className }: ProteinViewerProps) {
+export function ProteinViewer({ pdbId, highlightResidues, onReady, onError, className }: ProteinViewerProps) {
   const host = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const plugin = useRef<PluginContext | null>(null);
@@ -265,6 +219,22 @@ export function ProteinViewer({ pdbId, highlightResidues, className }: ProteinVi
   const [detail, setDetail] = useState("");
   const [hover, setHover] = useState("");
   const hlKey = JSON.stringify(highlightResidues ?? []);
+  const handled = !!onError;
+  const callbacks = useRef({ onReady, onError });
+
+  useEffect(() => {
+    callbacks.current = { onReady, onError };
+  }, [onReady, onError]);
+
+  // Start the download while Mol* is still starting up.
+  useEffect(() => {
+    prefetchEntry(pdbId);
+  }, [pdbId]);
+
+  useEffect(() => {
+    if (status === "ready") callbacks.current.onReady?.();
+    else if (status === "error" || status === "offline") callbacks.current.onError?.();
+  }, [status]);
 
   // Create the plugin once per mount, on a fresh canvas (a canvas whose
   // context was lost on dispose cannot host a new one).
@@ -274,7 +244,15 @@ export function ProteinViewer({ pdbId, highlightResidues, className }: ProteinVi
     let sub: { unsubscribe(): void } | null = null;
     const canvas = document.createElement("canvas");
     canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;outline:none;touch-action:none";
-    stage.current?.appendChild(canvas);
+    const el = stage.current;
+    el?.appendChild(canvas);
+    // Mol* zooms on the wheel and swallows the event. Stop it before it gets
+    // there, so the page keeps scrolling under the pointer.
+    const passWheel = (e: Event) => e.stopPropagation();
+    el?.addEventListener("wheel", passWheel, { capture: true });
+    // Dragging is for mouse and pen; on touch a swipe scrolls the page.
+    const fine = window.matchMedia?.("(pointer: fine)").matches ?? true;
+    if (el) el.style.pointerEvents = fine ? "auto" : "none";
     (async () => {
       const [{ PluginContext: Ctx }, { DefaultPluginSpec }, { PluginConfig }] = await Promise.all([
         import("molstar/lib/mol-plugin/context"),
@@ -322,6 +300,7 @@ export function ProteinViewer({ pdbId, highlightResidues, className }: ProteinVi
       disposed = true;
       ro?.disconnect();
       sub?.unsubscribe();
+      el?.removeEventListener("wheel", passWheel, { capture: true });
       const ctx = plugin.current;
       plugin.current = null;
       try {
@@ -439,7 +418,7 @@ export function ProteinViewer({ pdbId, highlightResidues, className }: ProteinVi
           {hover}
         </div>
       )}
-      {!shown && (
+      {!shown && !(handled && status !== "loading") && (
         <div
           role="status"
           style={{

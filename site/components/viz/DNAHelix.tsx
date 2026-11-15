@@ -28,6 +28,10 @@ export interface DNAHelixProps {
   sequence?: string;
   highlights?: Highlight[];
   autoRotate?: boolean;
+  /** Zoom on the wheel. Off by default, so the page scrolls over the figure. */
+  zoom?: boolean;
+  /** Called once the first frame is on screen. */
+  onReady?: () => void;
   className?: string;
 }
 
@@ -162,7 +166,7 @@ function EndLabel({ text, mode }: { text: string; mode: ColorMode }) {
   );
 }
 
-export function DNAHelix({ sequence, highlights, autoRotate = true, className }: DNAHelixProps) {
+export function DNAHelix({ sequence, highlights, autoRotate = true, zoom = false, onReady, className }: DNAHelixProps) {
   const host = useRef<HTMLDivElement>(null);
   const mode = useColorMode();
   const reduced = useReducedMotion();
@@ -187,7 +191,24 @@ export function DNAHelix({ sequence, highlights, autoRotate = true, className }:
   const idleTimer = useRef<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [ready, setReady] = useState(false);
+  const [fine, setFine] = useState(true);
   const labels = useLabelStore();
+  const readyCb = useRef(onReady);
+
+  useEffect(() => {
+    readyCb.current = onReady;
+  }, [onReady]);
+
+  // Dragging to orbit is for mouse and pen. On touch the helix only turns,
+  // so a swipe over it still scrolls the page.
+  useEffect(() => {
+    const mq = window.matchMedia?.("(pointer: fine)");
+    if (!mq) return;
+    const update = () => setFine(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const onStart = useCallback(() => {
     setInteracting(true);
@@ -240,8 +261,12 @@ export function DNAHelix({ sequence, highlights, autoRotate = true, className }:
           inset: 0,
           cursor: interacting ? "grabbing" : "grab",
           touchAction: "none",
+          pointerEvents: fine ? "auto" : "none",
         }}
-        onCreated={() => setReady(true)}
+        onCreated={() => {
+          setReady(true);
+          readyCb.current?.();
+        }}
         onPointerMissed={() => setHover(null)}
       >
         <fog attach="fog" args={[surface, 6, fogFar]} />
@@ -279,6 +304,7 @@ export function DNAHelix({ sequence, highlights, autoRotate = true, className }:
           enableDamping
           dampingFactor={0.08}
           rotateSpeed={0.6}
+          enableZoom={zoom}
           zoomSpeed={0.6}
           minDistance={3}
           maxDistance={40}

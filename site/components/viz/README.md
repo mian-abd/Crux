@@ -17,14 +17,18 @@ Also exported: `buildGraph` and `parseEventLog` (the pure event-to-graph reducer
 
 ## The gallery (`gallery/`)
 
-The Explore page's views. Pages load them through `components/viz-lazy.tsx`.
+The Explore page's views. Explore loads them through `components/viz/gallery/lazy.tsx`, which never
+imports the `components/viz` barrel, so the evidence graph is not compiled or loaded there;
+`components/viz-lazy.tsx` re-exports the same loaders for other pages.
 
 | Export | Props | What it draws |
 | --- | --- | --- |
 | `MoleculeView` | `name`, `labels?`, `onReady?`, `className?` | A small molecule from `/public/molecules/<name>.pdb` as ball-and-stick: CPK colours tuned to the site tokens, studio lighting, slow auto-rotate, drag to orbit (mouse and pen; on touch it only turns, so a swipe scrolls the page). Nitrogen, oxygen and other heteroatoms carry their letter as DOM labels on the shared label system (`ScreenLabels.tsx`); letters on the far side fade. |
 | `MoleculePoster` | `name`, `className?` | The same molecule in the same opening pose as SVG. No WebGL context. |
-| `StructureView` | `pdbId`, `accents?`, `turn?`, `onReady?`, `className?` | A PDB entry through the headless Mol* setup of `ProteinViewer` (it reuses its fetch and canvas styling): protein chains as grey cartoon, nucleic acids in the accent, other ligands as thin sticks, and each `accents` entry (component ids such as `HEM`, `MK1`, `CRO`, `ZN`) as ball-and-stick or spheres in a status colour. It turns slowly; the wheel is left to the page. |
-| `useLiveSlot`, `MAX_LIVE_VIEWS` | `(ref, pinned?)` | The page-wide budget of live WebGL views (`slots.ts`). At most three are mounted. Order: pinned views (the hero molecule and the two story figures), then the card last hovered, clicked or focused, then cards already live, then page order. A view that leaves the screen is unmounted and its context released. |
+| `StructureView` | `pdbId`, `accents?`, `turn?`, `onReady?`, `onError?`, `className?` | A PDB entry through the headless Mol* setup of `ProteinViewer` (it reuses its fetch and canvas styling): protein chains as grey cartoon, nucleic acids in the accent, other ligands as thin sticks, and each `accents` entry (component ids such as `HEM`, `MK1`, `CRO`, `ZN`) as ball-and-stick or spheres in a status colour. It turns slowly; the wheel is left to the page. With `onError` set it draws no message of its own when WebGL or the download fails, and the caller shows its still. Entries are fetched once per page and kept in memory (`pdb.ts`). |
+| `useLiveSlot`, `useLiveView`, `MAX_LIVE_VIEWS` | `(ref, priority?)` | The page-wide budget of live WebGL views (`slots.ts`). At most five are mounted. A view is a candidate while it is on screen or within about a third of a screen of it. Candidates rank by the card last hovered, clicked or focused, then by distance from the middle of the screen; views already live, and the hero and story figures, get a small head start. `useLiveView` mounts a view only after it has held its slot for about 0.2 s, unmounts it (releasing the context) the moment the slot goes, and gives the slot back if the browser loses the context. A lost or failed view shows its still until it leaves the screen and comes back. If the browser has no WebGL, nothing mounts and the cards say so. |
+| `LiveBoundary`, `LiveMount` | `onError`, `setReady` | Error boundary around one live view (`LiveBoundary.tsx`): a view that throws (no WebGL context, a chunk that failed) falls back to its still instead of taking the page down. |
+| `HelixPoster` | `sequence?`, `highlights?`, `className?` | The still for `DNAHelix`: the same layout and pose as SVG. No WebGL context. |
 | `GENOMICS`, `PROTEINS`, `DRUG_COMPLEX`, `MOLECULES`, `sourceOf` | | The catalogue (`catalog.ts`): ids, titles, one fact each, and the source link. |
 
 A card that is not live shows a still: `MoleculePoster` for molecules, and for structures a WebP

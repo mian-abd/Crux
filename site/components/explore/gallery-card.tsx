@@ -1,16 +1,18 @@
 "use client";
 
 // One gallery card: a 3D view, a title, one fact and its source. The view is
-// live only while the card holds one of the page's WebGL slots; otherwise the
-// card shows a still of the same thing and says how to wake it.
+// live only while the card is on or near screen and holds one of the page's
+// WebGL slots; otherwise, and whenever the view cannot draw, the card shows a
+// still of the same thing.
 
 import { ArrowUpRightIcon } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { MoleculePoster, MoleculeView, StructureView } from "@/components/viz-lazy";
+import { MoleculePoster, MoleculeView, StructureView } from "@/components/viz/gallery/lazy";
+import { LiveMount } from "@/components/viz/gallery/LiveBoundary";
 import { sourceOf, type GalleryItem } from "@/components/viz/gallery/catalog";
-import { useLiveSlot } from "@/components/viz/gallery/slots";
+import { useLiveView } from "@/components/viz/gallery/slots";
 import { cn } from "@/lib/utils";
 
 function Formula({ formula }: { formula: [string, number][] }) {
@@ -52,13 +54,32 @@ function Poster({ item, hidden }: { item: GalleryItem; hidden: boolean }) {
   );
 }
 
-/** Mounted only while the card is live, so `ready` resets with the view. */
-function Live({ item, onReady }: { item: GalleryItem; onReady: (ready: boolean) => void }) {
-  useEffect(() => () => onReady(false), [onReady]);
-  return item.kind === "molecule" ? (
-    <MoleculeView name={item.id} onReady={() => onReady(true)} className="size-full" />
-  ) : (
-    <StructureView pdbId={item.id} accents={item.accents} turn={item.turn} onReady={() => onReady(true)} className="size-full" />
+/** Mounted only while the card is live; `ready` resets when it unmounts. */
+function Live({
+  item,
+  setReady,
+  onError,
+}: {
+  item: GalleryItem;
+  setReady: (ready: boolean) => void;
+  onError: () => void;
+}) {
+  const ready = useCallback(() => setReady(true), [setReady]);
+  return (
+    <LiveMount onError={onError} setReady={setReady}>
+      {item.kind === "molecule" ? (
+        <MoleculeView name={item.id} onReady={ready} className="size-full" />
+      ) : (
+        <StructureView
+          pdbId={item.id}
+          accents={item.accents}
+          turn={item.turn}
+          onReady={ready}
+          onError={onError}
+          className="size-full"
+        />
+      )}
+    </LiveMount>
   );
 }
 
@@ -74,10 +95,10 @@ export function GalleryCard({
 }) {
   const frame = useRef<HTMLDivElement>(null);
   const hover = useRef<number | undefined>(undefined);
-  const { live, claim } = useLiveSlot(frame);
+  const { mounted, live, supported, claim, lose } = useLiveView(frame);
   const [ready, setReady] = useState(false);
   const source = sourceOf(item);
-  const moving = live && ready;
+  const moving = mounted && ready;
 
   useEffect(() => () => window.clearTimeout(hover.current), []);
 
@@ -97,7 +118,7 @@ export function GalleryCard({
         onClick={claim}
         onFocus={claim}
         onPointerEnter={(e) => {
-          if (e.pointerType !== "mouse" || live) return;
+          if (e.pointerType !== "mouse" || live || !supported) return;
           hover.current = window.setTimeout(claim, 160);
         }}
         onPointerLeave={() => window.clearTimeout(hover.current)}
@@ -107,7 +128,7 @@ export function GalleryCard({
         )}
       >
         <Poster item={item} hidden={moving} />
-        {live && <Live item={item} onReady={setReady} />}
+        {mounted && <Live item={item} setReady={setReady} onError={lose} />}
         <span className="pointer-events-none absolute top-3 left-3.5 font-mono text-xs tracking-wide text-muted-foreground">
           {item.kind === "structure" ? `PDB ${item.id}` : <Formula formula={item.formula} />}
         </span>
@@ -121,7 +142,13 @@ export function GalleryCard({
             aria-hidden="true"
             className={cn("size-1.5 rounded-full", moving ? "bg-brand" : "border border-muted-foreground/70")}
           />
-          {moving ? "Live · drag to turn" : live ? "Loading 3D" : "Still · hover or tap for 3D"}
+          {!supported
+            ? "Still · 3D needs WebGL"
+            : moving
+              ? "Live · drag to turn"
+              : live
+                ? "Loading 3D"
+                : "Still · hover or tap for 3D"}
         </span>
       </div>
       <div className={cn("flex flex-1 flex-col border-t p-5", wide && "lg:justify-center lg:border-t-0 lg:border-l lg:p-8")}>

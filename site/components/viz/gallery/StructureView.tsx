@@ -9,8 +9,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { PluginContext } from "molstar/lib/mol-plugin/context";
-import { LoadError, fetchEntry, hexToInt, styleCanvas } from "../ProteinViewer";
+import { hexToInt, styleCanvas } from "../ProteinViewer";
 import { useColorMode, useInView, useReducedMotion, useSurfaceColor } from "../hooks";
+import { LoadError, fetchEntry, prefetchEntry } from "../pdb";
 import { MONO_FONT, PALETTE, PROTEIN_COLORS, SANS_FONT, type ColorMode, type ModePalette } from "../theme";
 
 export type StructureTone = "accent" | "holds" | "refuted" | "conditional" | "unresolved";
@@ -30,6 +31,11 @@ export interface StructureViewProps {
   turn?: number;
   /** Called once the entry is drawn. */
   onReady?: () => void;
+  /**
+   * Called when the view cannot draw (no WebGL context, or the entry did not
+   * load). When set, the parent shows its own still and no message is drawn here.
+   */
+  onError?: () => void;
   className?: string;
 }
 
@@ -169,11 +175,13 @@ async function drawEntry(
   plugin.managers.camera.setSnapshot({ ...snap, position }, 0);
 }
 
-export function StructureView({ pdbId, accents, turn = 0, onReady, className }: StructureViewProps) {
+export function StructureView({ pdbId, accents, turn = 0, onReady, onError, className }: StructureViewProps) {
   const host = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const plugin = useRef<PluginContext | null>(null);
   const readyCb = useRef(onReady);
+  const errorCb = useRef(onError);
+  const handled = !!onError;
   const mode = useColorMode();
   const reduced = useReducedMotion();
   const inView = useInView(host);
@@ -185,7 +193,17 @@ export function StructureView({ pdbId, accents, turn = 0, onReady, className }: 
 
   useEffect(() => {
     readyCb.current = onReady;
-  }, [onReady]);
+    errorCb.current = onError;
+  }, [onReady, onError]);
+
+  // Start the download while Mol* is still starting up.
+  useEffect(() => {
+    prefetchEntry(pdbId);
+  }, [pdbId]);
+
+  useEffect(() => {
+    if (status === "error" || status === "offline") errorCb.current?.();
+  }, [status]);
 
   // One plugin per mount, on a fresh canvas (a canvas whose context was lost
   // on dispose cannot host a new one).
@@ -331,7 +349,7 @@ export function StructureView({ pdbId, accents, turn = 0, onReady, className }: 
           cursor: "grab",
         }}
       />
-      {(status === "offline" || status === "error") && (
+      {!handled && (status === "offline" || status === "error") && (
         <div
           role="status"
           style={{
