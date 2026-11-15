@@ -195,6 +195,7 @@
   height: 2.75rem;
   padding-inline: 1.25rem 1rem;
   border-radius: 9999px;
+  white-space: nowrap;
   background: var(--primary);
   color: var(--primary-foreground);
   font-size: 0.925rem;
@@ -212,6 +213,7 @@
   height: 2.75rem;
   padding-inline: 1.25rem 1rem;
   border-radius: 9999px;
+  white-space: nowrap;
   background: var(--ink-foreground);
   color: var(--ink);
   font-size: 0.925rem;

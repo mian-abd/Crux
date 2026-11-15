@@ -9,8 +9,8 @@ const NAV = [
   { href: "/runs", label: "Graded runs" },
   { href: "/#domains", label: "What it tests" },
   { href: "/#results", label: "Results" },
-  { href: "/#how", label: "How it works" },
-  { href: "/#sponsors", label: "Built with" },
+  { href: "/#how", label: "How it works", wide: true },
+  { href: "/#sponsors", label: "Built with", wide: true },
 ];
 
 /** A slim charcoal bar above the header, for the one result worth knowing first. */
@@ -44,7 +44,8 @@ export function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-3 py-2 text-[0.95rem] text-muted-foreground transition-colors hover:text-foreground"
+              // The last links show only on wide screens, so the row never wraps.
+              className={`rounded-md px-3 py-2 text-[0.95rem] whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground ${"wide" in item && item.wide ? "hidden xl:block" : ""}`}
             >
               {item.label}
             </Link>
@@ -55,13 +56,13 @@ export function SiteHeader() {
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            className="hidden rounded-md px-3 py-2 text-[0.95rem] text-muted-foreground transition-colors hover:text-foreground lg:block"
+            className="hidden rounded-md px-3 py-2 text-[0.95rem] whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground lg:block"
           >
             GitHub
           </a>
           <Link
             href="/login"
-            className="hidden rounded-md px-3 py-2 text-[0.95rem] text-muted-foreground transition-colors hover:text-foreground sm:block"
+            className="hidden rounded-md px-3 py-2 text-[0.95rem] whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground sm:block"
           >
             Sign in
           </Link>
