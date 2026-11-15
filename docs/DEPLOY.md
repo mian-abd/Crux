@@ -47,3 +47,19 @@ railway variables --service crux-api --set CRUX_CORS_ORIGINS=https://<site>
 ```
 
 Live runs on `crux-api` are kept in the container and lost on redeploy. The recorded demo runs ship with the image.
+
+## Auto-deploy from GitHub
+
+Both services are connected to `main`, so every merge redeploys them:
+
+```sh
+railway service source connect --repo mian-abd/Crux --branch main --service crux-api
+railway service source connect --repo mian-abd/Crux --branch main --service crux-site
+```
+
+`crux-site` needs its root directory set to `/site` (its Dockerfile copies from there). A watch path of `/site/**` keeps API-only commits from rebuilding it. Both are service settings: set them in the dashboard (Settings, Source), or with `railway api` and the `serviceInstanceUpdate` mutation (`rootDirectory`, `watchPatterns`). `crux-api` finds `Dockerfile.api` through `RAILWAY_DOCKERFILE_PATH` and rebuilds on any change.
+
+## Where it runs now
+
+- Site: https://crux-site-production-95830f5f.up.railway.app
+- API: https://crux-api-production-fef3e0e8.up.railway.app (`/health`, `/replays`)

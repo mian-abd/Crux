@@ -1,10 +1,89 @@
+<div align="center">
+
 # Crux
+
+**Disagreements settled by experiment, not by vote.**
+
+A team of AI scientists that runs the experiment expected to tell them the most per dollar,<br/>and changes its mind only on what that experiment shows.
+
+[![Live site](https://img.shields.io/badge/live-crux--site-2ea44f?logo=railway&logoColor=white)](https://crux-site-production-95830f5f.up.railway.app)
+[![API](https://img.shields.io/badge/API-health-2ea44f?logo=fastapi&logoColor=white)](https://crux-api-production-fef3e0e8.up.railway.app/health)
+[![SF AI Research Hackathon](https://img.shields.io/badge/SF_AI_Research_Hackathon-Track_3:_AI_Scientist_Swarms-6f42c1)](docs/SUBMISSION.md)
+![Python 3.12](https://img.shields.io/badge/python-3.12-3776ab?logo=python&logoColor=white)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-111111?logo=nextdotjs&logoColor=white)
+![Modal sandboxes](https://img.shields.io/badge/sandboxes-Modal-62de61)
+
+**[Open the live site](https://crux-site-production-95830f5f.up.railway.app)** · [Submission write-up](docs/SUBMISSION.md) · [How it works](#how-it-works) · [Architecture](#architecture) · [Results](#results-pilot-one-task-from-published-counts) · [Claims audit](#claims-audit-mvp) · [Reproduce](#reproduce)
+
+</div>
 
 Crux is a team of AI scientists that settles disagreements by running the most informative experiment instead of voting. Proposers raise competing options for an analysis choice. A predictor states what each option expects from each diagnostic. The orchestrator runs the diagnostic with the most expected information per cost in a network-blocked Modal sandbox, and a blind referee validates the result before a Bayes update. Questions settle only on evidence, or are reported unresolved, and every rejected option keeps the evidence that rejected it. A run can be replayed and checked from its event log alone.
 
 Our main test is BixBench3 task 9: differential expression from a published count matrix. We also point the same engine at four claims from the DESeq2 paper (the claims audit MVP) and at a simulated design task from BoxingGym.
 
 Built at the SF AI Research Hackathon, Track 3 (AI Scientist Swarms). The submission write-up is in [docs/SUBMISSION.md](docs/SUBMISSION.md). The engineering plan is in [docs/ERD.md](docs/ERD.md) and the event contract in [docs/EVENTS.md](docs/EVENTS.md).
+
+## Try it live
+
+| | Link | What you can do |
+| --- | --- | --- |
+| Site | https://crux-site-production-95830f5f.up.railway.app | Sign up, upload a paper, replay recorded runs, run the free claims audit, turn DNA, proteins and molecules in the 3D Explore gallery |
+| Engine API | https://crux-api-production-fef3e0e8.up.railway.app | `/health`, `/replays` (recorded runs as Server-Sent Events), `POST /runs {"lab": "claims"}` (about 10 s, $0) |
+
+The hosted API has no OpenAI or Modal keys, so it can't start paid Task 9 runs; those run from a laptop or the Modal cloud runner ([docs/DEPLOY.md](docs/DEPLOY.md), [docs/CLOUD.md](docs/CLOUD.md)).
+
+## At a glance
+
+On 13 fresh, pre-registered cases of BixBench3 task 9 (batch-04: one task of 20, from published counts, one run per arm per case; `eval/results/task9_batch04.md`):
+
+```mermaid
+xychart-beta
+    title "Mean grader score, 13 fresh cases"
+    x-axis ["Crux swarm", "Single agent (gpt-5.5)"]
+    y-axis "Score, 0 to 1" 0 --> 1
+    bar [0.811, 0.608]
+```
+
+```mermaid
+xychart-beta
+    title "Planted faults caught, of 12"
+    x-axis ["Crux swarm", "Single agent (gpt-5.5)"]
+    y-axis "Faults caught" 0 --> 12
+    bar [12, 3]
+```
+
+| | Crux swarm | Single agent (gpt-5.5) |
+| --- | --- | --- |
+| Mean score, 13 cases | **0.811** | 0.608 |
+| Paired difference (95% CI) | **+0.203 (+0.048 to +0.382)** | |
+| Planted faults caught, of 12 | **12** | 3 |
+| Clean case | 0.861 | 0.869 |
+| Mean cost per run | $1.17 | $1.38 |
+
+On the reused seed-43 suite (batch-03) the scores were tied, and random experiment selection did as well as information-gain selection. Both results, the caveats and the honest negatives are in [Results](#results-pilot-one-task-from-published-counts).
+
+## The idea
+
+Most agent swarms resolve a disagreement by debate or vote. Crux turns it into a prediction each side has to commit to, then runs the check that best tells the predictions apart.
+
+```mermaid
+flowchart LR
+    subgraph VOTE["Debate or vote"]
+        direction TB
+        VA["Agent A: two samples<br/>look swapped"] --> VV{"Argue,<br/>then vote"}
+        VB["Agent B: keep the<br/>labels as given"] --> VV
+        VV --> VW["The louder or larger side wins.<br/>No new evidence."]
+    end
+    subgraph CRUX["Crux"]
+        direction TB
+        CA["Option: samples swapped"] --> CP["Each option predicts the outcome<br/>of every candidate diagnostic"]
+        CB["Option: labels as given"] --> CP
+        CN["Option: none of these"] --> CP
+        CP --> CE["Run the diagnostic with the most<br/>expected information per cost"]
+        CE --> CU["Bayes update on what it showed"]
+        CU --> CS["Settle at posterior 0.9, or report unresolved.<br/>The losing option keeps the evidence against it."]
+    end
+```
 
 ## How it works
 
@@ -45,6 +124,122 @@ Every hard rule lives in code, not in a prompt. The loop is `core/orchestrator.p
 
 Two parts are still stand-ins, and we say so in every result. There is no `designer.py`: the designer is `SwarmRoles.design` in `agents/swarm.py`, which returns the pre-registered diagnostics attached to a question and ignores everything else, including recalled memory. Surprise-driven regeneration returns no new options in the swarm (`SwarmRoles.regenerate`). Questions the proposers raise without a library or search diagnostic therefore end unresolved.
 
+### One round, step by step
+
+Each name on the right of an arrow is an event in the run's log (`docs/EVENTS.md`), which is why `core.replay` can recompute every belief from the log alone.
+
+```mermaid
+%%{init: {"sequence": {"width": 110, "actorMargin": 24, "messageMargin": 30}}}%%
+sequenceDiagram
+    autonumber
+    participant O as Orchestrator
+    participant D as Designer
+    participant P as Predictor
+    participant S as Sandbox
+    participant R as Referee
+    participant L as Event log
+    O->>O: Pick a question (impact x entropy)
+    O->>D: Which diagnostics test it?
+    D-->>O: Pre-registered checks, doc searches
+    O->>P: P(outcome bin | option)?
+    P-->>O: Likelihood table
+    O->>O: Rank by EIG per cost
+    O->>L: experiment.proposed, .started
+    O->>S: Run the best diagnostic
+    S-->>O: Output ending in a RESULT line
+    O->>O: Code maps RESULT to a bin
+    O->>L: experiment.finished, .scored
+    O->>R: Is the run valid?
+    Note over R: never sees the options
+    R-->>O: Verdict
+    O->>L: referee.verdict
+    alt valid
+        O->>O: Bayes update
+        O->>L: belief.updated, hypothesis.rejected
+    else invalid
+        O->>O: No update, cost still spent
+    end
+```
+
+### The life of a question
+
+```mermaid
+stateDiagram-v2
+    [*] --> Open : options raised
+    Open --> Open : valid run, Bayes update
+    Open --> Settled : an option reaches 0.9
+    Open --> Robust : same deliverable either way
+    Open --> Unresolved : nothing left worth running
+    Settled --> Delivery
+    Robust --> Delivery
+    Unresolved --> Delivery
+    Delivery --> [*]
+    note right of Open
+        Options under posterior 0.02
+        are rejected and keep the id of
+        the evidence that rejected them.
+    end note
+```
+
+- **Options raised:** the proposers and the library raise options, and the orchestrator adds "none of these" at prior 0.15.
+- **Nothing left worth running:** the best EIG is under 0.05 bits, 4 experiments have run, no diagnostic separates the options, or every option is rejected.
+- **Delivery:** an unresolved question that a diagnostic tested uses its best-supported option; one that no diagnostic tested keeps the method's documented defaults.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    USER(["Researcher in a browser"])
+
+    subgraph RAIL["Railway, auto-deploys from main"]
+        direction LR
+        SITE["crux-site<br/>Next.js 16, Better Auth"]
+        VOL[("Volume /app/.data<br/>SQLite accounts, uploads")]
+        API["crux-api<br/>FastAPI, api/server.py"]
+    end
+
+    subgraph ENGINE["Engine"]
+        direction LR
+        ORCH["Orchestrator<br/>core/orchestrator.py"]
+        AG["Roles<br/>agents/"]
+        LABS["Labs<br/>bixbench3, claims,<br/>boxing, bench"]
+        LOG[("Event log<br/>events.jsonl")]
+    end
+
+    subgraph EXT["Outside services"]
+        direction LR
+        MODAL["Modal sandboxes<br/>R 4.5, DESeq2,<br/>network blocked"]
+        OAI["OpenAI<br/>gpt-4.1-mini, gpt-5.5"]
+        EXA["Exa search<br/>doc allow-list"]
+        PAST["past.dev<br/>shared memory"]
+    end
+
+    USER --> SITE
+    SITE --- VOL
+    SITE -- "REST, SSE" --> API
+    API --> ORCH
+    ORCH --> AG
+    ORCH --> LABS
+    ORCH --> LOG
+    LOG -. "replay" .-> API
+    LABS -- "Task 9 code" --> MODAL
+    AG --> OAI
+    ORCH -.-> EXA
+    AG -.-> PAST
+```
+
+The claims audit runs in-process in the API (SymPy and SciPy, no keys). Task 9 runs need `OPENAI_API_KEY` and Modal tokens; the hosted API has neither, by design. Dotted lines are optional tools that every graded batch stripped, except the separately labelled `tools-run-02`.
+
+```mermaid
+flowchart TB
+    PR["Pull request merged into main"] --> GH["github.com/mian-abd/Crux"]
+    GH -- "any change" --> RAPI["Railway: crux-api<br/>Dockerfile.api"]
+    GH -- "changes under site/" --> RSITE["Railway: crux-site<br/>site/Dockerfile"]
+    RSITE -- "calls NEXT_PUBLIC_CRUX_API" --> RAPI
+```
+
+`crux-api` redeploys on every merge to `main`, and `crux-site` on merges that touch `site/` (`docs/DEPLOY.md`).
+
 ## What is real and what is synthetic
 
 | Part | Real | Synthetic or stand-in |
@@ -65,6 +260,25 @@ Two parts are still stand-ins, and we say so in every result. There is no `desig
 ## Results (pilot: one task, from published counts)
 
 **Scope.** Everything in this section is BixBench3 task 9, one task of 20, starting from the published count matrix (Edison's artifact 1), not raw reads. Edison's deterministic grader at commit `d0e0bbb` scores the 9 required artifacts, and a run's score is their mean. These numbers are **not comparable** to the 0.523 full-suite record, which starts from raw data (`eval/results/task9_runs.md`). The comparison is a single ReAct agent on gpt-5.5 (`eval/baseline_agent.py`) with the same inputs, prompt, Modal image, grader, $2 cap and 40-call limit (`eval/results/task9_protocol.md`).
+
+How every batch number below is produced (`docs/CLOUD.md`, `eval/results/task9_protocol_batch04.md`):
+
+```mermaid
+flowchart TD
+    MAKE["make_cases --seed 44<br/>13 blinded cases: clean, plus 2 each of 6 planted faults"] --> PRE["Protocol pushed before any run<br/>(PR #59 for batch-04)"]
+    MAKE --> TRUTH[("Fault truth table<br/>crux-evaluator volume, read-only,<br/>never mounted in a sandbox")]
+    PRE --> ORC["Modal orchestrator container<br/>eval/cloud.py, spend cap checked before each run"]
+    ORC --> SW["Crux swarm"]
+    ORC --> BL["Single gpt-5.5 agent<br/>same inputs, prompt, image,<br/>$2 cap, 40 calls"]
+    SW --> SB["One network-blocked sandbox per run,<br/>mounting only that case's hashed inputs"]
+    BL --> SB
+    SB --> GR["Edison's grader at d0e0bbb<br/>outside the agent's folders"]
+    SB --> FS["Fault scoring<br/>a judge reads METHODS.md next to the truth"]
+    TRUTH -.-> FS
+    GR --> RES["eval/results/task9_batch04.md<br/>failed runs count as 0"]
+    FS --> RES
+    RES --> FIG["docs/figures/batch-04/"]
+```
 
 ### Batch-04: a fresh held-out suite (latest)
 
@@ -163,6 +377,17 @@ The four single-agent crashes were a bug in our harness: gpt-5.5 spent its whole
 
 The inputs and the prompt changed between these runs, so this is not a learning curve.
 
+Boxes are results (swarm vs single agent); arrows are what changed in between.
+
+```mermaid
+flowchart TD
+    R1["Run 1<br/>swarm 0.586"] -->|"same inputs"| B1["batch-01, 3 runs<br/>swarm 0.628"]
+    B1 -->|"adds a GENCODE v43 symbol map"| D22["DU-22 clean case<br/>0.727 vs 0.862"]
+    D22 -->|"the task's own gencode.v38 map,<br/>shared prompt rule, PR #30"| B2["batch-02 clean case<br/>0.833 vs 0.868"]
+    B2 -->|"untested questions keep<br/>method defaults, PR #47"| B3["batch-03 clean case<br/>0.862 vs 0.860, crashed run rerun"]
+    B3 -->|"merge-plan fix, PR #54,<br/>13 fresh seed-44 cases"| B4["batch-04, 13 cases<br/>0.811 vs 0.608, faults 12 of 12 vs 3"]
+```
+
 | Runs | Inputs and prompt | Swarm | Single agent | Source |
 | --- | --- | --- | --- | --- |
 | Run 1, `r-20261114-175926-6050` | Counts and sample sheet, no gene annotation (bundle `160253fe…`); before the shared prompt rule | 0.586 (5 of 9 at or above 0.80) | not run | `eval/results/task9_runs.md` |
@@ -219,7 +444,20 @@ The same items are in the run's `Report.rejected` and `Report.unresolved`, and i
 
 ## Claims audit (MVP)
 
-The claims lab (`labs/claims/`) points the same engine at four hand-curated claims from the DESeq2 paper (Love, Huber & Anders 2014, *Genome Biology* 15:550, CC BY 4.0). The diagnostics are SymPy derivations and NumPy/SciPy simulations. No model is called and no API key is needed (`docs/CLAIMS.md`).
+The claims lab (`labs/claims/`) points the same engine at four hand-curated claims from the DESeq2 paper (Love, Huber & Anders 2014, *Genome Biology* 15:550, CC BY 4.0). The diagnostics are SymPy derivations and NumPy/SciPy simulations. No model is called and no API key is needed (`docs/CLAIMS.md`). It runs on the hosted API too: `POST /runs {"lab": "claims"}` finishes in about 10 seconds for $0.
+
+```mermaid
+flowchart TD
+    CL["A claim from the paper<br/>e.g. BH controls the FDR"] --> OP["Two or three readings of it,<br/>plus none of these"]
+    OP --> PR["Each reading states what it predicts<br/>for each pre-registered diagnostic"]
+    PR --> DG["Run the most informative one<br/>SymPy derivation or simulation"]
+    DG --> RF["Code referee<br/>checks the RESULT line"]
+    RF --> BU["Bayes update"]
+    BU -->|"more to learn"| PR
+    BU --> V1["holds"]
+    BU --> V2["refuted: its holds<br/>reading was rejected"]
+    BU --> V3["unresolved, with the<br/>numbers that were run"]
+```
 
 ```sh
 uv run python -m core.cli --lab claims
@@ -239,7 +477,7 @@ On the planted claim, `holds` was rejected, but the question itself ended unreso
 
 ## Consumer site
 
-`site/` is a Next.js app: a landing page, email-and-password accounts (Better Auth, stored locally in SQLite), PDF upload with claim extraction, and a live view of a claims audit (`site/README.md`). The engineering run viewer stays in `web/`. Two servers, from the repository root:
+`site/` is a Next.js app: a landing page, email-and-password accounts (Better Auth, stored in SQLite through Node's built-in `node:sqlite`), PDF upload with claim extraction, and a live view of a claims audit (`site/README.md`). It is live at https://crux-site-production-95830f5f.up.railway.app. The engineering run viewer stays in `web/`. Two servers, from the repository root:
 
 ```sh
 CRUX_CORS_ORIGINS=http://localhost:3000 uv run uvicorn api.server:app --port 8001
@@ -408,6 +646,41 @@ uv run python -m labs.bench.run_bench --node http://127.0.0.1:8765 --strategy ei
 
 ## Repository map
 
+```mermaid
+mindmap
+  root((Crux))
+    core
+      orchestrator.py, the loop
+      eig.py and scoring.py
+      events.py and replay.py
+      config.py, thresholds and presets
+    agents
+      proposers
+      predictor, sampled or Tinker LoRA
+      blind referee
+      deliverer, critic, reporter
+    labs
+      bixbench3 task 9
+      claims audit
+      BoxingGym location finding
+      Jetson bench and One Letter
+    diagnostics
+      6 forks
+      12 pre-registered checks
+    execution
+      Modal sandboxes
+      hashed staging
+    eval
+      single-agent baseline
+      Modal cloud runner
+      grader wrapper
+      planted-fault suite
+    interfaces
+      api, FastAPI and SSE
+      site, Next.js
+      web, run viewer
+```
+
 | Path | What is there |
 | --- | --- |
 | `core/` | `orchestrator.py` (the loop), `scoring.py` and `eig.py` (categorical EIG), `eig_exec.py` (hypotheses as code, for numeric labs), `config.py` (thresholds, budgets, presets), `events.py`, `replay.py`, `manifest.py` (including `tools_connected`), `tracing.py`, `budget.py`, `cli.py`, fakes |
@@ -517,7 +790,7 @@ Recalled records only inform prompts. Beliefs change only through the orchestrat
 
 **Libraries:** R, DESeq2, edgeR, apeglm, data.table, PyDESeq2, GSEApy, SymPy, SciPy, NumPy, pandas, Matplotlib, FastAPI, Uvicorn, Pydantic, HTTPX, the OpenAI SDK, the Modal client, Langfuse, Arize Phoenix, React, Vite, Tailwind CSS and Recharts; development with uv, pytest, Ruff and Vitest.
 
-**Site** (licences as listed in `site/README.md` and `site/components/viz/README.md`): Next.js and React (MIT); shadcn/ui (MIT); Magic UI (MIT); Better Auth (MIT); Base UI, Motion, next-themes, Sonner, better-sqlite3, tw-animate-css, tailwind-merge and clsx (MIT); class-variance-authority (Apache-2.0); Lucide (ISC); unpdf (MIT, bundling PDF.js, Apache-2.0); three.js, react-three-fiber, drei, react-force-graph-3d and Mol* (MIT); the Geist and Instrument Serif typefaces (SIL Open Font License 1.1). PDBe Molstar (Apache-2.0) informed the run viewer's structure panel. Experimental-design references, including BoxingGym and BED-LLM, are in `docs/research/DU-37-rigour.md`.
+**Site** (licences as listed in `site/README.md` and `site/components/viz/README.md`): Next.js and React (MIT); shadcn/ui (MIT); Magic UI (MIT); Better Auth (MIT); Base UI, Motion, next-themes, Sonner, tw-animate-css, tailwind-merge and clsx (MIT); class-variance-authority (Apache-2.0); Lucide (ISC); unpdf (MIT, bundling PDF.js, Apache-2.0); three.js, react-three-fiber, drei, react-force-graph-3d and Mol* (MIT); the Geist and Instrument Serif typefaces (SIL Open Font License 1.1). PDBe Molstar (Apache-2.0) informed the run viewer's structure panel. Experimental-design references, including BoxingGym and BED-LLM, are in `docs/research/DU-37-rigour.md`.
 
 ## Contributing
 

@@ -12,6 +12,7 @@ Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
 
 ## Where to look
 
+- **Live site:** https://crux-site-production-95830f5f.up.railway.app (sign up, replay the recorded runs, run the free claims audit, the 3D Explore gallery). The engine API behind it is https://crux-api-production-fef3e0e8.up.railway.app. It has no OpenAI or Modal keys, so it cannot start paid Task 9 runs (`docs/DEPLOY.md`).
 - **The loop:** `core/orchestrator.py`. The README has a diagram and a step-by-step map to its functions.
 - **Latest results:** `eval/results/task9_batch03.md`, its protocol `eval/results/task9_protocol_batch03.md` (pushed before any run, PR #48) and raw outputs in `eval/results/task9_batch03/`. Earlier batches: `task9_batch02.md`, `task9_batch01.md`, `task9_runs.md` in the same folder.
 - **Charts:** `docs/figures/batch-03/` (swarm versus single agent, per case, faults caught). Batch-02's charts are `docs/figures/task9_*.png`; real-data fault detection, the airway label swap and predictor calibration are also in `docs/figures/`.

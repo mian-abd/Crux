@@ -108,7 +108,7 @@ package's `package.json` or repository.
 | [Motion](https://motion.dev) | The beam animation | MIT |
 | [Lucide](https://lucide.dev) | Icons | ISC |
 | [next-themes](https://github.com/pacocoursey/next-themes), [Sonner](https://sonner.emilkowal.ski) | Theme switch, toasts | MIT |
-| [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) | SQLite driver | MIT |
+| [Node.js `node:sqlite`](https://nodejs.org/api/sqlite.html) | SQLite driver, built into Node (no package) | MIT |
 | [unpdf](https://github.com/unjs/unpdf) (bundles PDF.js, Apache-2.0) | PDF text extraction | MIT |
 | [three](https://threejs.org), [@react-three/fiber](https://github.com/pmndrs/react-three-fiber), [@react-three/drei](https://github.com/pmndrs/drei), [react-force-graph-3d](https://github.com/vasturiano/react-force-graph), [Mol*](https://molstar.org) | Dependencies of the 3D library | MIT |
 | [three.js molecules example](https://threejs.org/examples/#webgl_loader_pdb) (`examples/webgl_loader_pdb.html`, `PDBLoader`, and nine files from `examples/models/pdb/`, tag r187) | The small-molecule views and `public/molecules/*.pdb` | MIT |
