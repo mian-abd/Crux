@@ -1,0 +1,6 @@
+$ python wald_pergene.py
+20000 null genes, 3 vs 3 samples
+true dispersion: median 0.0652
+per-gene estimate: median 0.0504, 6.5% at the floor
+false positives at p < 0.05: 0.1140
+RESULT: {"fpr": 0.114, "fpr_se": 0.002247, "frac_dispersion_at_floor": 0.06525, "n_genes": 20000, "n_per_group": 3, "seed": 9001}

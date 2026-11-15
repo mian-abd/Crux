@@ -1,0 +1,9 @@
+$ python nb_variance_symbolic.py
+pmf: (1/(alpha*(mu + 1/alpha)))**(1/alpha)*(mu/(mu + 1/alpha))**k*gamma(k + 1/alpha)/(factorial(k)*gamma(1/alpha))
+G(s) = (-alpha*mu*s + alpha*mu + 1)**(-1/alpha) (series converges at s = 1: True)
+G(1) = 1, mean = mu, variance = mu*(alpha*mu + 1)
+mixture: E[lambda] = mu, Var(Y) = mu*(alpha*mu + 1)
+variance - (mu + alpha*mu^2) = 0
+variance - (mu + mu^2/alpha) = mu**2*(alpha**2 - 1)/alpha
+largest |variance - form| on 9 grid points: 0 and 31920
+RESULT: {"eq_alpha_form": true, "eq_inv_alpha_form": false, "max_abs_residual_alpha_form": 0.0, "max_abs_residual_inv_alpha_form": 31920.0, "mean_is_mu": true, "mixture_agrees": true, "normalised": true, "pgf": "(-alpha*mu*s + alpha*mu + 1)**(-1/alpha)", "series_converges_at_1": true, "variance": "mu*(alpha*mu + 1)"}
