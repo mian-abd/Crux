@@ -1,15 +1,17 @@
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 
+import { ScrollProgressBar } from "@/components/landing/scroll-guides";
 import { Wordmark } from "@/components/wordmark";
 import { REPO_URL } from "@/lib/site";
 
 const NAV = [
   { href: "/#results", label: "Results" },
+  { href: "/#jetson", label: "Jetson" },
   { href: "/#runs", label: "Graded runs" },
   { href: "/#sponsors", label: "Built with" },
   { href: "/#explore", label: "Explore" },
-  { href: "/#how", label: "How it works" },
+  { href: "/#how", label: "How it works", wide: true },
 ];
 
 /** A slim charcoal bar above the header, for the one result worth knowing first. */
@@ -55,7 +57,7 @@ export function SiteHeader() {
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            className="hidden rounded-md px-3 py-2 text-[0.95rem] whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground lg:block"
+            className="hidden rounded-md px-3 py-2 text-[0.95rem] whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground xl:block"
           >
             GitHub
           </a>
@@ -71,6 +73,7 @@ export function SiteHeader() {
           </Link>
         </div>
       </div>
+      <ScrollProgressBar />
     </header>
   );
 }

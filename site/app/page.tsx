@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Domains } from "@/components/landing/domains";
 import { GradedRunPreview } from "@/components/landing/graded-run-preview";
 import { Loop } from "@/components/landing/loop";
+import { JetsonMoment } from "@/components/landing/jetson-moment";
 import { Plate } from "@/components/landing/plate";
+import { ScrollCue, SectionRail } from "@/components/landing/scroll-guides";
 import { Sponsors } from "@/components/landing/sponsors";
 import { GrowthChart } from "@/components/growth-chart";
 import { Scoreboard } from "@/components/scoreboard";
@@ -150,8 +152,19 @@ export default function Home() {
       <SiteHeader />
       <main id="main" className="flex-1">
         {/* Hero */}
-        <section className={`${WRAP} grid items-center gap-12 pt-12 pb-20 sm:pt-14 lg:min-h-[calc(100svh-7rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:pb-20`}>
+        <section id="top" className={`${WRAP} relative grid items-center gap-12 pt-12 pb-20 sm:pt-14 lg:min-h-[calc(100svh-7rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:pb-20`}>
           <div>
+            <a
+              href="#jetson"
+              className="mb-7 inline-flex animate-rise items-center gap-2.5 rounded-full border bg-card py-1.5 pr-3.5 pl-2 text-sm text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+            >
+              <span className="relative flex size-2.5">
+                <span className="absolute inline-flex size-full rounded-full bg-v-holds opacity-60 motion-safe:animate-ping" />
+                <span className="relative inline-flex size-2.5 rounded-full bg-v-holds" />
+              </span>
+              Also on a Jetson Orin Nano: watch it catch a swapped DNA strip
+              <ArrowRightIcon className="size-3.5" aria-hidden="true" />
+            </a>
             <h1 className="font-display text-[3.4rem] leading-[0.98] sm:text-[5rem] lg:text-[5rem] xl:text-[5.6rem]">
               <span className="block animate-rise">Settled by experiment,</span>
               <span className="block animate-rise text-subtle [animation-delay:80ms]">not by vote.</span>
@@ -199,6 +212,7 @@ export default function Home() {
             </Link>
           </div>
           <Plate {...PLATES.hero} priority sizes="(min-width: 1024px) 55vw, 100vw" className="w-full" />
+          <ScrollCue />
         </section>
 
         {/* Results */}
@@ -244,6 +258,25 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* On the bench: the Jetson */}
+        <section id="jetson" className="scroll-mt-24 border-t">
+          <div className={`${WRAP} py-24 sm:py-32`}>
+            <div className="max-w-3xl">
+              <p className="eyebrow">On the bench, on a Jetson</p>
+              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">We swapped the DNA mid-run. It noticed.</h2>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                The same engine, off the cloud: a Jetson Orin Nano with a USB camera. It chooses which part of a DNA strip
+                to read, calls the sickle-cell letter in six seconds, and when the strip changed under it, it flagged the
+                surprise, re-read to rule out the camera, and settled on the new variant. Twenty-seven seconds, with its
+                verdicts written on the device by a 3B model.
+              </p>
+            </div>
+            <div className="mt-12">
+              <JetsonMoment />
             </div>
           </div>
         </section>
@@ -467,6 +500,7 @@ export default function Home() {
           </div>
         </section>
       </main>
+      <SectionRail />
       <SiteFooter />
     </>
   );
