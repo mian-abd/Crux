@@ -94,7 +94,7 @@ A gpt-5.5 judge read each run's METHODS.md next to the planted fault and the aff
 
 ## Also run, separately labelled: the swarm with search and memory on
 
-`tools-run-02`, the clean case with Exa search and past.dev memory on, after PR #38. Score **0.815** (8 of 9 at or above 0.80), 26 calls, $1.05. Three searches won their ranking round. One of them, independent filtering, rejected an option outright. The critic recalled 8 records written by the referee. Recall latency over 25 recalls was p50 569 ms and p95 839 ms. One run is in line with the tools-off clean runs (0.790 to 0.861), so it shows no score effect either way.
+`tools-run-02`, the clean case with Exa search and past.dev memory on, after PR #38. Score **0.815** (8 of 9 at or above 0.80), 26 calls, $1.05. Three searches were chosen and run; in each round the search was the only candidate for its question. One of them, independent filtering, rejected an option outright. The critic recalled 8 records written by the referee. Recall latency over 25 recalls was p50 569 ms and p95 979 ms (interpolated percentile, as in `memory/instrumentation.py`; an earlier version of this file gave 839 ms, the 23rd of the 25 sorted values). One run is in line with the tools-off clean runs (0.790 to 0.861), so it shows no score effect either way.
 
 ## Reproduce
 
