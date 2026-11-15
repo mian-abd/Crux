@@ -8,7 +8,7 @@ loads the components through `components/viz-lazy.tsx` (`next/dynamic`, `ssr: fa
 | `HeroScene` | `className?` | Landing background: a B-DNA helix of HBB, turning slowly about its own axis and receding into fog, over a faint particle field. One pair (HBB c.20A>T, codon 6) is drawn in the accent. |
 | `DNAHelix` | `sequence?`, `highlights?`, `autoRotate?`, `className?` | Interactive helix of `sequence` (default: the first 27 nt of HBB, NM_000518.5). Each highlight is drawn larger and in the accent, with a glow and a label such as `codon 6: GAG → GTG` (changed letters in bold) over `Glu → Val · c.20A>T`. Orbit with the mouse; it spins about its axis until you do, and resumes after 8 s. Hover a pair to name it. |
 | `ProteinViewer` | `pdbId`, `highlightResidues?`, `className?` | A Mol* view with no Mol* interface: muted cartoon, soft ambient occlusion and outlines, hemes as thin sticks, highlighted residues as accent ball-and-stick inside a translucent shell. The camera turns the residues toward the viewer, or keeps Mol*'s principal-axes view when they surround the centre (2HBS). Loading, not-found and offline states are spelled out. |
-| `EvidenceGraph3D` | `events`, `height?`, `className?` | The run's evidence graph, built live from its events (see below). |
+| `EvidenceGraph` | `events`, `run`, `height?` | The run's evidence graph, a 2D layered graph built live from its events (see below). |
 
 Also exported: `buildGraph` and `parseEventLog` (the pure event-to-graph reducer), the
 `RunEvent` type, the palette and constants from `theme.ts`, and the HBB helpers from
@@ -74,24 +74,23 @@ PubChem compound the card links to (CIDs 2519, 2244, 5793, 89594, 5997, 702, 136
 
 ## The evidence graph
 
-`buildGraph(events)` folds the event stream (fields as in `docs/EVENTS.md`) into nodes and links:
+`components/viz/EvidenceGraph.tsx` draws the run's evidence as a 2D layered SVG graph, built by
+`buildEvidenceGraph` (`lib/crux/evidence-graph.ts`, unit-tested) from the events and the folded run
+state, and laid out by `graphScene.ts` (pure, unit-tested):
 
-* **Nodes:** questions (large spheres), their options (spheres sized by the current posterior) and
-  diagnostics (octahedra, from `experiment.proposed`, or `experiment.started` if never proposed).
-* **Links:** option to question, diagnostic to each question it tests.
-* **State:** `belief.updated` resizes options; `hypothesis.rejected` dims an option and strikes it
-  through; `question.settled` rings the question and its winner (winner link in the accent);
-  `question.unresolved` gives the question a dashed ring; `experiment.started`/`finished` pulse the
-  diagnostic and send a particle along its links; `question.opened` with `reopened` clears the verdict.
-* **Claims runs:** `claims.source` supplies each question's label (the claim text) and the source line.
-  Answer keys map to `holds` (holds), `fails` / `alt_param` / `fails_conservative` (refuted) and
-  `holds_if` (holds under a condition). Colour is never the only cue: the legend, the hover tooltips
-  (claim, quote, status, posterior, rejection reason) and, for graphs of ten questions or fewer, the
-  captions under each question carry the text.
-* **Layout:** react-force-graph-3d's d3 simulation, warmed up before the first frame and cooled
-  quickly. Node objects persist across updates, and nodes already placed are pinned while newcomers
-  settle, so nothing jumps as events stream in. The camera eases toward the graph's bounding sphere
-  (between the caption bands) and orbits slowly until the user takes over.
+* **Columns:** claims, then each claim's competing readings, then the experiments that were chosen or
+  ran, then their observed outcomes.
+* **Edges:** a reading to an experiment is "predicts" (dashed) while the experiment is pending, then
+  "supports" if the result raised its posterior, "rejected by" for the update that pushed it under
+  0.02, and "tested by" otherwise. Edges whose endpoints do not exist are dropped.
+* **State:** statuses and verdicts come from the same fold as the claim cards, so the two always
+  agree. Posterior bars animate, an option flashes when an update moves it, and a running experiment
+  pulses.
+* **Reading it:** hover, focus or tap shows the statement, posterior, the experiment's goal and bits,
+  the referee's note and the observed bin; hovering an edge explains it. Drag to pan; Ctrl or Cmd +
+  scroll (or pinch) to zoom between 0.35x and 2.5x; the -, + and Fit buttons do the same.
+* Colours are the site's verdict tokens, read from CSS variables, so the light and dark themes both
+  work. `EvidenceGraph3D` is kept as a re-export for older imports.
 
 ## Dependencies
 

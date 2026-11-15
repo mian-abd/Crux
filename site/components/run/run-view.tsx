@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Chip, VERDICT_TEXT } from "@/components/verdict-chip";
-import { EvidenceGraph3D } from "@/components/viz-lazy";
+import { EvidenceGraph } from "@/components/viz/EvidenceGraph";
 import { claimRows, isClaimsLab, verdictCounts, type ClaimVerdict } from "@/lib/crux/claims";
 import { clock, usd } from "@/lib/crux/format";
 import { DEMO_RUN_ID, useRun, type Provenance } from "@/lib/crux/use-run";
@@ -231,7 +231,7 @@ export function RunView({ runId }: { runId: string }) {
 
           <Panel title="Evidence graph" hint="Questions, options and the diagnostics that tested them">
             <div className="h-[420px] overflow-hidden rounded-b-lg">
-              <EvidenceGraph3D events={events} height={420} />
+              <EvidenceGraph events={events} run={run} height={420} />
             </div>
           </Panel>
         </>
