@@ -27,8 +27,8 @@ export interface Molecule {
  * tuned to the site's tokens: nitrogen is the accent, oxygen the refuted red.
  */
 export const CPK: Record<ColorMode, Record<string, string>> = {
-  dark: { C: "#8f97a3", H: "#eef0f2", N: "#83b3fa", O: "#fc7a75", other: "#bd9ff2" },
-  light: { C: "#4c525c", H: "#e3e6ea", N: "#1f53b8", O: "#c9322e", other: "#724aab" },
+  dark: { C: "#8f97a3", H: "#eef0f2", N: "#83b3fa", O: "#fc7a75", other: "#e1ad63" },
+  light: { C: "#4c525c", H: "#e3e6ea", N: "#1f53b8", O: "#c9322e", other: "#a06a20" },
 };
 
 export const ELEMENT_NAME: Record<string, string> = {

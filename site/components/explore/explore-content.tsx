@@ -3,6 +3,13 @@
 // outer spacing: the public page runs full-bleed bands, the app page sits in
 // the shell's own container.
 
+import { BhFwerCounterexample } from "@/components/explore/figures/bh-fwer-counterexample";
+import { BhThreshold } from "@/components/explore/figures/bh-threshold";
+import { EigToy } from "@/components/explore/figures/eig-toy";
+import { SourceLink } from "@/components/explore/figures/figure-parts";
+import { GaltonBoard } from "@/components/explore/figures/galton-board";
+import { NbVariancePlot } from "@/components/explore/figures/nb-variance-plot";
+import { RecordedEig } from "@/components/explore/figures/recorded-eig";
 import { GalleryCard } from "@/components/explore/gallery-card";
 import { HeroSpecimen } from "@/components/explore/hero-specimen";
 import { StoryHelix, StoryProtein } from "@/components/explore/live-figure";
@@ -22,6 +29,9 @@ const SECTIONS = [
   { id: "genomics", label: "Genomics", count: `${GENOMICS.length + 2} views` },
   { id: "structural-biology", label: "Structural biology", count: `${PROTEINS.length + 1} views` },
   { id: "chemistry", label: "Chemistry", count: `${MOLECULES.length} views` },
+  { id: "statistics", label: "Statistics", count: "2 figures" },
+  { id: "mathematics", label: "Mathematics", count: "2 figures" },
+  { id: "experimental-design", label: "Experimental design", count: "2 figures" },
 ];
 
 /** CPK swatches for the chemistry key. The values are CPK in components/viz/gallery/molecule.ts. */
@@ -136,7 +146,8 @@ export function ExploreContent({ shell }: { shell: Shell }) {
         </h1>
         <p className={cn("mt-6 max-w-2xl leading-relaxed text-muted-foreground", app ? "text-lg" : "text-lg sm:text-xl")}>
           Start with the single DNA letter behind sickle-cell disease. Then real structures you can
-          turn: DNA, proteins and small molecules, drawn in the browser from public data.
+          turn: DNA, proteins and small molecules, drawn in the browser from public data. Then the
+          statistics and mathematics the engine checks, and how it chooses which experiment to run.
         </p>
         <nav aria-label="Gallery sections" className="mt-10 flex flex-wrap gap-2.5">
           {SECTIONS.map((s, i) => (
@@ -326,6 +337,66 @@ export function ExploreContent({ shell }: { shell: Shell }) {
           audit next, for example a paper&apos;s claims about a compound&apos;s measured properties.
           The models are illustrations, built from the structure files that ship with the three.js
           molecules example.
+        </NextNote>
+      </Band>
+
+      {/* 04 Statistics: two seeded simulations, run in the browser. */}
+      <Band shell={shell} tinted id="statistics" aria-labelledby="statistics-heading">
+        <SectionHead index="04" eyebrow="Statistics" title="Chance, counted." headingId="statistics-heading">
+          Two simulations that run in your browser from a seeded random number generator, so a seed
+          always draws the same picture. Neither is a Crux run. They show two ideas the claims audit
+          leans on: coin flips add up to a bell curve, and when many tests run at once, the rule
+          for which results to believe decides how many false finds get through.
+        </SectionHead>
+        <div className="mt-12 grid items-start gap-5 lg:grid-cols-2">
+          <GaltonBoard />
+          <BhThreshold />
+        </div>
+        <NextNote>
+          These are teaching figures. The claims audit that checks statements like these in a
+          paper&apos;s analysis is an MVP on four hand-curated claims: their options and diagnostics
+          were written by hand before the run, and pulling claims out of an arbitrary paper is not
+          built yet (<SourceLink path="runs/demo/claims-deseq2-20261114/artifacts/CLAIMS.md">CLAIMS.md</SourceLink>).
+        </NextNote>
+      </Band>
+
+      {/* 05 Mathematics: two recorded verdicts, each re-checked in the browser. */}
+      <Band shell={shell} id="mathematics" aria-labelledby="mathematics-heading">
+        <SectionHead index="05" eyebrow="Mathematics" title="One formula holds. One claim is false." headingId="mathematics-heading">
+          Both verdicts are recorded from the claims audit of the DESeq2 paper, run on 14 November
+          2026. The first is a formula from the paper&apos;s Methods; the second is a false claim
+          planted to test the audit. The plots beside them are recomputed in your browser from a
+          seeded generator.
+        </SectionHead>
+        <div className="mt-12 grid gap-5">
+          <NbVariancePlot />
+          <BhFwerCounterexample />
+        </div>
+        <NextNote>
+          Formal proofs are next, and not built. Today the symbolic check is an exact SymPy
+          derivation and the rest is simulation, which is evidence at the settings tried rather than
+          a proof. Writing derivations like the one above in Lean would turn a recorded verdict into
+          a machine-checked one.
+        </NextNote>
+      </Band>
+
+      {/* 06 Experimental design: a recorded EIG ranking, then a toy that computes EIG live. */}
+      <Band shell={shell} tinted id="experimental-design" aria-labelledby="design-heading">
+        <SectionHead index="06" eyebrow="Experimental design" title="Run the most informative check first." headingId="design-heading">
+          Crux scores each candidate check by its expected information gain per unit of cost, runs
+          the best one, then updates its beliefs with Bayes&apos; rule. The ranking below is
+          recorded from a real run. The toy after it computes EIG in your browser.
+        </SectionHead>
+        <div className="mt-12 grid gap-5">
+          <RecordedEig />
+          <EigToy />
+        </div>
+        <NextNote>
+          Ranking by EIG is a bet, not a proven edge. In a BoxingGym study, choosing measurements by
+          EIG showed no advantage over choosing them at random: the paired 95% interval includes
+          zero (<SourceLink path="eval/results/boxing/README.md" />). The order in the run above is
+          the engine&apos;s stated reason for what it ran first. Showing that this order reaches
+          answers sooner than chance is still open.
         </NextNote>
       </Band>
     </>

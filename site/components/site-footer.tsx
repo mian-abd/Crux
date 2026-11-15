@@ -17,50 +17,59 @@ function Ext({ href, children }: { href: string; children: React.ReactNode }) {
   );
 }
 
+const LINKS = [
+  { href: "/#domains", label: "What it tests" },
+  { href: "/#results", label: "Results" },
+  { href: "/#how", label: "How it works" },
+  { href: "/explore", label: "Explore" },
+  { href: "/login", label: "Sign in" },
+];
+
 export function SiteFooter() {
   return (
-    <footer className="border-t">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.2fr_1fr_1.6fr]">
-        <div className="space-y-3">
+    <footer>
+      <div className="mx-auto grid w-full max-w-[90rem] gap-12 px-5 py-16 sm:px-8 md:grid-cols-[1.1fr_0.7fr_1.6fr] lg:px-12">
+        <div className="space-y-4">
           <Wordmark />
-          <p className="max-w-xs text-sm text-muted-foreground">
-            A hackathon research prototype. Results are from a pilot on one task.
+          <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+            A research prototype from the SF AI Research Hackathon, Track 3. Results are from a pilot on one task.
           </p>
         </div>
-        <nav aria-label="Footer" className="space-y-2 text-sm text-muted-foreground">
-          <p className="eyebrow mb-3">Project</p>
+        <nav aria-label="Footer" className="space-y-2.5 text-sm text-muted-foreground">
+          {LINKS.map((l) => (
+            <p key={l.href}>
+              <Link href={l.href} className="transition-colors hover:text-foreground">
+                {l.label}
+              </Link>
+            </p>
+          ))}
           <p>
-            <Ext href={REPO_URL}>Source on GitHub</Ext>
-          </p>
-          <p>
-            <Ext href={repoFile("eval/results/task9_batch03.md")}>Pilot results</Ext>
-          </p>
-          <p>
-            <Link
-              href="/explore"
-              className="underline decoration-border underline-offset-4 hover:text-foreground"
-            >
-              Explore: one letter
-            </Link>
+            <a href={REPO_URL} target="_blank" rel="noreferrer" className="transition-colors hover:text-foreground">
+              GitHub
+            </a>
           </p>
         </nav>
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <p className="eyebrow mb-3">Credits</p>
+        <div className="space-y-2.5 text-sm leading-relaxed text-muted-foreground">
+          <p className="eyebrow mb-4">Credits</p>
           <p>
             Claims audit source: {LIBRARY_PAPER.authors}, <Ext href={LIBRARY_PAPER.url}>{LIBRARY_PAPER.venue}</Ext>,
             licensed <Ext href={LIBRARY_PAPER.licenseUrl}>{LIBRARY_PAPER.license}</Ext>.
           </p>
           <p>
             Structure data: <Ext href="https://www.rcsb.org/structure/2HBS">PDB 2HBS</Ext>. Sequence: NCBI RefSeq
-            NM_000518.5.
+            NM_000518.5. Historical plates are public domain, via Wikimedia Commons.
           </p>
           <p>
-            Interface built from <Ext href="https://ui.shadcn.com">shadcn/ui</Ext>,{" "}
-            <Ext href="https://magicui.design">Magic UI</Ext> and{" "}
-            <Ext href="https://www.better-auth.com">Better Auth</Ext>, all MIT. Full list in{" "}
+            Built with Next.js, <Ext href="https://ui.shadcn.com">shadcn/ui</Ext> and{" "}
+            <Ext href="https://www.better-auth.com">Better Auth</Ext>. Full list in{" "}
             <Ext href={repoFile("site/README.md")}>site/README.md</Ext>.
           </p>
         </div>
+      </div>
+      <div className="border-t">
+        <p className="mx-auto w-full max-w-[90rem] px-5 py-5 font-mono text-[0.7rem] tracking-wide text-muted-foreground uppercase sm:px-8 lg:px-12">
+          © 2026 Crux · Pilot results, one task of 20
+        </p>
       </div>
     </footer>
   );

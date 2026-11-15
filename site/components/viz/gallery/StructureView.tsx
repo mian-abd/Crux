@@ -35,16 +35,16 @@ export interface StructureViewProps {
 
 type Status = "loading" | "ready" | "offline" | "error";
 
-/** Cartoon colours for protein chains: cool greys, so the accents carry the story. */
+/** Cartoon colours for protein chains: warm greys, so the accents carry the story. */
 const CHAIN_COLORS: Record<ColorMode, string[]> = {
-  dark: ["#8d97a5", "#b0b8c3", "#7889a3", "#9ea7b2"],
-  light: ["#9aa4b1", "#c0c7cf", "#8798b2", "#afb6c0"],
+  dark: ["#9d978f", "#bdb7ae", "#8a847c", "#aaa49c"],
+  light: ["#a7a198", "#c9c3ba", "#958f86", "#b8b2a9"],
 };
 
 /** Nucleic acid strands: the accent and a quieter second strand. */
 const STRAND_COLORS: Record<ColorMode, string[]> = {
-  dark: ["#83b3fa", "#c3d8fb"],
-  light: ["#1f53b8", "#6f92d6"],
+  dark: ["#dd8461", "#efc3ad"],
+  light: ["#a5492b", "#cf8f74"],
 };
 
 function tone(p: ModePalette, t: StructureTone): string {

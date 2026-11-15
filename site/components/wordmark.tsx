@@ -22,8 +22,8 @@ export function Wordmark({ href = "/", className }: { href?: string; className?:
       aria-label="Crux home"
       className={cn("inline-flex items-center gap-2 rounded-sm text-foreground", className)}
     >
-      <CruxMark />
-      <span className="font-display text-[1.45rem] leading-none">Crux</span>
+      <CruxMark className="size-[1.35rem]" />
+      <span className="font-display text-[1.6rem] leading-none font-normal tracking-[-0.02em]">Crux</span>
     </Link>
   );
 }

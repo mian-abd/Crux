@@ -112,7 +112,20 @@ package's `package.json` or repository.
 | [unpdf](https://github.com/unjs/unpdf) (bundles PDF.js, Apache-2.0) | PDF text extraction | MIT |
 | [three](https://threejs.org), [@react-three/fiber](https://github.com/pmndrs/react-three-fiber), [@react-three/drei](https://github.com/pmndrs/drei), [react-force-graph-3d](https://github.com/vasturiano/react-force-graph), [Mol*](https://molstar.org) | Dependencies of the 3D library | MIT |
 | [three.js molecules example](https://threejs.org/examples/#webgl_loader_pdb) (`examples/webgl_loader_pdb.html`, `PDBLoader`, and nine files from `examples/models/pdb/`, tag r187) | The small-molecule views and `public/molecules/*.pdb` | MIT |
-| [Geist](https://vercel.com/font), [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif) | Typefaces, loaded with `next/font` | SIL Open Font License 1.1 |
+| [Newsreader](https://fonts.google.com/specimen/Newsreader), [Hanken Grotesk](https://fonts.google.com/specimen/Hanken+Grotesk), [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) | Typefaces (display, text, labels), loaded with `next/font` | SIL Open Font License 1.1 |
+
+### Images
+
+The landing page's plates are public-domain works from Wikimedia Commons, in `public/plates/`. We cropped them and toned the engravings to the site's paper and ink colours.
+
+| File | Work | Source | Licence on Commons |
+| --- | --- | --- | --- |
+| `lavoisier-apparatus.jpg` | Planche IV, Lavoisier, *Traité élémentaire de chimie* (1789), engraved by Marie-Anne Paulze Lavoisier (Library of Congress scan) | [File page](https://commons.wikimedia.org/wiki/File:Scientific_apparatus_used_by_Lavoisier_in_studying_chemical_reactions_in_combustion_of_substances,_including_mercury,_top_right)_-_Paulze_Lavoisier,_sculpt_LCCN92517580.jpg) | PD-old-100 |
+| `wright-air-pump.jpg` | Joseph Wright of Derby, *An Experiment on a Bird in the Air Pump* (1768), National Gallery, London | [File page](https://commons.wikimedia.org/wiki/File:An_Experiment_on_a_Bird_in_an_Air_Pump_by_Joseph_Wright_of_Derby,_1768.jpg) | PD-Art |
+| `hooke-flea.jpg` | Robert Hooke, *Micrographia* (1665), Schem. XXXIV | [File page](https://commons.wikimedia.org/wiki/File:HookeFlea01.jpg) | PD-old-100 |
+| `hooke-cork.jpg` | Robert Hooke, *Micrographia* (1665), Schem. XI, cork cells | [File page](https://commons.wikimedia.org/wiki/File:Micrographia_Schem_11.jpg) | PD-old-100 |
+| `galton-quincunx.png` | Francis Galton, *Natural Inheritance* (1889), the quincunx | [File page](https://commons.wikimedia.org/wiki/File:Quincunx_(Galton_Box)_-_Galton_1889_diagram.png) | PD-old |
+| `euclid-1482.jpg` | Euclid, *Elements*, Book VI, Erhard Ratdolt's first printed edition (1482), the diagram column | [File page](https://commons.wikimedia.org/wiki/File:EuclideLivreVIProp2Ratdolt1482ed.jpg) | PD-old-70-expired |
 
 Content credits: the claims audit uses Love MI, Huber W, Anders S, "Moderated estimation
 of fold change and dispersion for RNA-seq data with DESeq2", Genome Biology 15, 550

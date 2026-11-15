@@ -60,7 +60,7 @@ export const GENOMICS: StructureItem[] = [
     title: "A protein that bends DNA",
     fact: "Yeast TATA-binding protein sits on the TATA box like a saddle and kinks the helix, an early step in reading a gene.",
     meta: "X-ray, 1.8 Å",
-    legend: "DNA in blue with base rungs; protein as grey ribbon.",
+    legend: "DNA in oxide red with base rungs; protein as grey ribbon.",
   },
   {
     kind: "structure",
@@ -68,7 +68,7 @@ export const GENOMICS: StructureItem[] = [
     title: "Cas9 with its guide RNA",
     fact: "Streptococcus pyogenes Cas9 holding a guide RNA paired with the target DNA strand it was sent to find.",
     meta: "X-ray, 2.5 Å",
-    legend: "RNA and DNA in blue with base rungs; protein as grey ribbon.",
+    legend: "RNA and DNA in oxide red with base rungs; protein as grey ribbon.",
   },
 ];
 
@@ -98,7 +98,7 @@ export const PROTEINS: StructureItem[] = [
     fact: "Pig insulin crystallised with zinc. Two molecules are shown, each made of an A chain and a B chain.",
     meta: "X-ray, 1.5 Å",
     accents: [{ comps: ["ZN"], tone: "conditional", as: "spheres" }],
-    legend: "Zinc ions as purple spheres.",
+    legend: "Zinc ions as ochre spheres.",
   },
   {
     kind: "structure",
