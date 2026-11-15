@@ -11,6 +11,7 @@ import { AnnouncementBar, SiteHeader } from "@/components/site-header";
 import { REPO_URL, repoFile } from "@/lib/site";
 
 const BATCH04 = "eval/results/task9_batch04.md";
+const BATCH05 = "eval/results/task9_batch05.md";
 const BATCH03 = "eval/results/task9_batch03.md";
 
 /**
@@ -68,7 +69,13 @@ const EXPLORE_CARDS = [
 const REPORTS = [
   {
     date: "November 15, 2026",
-    title: "Batch-04: a fresh held-out suite",
+    title: "Batch-05: 52 fresh cases in four suites",
+    body: "Three more pre-registered suites in parallel. Swarm 0.817, single agent 0.671; +0.146 (+0.084 to +0.215); 48 of 48 faults against 14.",
+    path: BATCH05,
+  },
+  {
+    date: "November 15, 2026",
+    title: "Batch-04: the first fresh held-out suite",
     body: "13 pre-registered cases nobody had run. Swarm 0.811, single agent 0.608; 12 of 12 planted faults against 3.",
     path: BATCH04,
   },
@@ -86,11 +93,62 @@ const REPORTS = [
   },
 ];
 
+const RUN1 = "runs/demo/task9_real_swarm_run1.jsonl";
+
+/** Run 1's rejections (the first graded run) and one from tools-run-02, as in docs/SUBMISSION.md. */
+const REJECTED = [
+  { question: "Were two samples swapped?", option: "Two libraries carry each other's labels", by: "labels_swap_search: as given", posterior: "0.0021" },
+  { question: "Is a library duplicated?", option: "One library appears under two names", by: "duplicates_identical: none", posterior: "0.0085" },
+  { question: "Is a library degraded?", option: "At least one library is degraded", by: "quality_depth: all usable", posterior: "0.0085" },
+  { question: "Is the cell-line column wrong?", option: "Some libraries carry the wrong cell line", by: "cell_line_centroid: as given", posterior: "0.0085" },
+  { question: "Are gene-ID versions mixed?", option: "Versioned and unversioned IDs are mixed", by: "gene_strip_check: uniform", posterior: "0.0046" },
+  { question: "Filter low-count genes before DESeq2?", option: "Use internal independent filtering only", by: "Exa search of the DESeq2 docs: both", posterior: "0.0172" },
+];
+
+/** Where it fell short, what its own logs showed, and what changed (README, "Where it fell short"). */
+const FELL_SHORT = [
+  { from: "0.586", to: "0.727", short: "Two artifacts scored 0", logs: "Every run's methods said the inputs had no gene annotation.", change: "Added a gene symbol map to the inputs." },
+  { from: "0.727", to: "0.833", short: "Behind the single agent's 0.862", logs: "Per-pair refits recovered 427 of 1,232 reference genes.", change: "One DESeq2 fit per cell line (PR #30)." },
+  { from: "0.833", to: "0.862", short: "Clean runs from 0.790 to 0.861", logs: "An untested question was applied three different ways.", change: "Untested questions keep the method's defaults (PR #47)." },
+  { from: "3", to: "0", short: "Crashed swarm runs, then 0 in 52", logs: "The merge step raised on a malformed plan.", change: "A bad merge plan keeps the proposals (PR #54)." },
+];
+
+const LOOPS = [
+  {
+    title: "Inside a run, with no human",
+    stat: "7 tables blocked, repaired",
+    body: "The critic checks every deliverable. In run 1 it blocked versioned gene IDs in 7 tables, and the one repair round fixed them, except one ID in 4.",
+    path: "eval/results/task9_runs.md",
+  },
+  {
+    title: "From its own diagnostic outcomes",
+    stat: "Log loss 0.600 → 0.472",
+    body: "The outcome predictor, fine-tuned on 20,640 of the lab's own diagnostic results, beat its base model and the library rows in distribution. The edge went away under shift and on real data, so it stays off.",
+    path: "eval/results/predictor_calibration.md",
+  },
+  {
+    title: "From its own runs",
+    stat: "+0.010, no effect",
+    body: "Six lessons drafted from its dev-case runs, reviewed and frozen, made no measurable difference on 9 held-out cases.",
+    path: BATCH03,
+  },
+];
+
 const CAVEATS = [
   {
-    title: "Two single-agent runs scored 0, and both count.",
-    body: "One agent decided the mounted data folder was empty; one hit the $2 cap. Leaving out the first gives +0.147 (+0.025 to +0.299); leaving out both, which can only favour the single agent, gives +0.089 (+0.002 to +0.189).",
-    path: BATCH04,
+    title: "Three single-agent runs scored 0, and they count.",
+    body: "One decided the mounted data folder was empty; two hit the $2 cap with no outputs. Leaving out all three cases, which can only favour the single agent, gives +0.104 (+0.057 to +0.154) on 49 cases.",
+    path: BATCH05,
+  },
+  {
+    title: "One of the four suites is not significant on its own.",
+    body: "Per suite the difference was +0.203, +0.123, +0.147 and +0.112; the last one's interval (−0.010 to +0.276) includes zero.",
+    path: BATCH05,
+  },
+  {
+    title: "We do not compare to the 0.523 record.",
+    body: "The BixBench3 record covers all 20 tasks from raw reads. Ours is task 9 from the published counts, so the numbers are not comparable.",
+    path: "eval/results/task9_runs.md",
   },
   {
     title: "On the reused seed-43 suite, scores were tied.",
@@ -104,13 +162,13 @@ const CAVEATS = [
   },
   {
     title: "The checks match the planted faults.",
-    body: "The library holds diagnostics for exactly the six fault types the suite plants. This shows the checks catch what they were written for, not unknown faults.",
-    path: BATCH04,
+    body: "The library holds diagnostics for exactly the six fault types the suites plant. This shows the checks catch what they were written for, not unknown faults.",
+    path: BATCH05,
   },
   {
     title: "One task, small samples.",
     body: "BixBench3 task 9 of 20, from published counts, one run per arm per case.",
-    path: BATCH04,
+    path: BATCH05,
   },
 ];
 
@@ -275,6 +333,105 @@ export default function Home() {
                 ))}
               </ul>
             </div>
+          </div>
+        </section>
+
+        {/* What it rejected (Track 3 asks for it) */}
+        <section id="rejected" className="scroll-mt-24 border-t">
+          <div className={`${WRAP} py-24 sm:py-32`}>
+            <div className="max-w-3xl">
+              <p className="eyebrow">What it rejected</p>
+              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">Every rejection keeps the evidence behind it</h2>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                What the swarm ruled out matters as much as what it found. The first five options fell below posterior 0.02
+                in the first graded run; the last one fell in a run with documentation search on. Thirteen questions in the
+                first run ended unresolved and were reported that way, not guessed.
+              </p>
+            </div>
+            <div className="mt-12 overflow-x-auto rounded-2xl border bg-card">
+              <table className="w-full min-w-[40rem] text-left text-[0.95rem]">
+                <thead>
+                  <tr className="border-b text-sm text-muted-foreground">
+                    <th className="px-6 py-4 font-normal">Question</th>
+                    <th className="px-6 py-4 font-normal">Rejected option</th>
+                    <th className="px-6 py-4 font-normal">Rejected by</th>
+                    <th className="px-6 py-4 text-right font-normal">Posterior</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {REJECTED.map((r) => (
+                    <tr key={r.question} className="border-b last:border-0">
+                      <td className="px-6 py-4 font-medium">{r.question}</td>
+                      <td className="px-6 py-4 text-muted-foreground line-through decoration-v-refuted/60">{r.option}</td>
+                      <td className="px-6 py-4 font-mono text-sm">{r.by}</td>
+                      <td className="px-6 py-4 text-right font-mono text-sm text-v-refuted tabular-nums">{r.posterior}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Link
+                href="/runs"
+                className="inline-flex items-center gap-1.5 text-[0.95rem] font-medium underline decoration-border underline-offset-[6px] transition-colors hover:decoration-foreground"
+              >
+                Replay the run and its rejected ledger
+                <ArrowRightIcon className="size-4" aria-hidden="true" />
+              </Link>
+              <Source path={RUN1} />
+            </div>
+          </div>
+        </section>
+
+        {/* Where it fell short (self-improvement) */}
+        <section id="improves" className="scroll-mt-24 border-t bg-card">
+          <div className={`${WRAP} py-24 sm:py-32`}>
+            <div className="max-w-3xl">
+              <p className="eyebrow">Where it fell short</p>
+              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">It learns from its own results, and we say where it doesn&apos;t</h2>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                On the clean case the swarm started well behind a single agent. Each step below came from a failure in its
+                own logs, and each batch after it was pre-registered.
+              </p>
+            </div>
+
+            <ol className="mt-12 grid gap-3 lg:grid-cols-4">
+              {FELL_SHORT.map((s, i) => (
+                <li key={s.from} className="flex flex-col rounded-2xl border bg-background p-6">
+                  <p className="text-sm text-muted-foreground">Step {i + 1} · {s.short}</p>
+                  <p className="mt-4 font-display text-4xl leading-none tabular-nums">
+                    <span className="text-subtle">{s.from}</span> <span className="text-subtle">→</span>{" "}
+                    <span className="text-foreground">{s.to}</span>
+                  </p>
+                  <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+                    <span className="font-medium text-foreground">The logs: </span>
+                    {s.logs}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    <span className="font-medium text-foreground">The change: </span>
+                    {s.change}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              We made these four fixes; the system did not change its own code. Inputs and the prompt changed along the way,
+              so this is not a learning curve. Now, on 52 fresh cases: +0.146, with 48 of 48 faults caught.
+            </p>
+
+            <h3 className="mt-16 font-display text-3xl">Loops that run on their own</h3>
+            <ul className="mt-6 grid gap-3 md:grid-cols-3">
+              {LOOPS.map((l) => (
+                <li key={l.title} className="flex flex-col rounded-2xl border bg-background p-6">
+                  <p className="text-sm text-muted-foreground">{l.title}</p>
+                  <p className="mt-3 font-display text-3xl leading-tight">{l.stat}</p>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{l.body}</p>
+                  <p className="mt-4">
+                    <Source path={l.path} />
+                  </p>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

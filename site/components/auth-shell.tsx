@@ -29,7 +29,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           <div className="absolute right-0 bottom-0 left-0 p-10 text-ink-foreground">
             <p className="font-display text-4xl leading-[1.08] xl:text-5xl">Settled by experiment, not by vote.</p>
             <p className="mt-4 max-w-md text-ink-foreground/70">
-              On 13 fresh pre-registered cases, the swarm scored 0.811 against 0.608 and caught 12 of 12 planted faults.
+              On 52 fresh pre-registered cases, the swarm scored 0.817 against 0.671 and caught 48 of 48 planted faults.
             </p>
             <p className="mt-8 text-[0.7rem] text-ink-foreground/50">
               Joseph Wright of Derby, An Experiment on a Bird in the Air Pump (1768). Public domain.

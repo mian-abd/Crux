@@ -1,0 +1,221 @@
+{
+  "h44": {
+    "cases": 13,
+    "mean": {
+      "swarm": 0.8107419098987421,
+      "baseline": 0.6079340139611548
+    },
+    "sd": {
+      "swarm": 0.07828105620417454,
+      "baseline": 0.3046034351440355
+    },
+    "paired_diff": 0.20280789593758747,
+    "paired_ci": [
+      0.04838733629844605,
+      0.38161791807864
+    ],
+    "higher_lower_tied": [
+      8,
+      4,
+      1
+    ],
+    "mean_cost": {
+      "swarm": 1.173226153846154,
+      "baseline": 1.375794615384615
+    },
+    "failed_runs": {
+      "swarm": 0,
+      "baseline": 0
+    },
+    "faults": {
+      "swarm": {
+        "caught": 12
+      },
+      "baseline": {
+        "missed": 7,
+        "caught": 3,
+        "noticed": 2
+      }
+    },
+    "fault_cases": 12,
+    "fault_mean": {
+      "swarm": 0.806575152046098,
+      "baseline": 0.5861677807091032
+    }
+  },
+  "h45": {
+    "cases": 13,
+    "mean": {
+      "swarm": 0.8325519351403512,
+      "baseline": 0.709773628549622
+    },
+    "sd": {
+      "swarm": 0.0423137664463364,
+      "baseline": 0.16199136568873054
+    },
+    "paired_diff": 0.12277830659072933,
+    "paired_ci": [
+      0.03301339372450806,
+      0.21724271829017153
+    ],
+    "higher_lower_tied": [
+      7,
+      2,
+      4
+    ],
+    "mean_cost": {
+      "swarm": 1.2091230769230767,
+      "baseline": 1.5505711538461537
+    },
+    "failed_runs": {
+      "swarm": 0,
+      "baseline": 0
+    },
+    "faults": {
+      "swarm": {
+        "caught": 12
+      },
+      "baseline": {
+        "caught": 3,
+        "missed": 7,
+        "noticed": 2
+      }
+    },
+    "fault_cases": 12,
+    "fault_mean": {
+      "swarm": 0.8297650742761083,
+      "baseline": 0.6967552421361517
+    }
+  },
+  "h46": {
+    "cases": 13,
+    "mean": {
+      "swarm": 0.8131707062780547,
+      "baseline": 0.6659337891816224
+    },
+    "sd": {
+      "swarm": 0.10951027713363863,
+      "baseline": 0.19161351808157645
+    },
+    "paired_diff": 0.14723691709643216,
+    "paired_ci": [
+      0.053183683419237855,
+      0.2528640102876175
+    ],
+    "higher_lower_tied": [
+      7,
+      3,
+      3
+    ],
+    "mean_cost": {
+      "swarm": 1.1263294461538462,
+      "baseline": 1.4620096153846154
+    },
+    "failed_runs": {
+      "swarm": 0,
+      "baseline": 0
+    },
+    "faults": {
+      "swarm": {
+        "caught": 12
+      },
+      "baseline": {
+        "noticed": 2,
+        "missed": 7,
+        "caught": 3
+      }
+    },
+    "fault_cases": 12,
+    "fault_mean": {
+      "swarm": 0.8087687430086202,
+      "baseline": 0.6490008705312765
+    }
+  },
+  "h47": {
+    "cases": 13,
+    "mean": {
+      "swarm": 0.811745053277257,
+      "baseline": 0.7000100869580735
+    },
+    "sd": {
+      "swarm": 0.08613817652310524,
+      "baseline": 0.25519033435455885
+    },
+    "paired_diff": 0.11173496631918353,
+    "paired_ci": [
+      -0.009981011873124668,
+      0.2762826545494271
+    ],
+    "higher_lower_tied": [
+      5,
+      4,
+      4
+    ],
+    "mean_cost": {
+      "swarm": 1.2205956153846154,
+      "baseline": 1.5031023076923078
+    },
+    "failed_runs": {
+      "swarm": 0,
+      "baseline": 0
+    },
+    "faults": {
+      "swarm": {
+        "caught": 12
+      },
+      "baseline": {
+        "missed": 7,
+        "caught": 5
+      }
+    },
+    "fault_cases": 12,
+    "fault_mean": {
+      "swarm": 0.807390880582767,
+      "baseline": 0.6859168597890987
+    }
+  },
+  "combined": {
+    "cases": 52,
+    "mean": {
+      "swarm": 0.8170524011486013,
+      "baseline": 0.670912879662618
+    },
+    "sd": {
+      "swarm": 0.08070410632707795,
+      "baseline": 0.23148585573576666
+    },
+    "paired_diff": 0.14613952148598314,
+    "paired_ci": [
+      0.08401671136470451,
+      0.21519285167386984
+    ],
+    "higher_lower_tied": [
+      27,
+      13,
+      12
+    ],
+    "mean_cost": {
+      "swarm": 1.182318573076923,
+      "baseline": 1.472869423076923
+    },
+    "failed_runs": {
+      "swarm": 0,
+      "baseline": 0
+    },
+    "faults": {
+      "swarm": {
+        "caught": 48
+      },
+      "baseline": {
+        "missed": 28,
+        "caught": 14,
+        "noticed": 6
+      }
+    },
+    "fault_cases": 48,
+    "fault_mean": {
+      "swarm": 0.8131249624783985,
+      "baseline": 0.6544601882914075
+    }
+  }
+}

@@ -37,33 +37,33 @@ The hosted API holds the OpenAI, Modal, Exa, past.dev and Langfuse keys and the 
 
 ## At a glance
 
-On 13 fresh, pre-registered cases of BixBench3 task 9 (batch-04: one task of 20, from published counts, one run per arm per case; `eval/results/task9_batch04.md`):
+On 52 fresh, pre-registered cases of BixBench3 task 9 (four suites nobody had run or tuned on: batch-04 and batch-05; one task of 20, from published counts, one run per arm per case; `eval/results/task9_batch05.md`):
 
 ```mermaid
 xychart-beta
-    title "Mean grader score, 13 fresh cases"
+    title "Mean grader score, 52 fresh cases"
     x-axis ["Crux swarm", "Single agent (gpt-5.5)"]
     y-axis "Score, 0 to 1" 0 --> 1
-    bar [0.811, 0.608]
+    bar [0.817, 0.671]
 ```
 
 ```mermaid
 xychart-beta
-    title "Planted faults caught, of 12"
+    title "Planted faults caught, of 48"
     x-axis ["Crux swarm", "Single agent (gpt-5.5)"]
-    y-axis "Faults caught" 0 --> 12
-    bar [12, 3]
+    y-axis "Faults caught" 0 --> 48
+    bar [48, 14]
 ```
 
 | | Crux swarm | Single agent (gpt-5.5) |
 | --- | --- | --- |
-| Mean score, 13 cases | **0.811** | 0.608 |
-| Paired difference (95% CI) | **+0.203 (+0.048 to +0.382)** | |
-| Planted faults caught, of 12 | **12** | 3 |
-| Clean case | 0.861 | 0.869 |
-| Mean cost per run | $1.17 | $1.38 |
+| Mean score, 52 cases | **0.817** | 0.671 |
+| Paired difference (95% CI) | **+0.146 (+0.084 to +0.215)** | |
+| Planted faults caught, of 48 | **48** | 14 |
+| Clean cases, 4 runs | 0.864 | 0.868 |
+| Mean cost per run | $1.18 | $1.47 |
 
-On the reused seed-43 suite (batch-03) the scores were tied, and random experiment selection did as well as information-gain selection. Both results, the caveats and the honest negatives are in [Results](#results-pilot-one-task-from-published-counts).
+Per suite, the difference was +0.203, +0.123, +0.147 and +0.112; the last suite's interval includes zero. On the reused seed-43 suite (batch-03) the scores were tied, and random experiment selection did as well as information-gain selection. The caveats and the honest negatives are in [Results](#results-pilot-one-task-from-published-counts).
 
 ## The idea
 
@@ -268,7 +268,7 @@ How every batch number below is produced (`docs/CLOUD.md`, `eval/results/task9_p
 
 ```mermaid
 flowchart TD
-    MAKE["make_cases --seed 44<br/>13 blinded cases: clean, plus 2 each of 6 planted faults"] --> PRE["Protocol pushed before any run<br/>(PR #59 for batch-04)"]
+    MAKE["make_cases --seed 44 to 47<br/>13 blinded cases per suite: clean, plus 2 each of 6 planted faults"] --> PRE["Protocol pushed before any run<br/>(PR #59 for batch-04, PR #72 for batch-05)"]
     MAKE --> TRUTH[("Fault truth table<br/>crux-evaluator volume, read-only,<br/>never mounted in a sandbox")]
     PRE --> ORC["Modal orchestrator container<br/>eval/cloud.py, spend cap checked before each run"]
     ORC --> SW["Crux swarm"]
@@ -278,12 +278,44 @@ flowchart TD
     SB --> GR["Edison's grader at d0e0bbb<br/>outside the agent's folders"]
     SB --> FS["Fault scoring<br/>a judge reads METHODS.md next to the truth"]
     TRUTH -.-> FS
-    GR --> RES["eval/results/task9_batch04.md<br/>failed runs count as 0"]
+    GR --> RES["eval/results/task9_batch05.md<br/>failed runs count as 0"]
     FS --> RES
-    RES --> FIG["docs/figures/batch-04/"]
+    RES --> FIG["docs/figures/batch-05/"]
 ```
 
-### Batch-04: a fresh held-out suite (latest)
+### Batch-05: three more fresh suites, and the 52-case result (latest)
+
+Pre-registered in PR #72 before any run (`eval/results/task9_protocol_batch05.md`). Three suites made fresh with `make_cases` seeds 45, 46 and 47 (39 cases, no bundle shared with any earlier suite), both arms once each, as three Modal launches at the same time at commit `3f09a28`. 78 runs in about 20 minutes, $104.94, **no crashes and no reruns**. With batch-04's seed-44 suite, that makes 52 held-out cases (`eval/results/task9_batch05.md`).
+
+| Measure | Swarm | Single agent (gpt-5.5) |
+| --- | --- | --- |
+| All 52 cases | **0.817 ± 0.081** | 0.671 ± 0.231 |
+| 48 fault cases | **0.813** | 0.654 |
+| Clean cases, 4 runs | 0.864 | 0.868 |
+| Paired difference, 52 cases (95% CI) | **+0.146 (+0.084 to +0.215)** | |
+| Per case: higher / lower / tied | 27 / 13 / 12 | |
+| **Faults caught / noticed only / missed, of 48** | **48 / 0 / 0** | 14 / 6 / 28 |
+| Mean cost per run; runs stopped by the $2 cap | $1.18; 0 | $1.47; 27 |
+
+| Suite | Paired difference (95% CI) | Faults caught, swarm vs single agent |
+| --- | --- | --- |
+| seed 44 (batch-04) | +0.203 (+0.048 to +0.382) | 12 vs 3 |
+| seed 45 | +0.123 (+0.033 to +0.217) | 12 vs 3 |
+| seed 46 | +0.147 (+0.053 to +0.253) | 12 vs 3 |
+| seed 47 | +0.112 (−0.010 to +0.276) | 12 vs 5 |
+| batch-05 only, 39 cases | +0.127 (+0.065 to +0.196) | 36 vs 11 |
+
+- **The held-out result held, and the estimate shrank.** From +0.203 on 13 cases to +0.146 on 52, with a narrower interval that still excludes zero. One suite (seed 47) on its own includes zero.
+- **It doesn't rest on zero scores.** Three single-agent runs scored 0 across the four suites (two in batch-04, one in seed 47, which hit the $2 cap with no outputs). Leaving all three cases out, which can only favour the single agent, gives +0.104 (+0.057 to +0.154) on 49 cases.
+- **Fault handling is the consistent difference:** 48 of 48 against 14. The library-checks caveat still applies: these are new instances of the six fault types the library was written for.
+- **One labelled deviation:** the cloud fault-scoring step matched no cases (the uploaded truth files kept `case-NN` names), so the same scorer and judge were re-run on the fetched runs after renaming. Grades were unaffected.
+- The numbers come from `eval/heldout_summary.py`, which reproduces batch-04's published numbers exactly (`tests/test_heldout_summary.py`).
+
+![Pre-registered measures, 52 held-out cases](docs/figures/batch-05/task9_swarm_vs_baseline.png)
+
+![Faults caught, 52 held-out cases](docs/figures/batch-05/task9_fault_detection.png)
+
+### Batch-04: the first fresh held-out suite
 
 Pre-registered in PR #59 before any run (`eval/results/task9_protocol_batch04.md`). The first batch on cases nobody had run, graded or tuned on: `make_cases --seed 44`, 13 cases, no input bundle shared with the seed-43 suite. Both arms once each, in Modal at commit `95aaa11`; 26 runs, $33.14 of a $45 cap, **no crashes and no reruns** (`eval/results/task9_batch04.md`).
 
@@ -376,7 +408,7 @@ Pre-registered before any run, at code commit `799febd` (`eval/results/task9_pro
 
 The four single-agent crashes were a bug in our harness: gpt-5.5 spent its whole 4,096-token output cap on reasoning, and the baseline loop did not catch `LengthFinishReasonError`. PR #40 fixed it (`eval/results/task9_batch02.md`). The batch-02 charts are in `docs/figures/task9_*.png`.
 
-### Progression: run 1 to batch-04
+### Progression: run 1 to batch-05
 
 The inputs and the prompt changed between these runs, so this is not a learning curve.
 
@@ -389,6 +421,7 @@ flowchart TD
     D22 -->|"the task's own gencode.v38 map,<br/>shared prompt rule, PR #30"| B2["batch-02 clean case<br/>0.833 vs 0.868"]
     B2 -->|"untested questions keep<br/>method defaults, PR #47"| B3["batch-03 clean case<br/>0.862 vs 0.860, crashed run rerun"]
     B3 -->|"merge-plan fix, PR #54,<br/>13 fresh seed-44 cases"| B4["batch-04, 13 cases<br/>0.811 vs 0.608, faults 12 of 12 vs 3"]
+    B4 -->|"no code change,<br/>39 more fresh cases, seeds 45-47"| B5["batch-04 + batch-05, 52 cases<br/>0.817 vs 0.671, faults 48 of 48 vs 14"]
 ```
 
 | Runs | Inputs and prompt | Swarm | Single agent | Source |
@@ -399,6 +432,7 @@ flowchart TD
 | batch-02 clean, 3 runs per arm | The task's own `gencode.v38` map; shared prompt rule (PR #30) | 0.833 ± 0.038 | **0.868 ± 0.002** | `eval/results/task9_batch02.md` |
 | batch-03 clean, 3 runs per arm | As batch-02, plus untested questions keep method defaults (PR #47) | 0.576 pre-registered; **0.862** with the crashed run rerun | 0.860 | `eval/results/task9_batch03.md` |
 | batch-04, 13 fresh cases (seed 44), 1 run per arm | As batch-03, plus the merge-plan fix (PR #54) | **0.811 ± 0.078**; clean case 0.861; 12 of 12 faults | 0.608 ± 0.305; clean case 0.869; 3 of 12 faults | `eval/results/task9_batch04.md` |
+| batch-05, 39 fresh cases (seeds 45 to 47), 1 run per arm; with batch-04, 52 | No engine change | **0.819** on 39; **0.817 ± 0.081** on 52; clean cases 0.864; 48 of 48 faults | 0.692 on 39; 0.671 ± 0.231 on 52; clean cases 0.868; 14 of 48 faults | `eval/results/task9_batch05.md` |
 
 - **No annotation meant two zeros.** In run 1 and batch-01, the two shared-gene lists scored 0 by construction. They are keyed by gene symbol, and those inputs had no annotation. Every run's METHODS.md said so before grading (`eval/results/task9_batch01.md`).
 - **Where the DU-22 gap came from.** On C10 versus control, the baseline fit one model across all T98G conditions and recovered all 1,232 reference significant genes; the swarm refit a model per treatment-control pair and recovered 427 (`eval/results/task9_runs.md`). The shared prompt rule "one DESeq2 fit per cell line" came out of this.
@@ -444,6 +478,37 @@ The same items are in the run's `Report.rejected` and `Report.unresolved`, and i
 `labs/boxing/` ports the Location Finding environment from Kanishk Gandhi's BoxingGym (MIT, upstream commit `5df3d32`), with the licence kept next to the port (`docs/BOXING_STUDY.md`). The repaired study ran six arms on 20 paired seeds: 120 episodes and 360 checkpoints, with failed checkpoints kept in every aggregate (`eval/results/boxing/README.md`).
 
 **Honest negative: EIG selection did not beat random selection here.** The paired mean log10 MSE, Crux EIG minus Crux random, was +0.5542 at 20 measurements (95% CI −0.0298 to 1.6071; negative favours EIG). Plain random design had the lowest median MSE at 20 measurements, 8.737. Crux EIG had 3 failed episodes of 20, one of them a Windows NumPy DLL import failure. Wrapper-accounted spend was $0.1055536, a list-price estimate. This is simulator evidence, and its results file lists its numerical limits, such as low move acceptance and particle duplication.
+
+## Where it fell short, and what changed
+
+The judging asks how much of the loop runs without a human, with extra credit if the system improves from its own results. Here is each loop we have, what it measured, and who made the change.
+
+```mermaid
+flowchart LR
+    RUN["A run's own results<br/>diagnostics, critic findings,<br/>graded artifacts, event log"] --> A["Inside the run, unattended<br/>critic blocks, one repair round"]
+    RUN --> B["Its own diagnostic outcomes<br/>fine-tune the outcome predictor"]
+    RUN --> C["Its own dev-case runs<br/>lessons, reviewed and frozen"]
+    RUN --> D["Its own failures in the logs<br/>fixes we made between batches"]
+    A --> A2["Run 1: versioned IDs blocked in 7 tables,<br/>fixed except one ID in 4"]
+    B --> B2["Log loss 0.600 to 0.472 in distribution;<br/>no edge under shift or on real data"]
+    C --> C2["+0.010 on 9 held-out cases:<br/>no measurable effect"]
+    D --> D2["Clean case 0.586 to 0.864;<br/>52 fresh cases +0.146"]
+```
+
+**1. Inside a run, with no human (autonomous).** The critic checks every deliverable against the task's contract rules and a model review of `METHODS.md`. A blocking finding sends the run back to delivery once. In run 1 the critic blocked versioned gene IDs in 7 DE tables, and the repair round fixed them in all but one `_PAR_Y` ID in 4 tables (`eval/results/task9_runs.md`). The run's own diagnostics also overturn its starting assumptions. On the 48 fault cases the swarm started with "the data is as given" as a live option, rejected it on evidence, and named and handled the fault in every case. The single agent, keeping the data as given, missed 28 of the 48 faults (`eval/results/task9_batch05.md`).
+
+**2. From its own diagnostic outcomes (automatic training, measured).** The outcome predictor that feeds the EIG was fine-tuned with Tinker on 20,640 records of the lab's own diagnostic outcomes. In distribution, its log loss fell from 0.600 for the base model to 0.472, beating the library's stated rows at 0.557. Under shift the edge went away (0.569 against 0.560 with the run-time floor). On held-out real data the stated rows still won (0.503 against 0.591), so the fine-tune stays off by default (`eval/results/predictor_calibration.md`, `eval/results/predictor_real_data.md`).
+
+**3. Lessons from its own runs (measured, no effect).** Six lessons drafted from the four dev cases' runs were reviewed, frozen and given to a lessons arm on 9 held-out cases. Lessons on minus off was +0.010 (95% CI −0.059 to 0.089) (`eval/results/task9_batch03.md`, `docs/LESSONS.md`).
+
+**4. From its own failures, fixed by us between batches.** Each fix came from a failure the run logs showed, and each batch after it was pre-registered. Inputs and the prompt changed along the way, so this is not a learning curve, and the system did not make these changes itself.
+
+| Where it fell short | What the logs showed | What changed | After |
+| --- | --- | --- | --- |
+| Run 1 and batch-01: swarm 0.586 and 0.628 on the clean case | Two shared-gene lists scored 0 by construction; every run's `METHODS.md` said the inputs had no gene annotation | Added a gene symbol map to the inputs | DU-22: 0.727 |
+| DU-22: 0.727 against the single agent's 0.862 | Per-pair refits recovered 427 of 1,232 reference genes; one fit per cell line recovered all | Shared prompt rule: one DESeq2 fit per cell line (PR #30) | batch-02: 0.833 |
+| batch-02: clean runs 0.790 to 0.861 | The untested low-count-filtering question was applied three different ways in three runs | Untested questions keep the method's defaults (PR #47) | batch-03: 0.862, 0.861 and 0.866 on finished runs |
+| batch-03: three swarm runs crashed (scored 0) | The merge model put an option under the wrong question and the code raised | A bad merge plan keeps proposals unmerged (PR #54) | batch-04 and batch-05: 0 crashes in 52 swarm runs; +0.146 on 52 fresh cases |
 
 ## Claims audit (MVP)
 

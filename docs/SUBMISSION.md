@@ -10,9 +10,9 @@ Every number below comes from a file in this repository, cited next to it. Where
 
 ## Project description (150 words)
 
-Crux is a team of AI scientists that settles disagreements by running the most informative experiment instead of voting. Proposer agents and a library of pre-registered checks raise competing options, such as whether two samples were swapped. A predictor states what each option expects from each diagnostic. The orchestrator runs the diagnostic with the most expected information per cost in a network-blocked Modal sandbox, and a blind referee validates the result before a Bayes update. Every rejected option keeps the evidence that rejected it. In a pilot on one BixBench3 task from published counts, on 13 fresh pre-registered cases, the swarm scored 0.811 against 0.608 for a single GPT-5.5 agent (paired difference +0.20, 95% CI 0.05 to 0.38) and caught 12 of 12 planted faults against 3. On a reused suite, scores were tied, and random experiment selection did as well.
+Crux is a team of AI scientists that settles disagreements by running the most informative experiment instead of voting. Proposer agents and a library of pre-registered checks raise competing options, such as whether two samples were swapped. A predictor states what each option expects from each diagnostic. The orchestrator runs the diagnostic with the most expected information per cost in a network-blocked Modal sandbox, and a blind referee validates the result before a Bayes update. Every rejected option keeps the evidence that rejected it. In a pilot on one BixBench3 task from published counts, on 52 fresh pre-registered cases, the swarm scored 0.817 against 0.671 for a single GPT-5.5 agent (paired difference +0.15, 95% CI 0.08 to 0.22) and caught 48 of 48 planted faults against 14. On a reused suite, scores were tied, and random experiment selection did as well.
 
-Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
+Sources: `eval/results/task9_batch05.md` and `eval/results/task9_batch03.md`.
 
 ## Where to look
 
@@ -20,8 +20,8 @@ Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
 - **The loop:** `core/orchestrator.py`. The README has a diagram and a step-by-step map to its functions.
 - **Watch a graded Task 9 run:** https://crux-viewer-production.up.railway.app/?apireplay=task9_real_swarm_run1.jsonl&speed=8 replays run 1 from its event log: questions, EIG rankings, sandboxed diagnostics, the referee, Bayes updates and the rejected ledger.
 - **Watch Exa and past.dev in the loop:** https://crux-viewer-production.up.railway.app/?apireplay=task9_tools_run2.jsonl&speed=8 replays `tools-run-02`. The memory and search panel shows each Exa query's URLs (blocked ones struck through), and the critic's recall of the referee's records.
-- **Latest results:** `eval/results/task9_batch04.md`, its protocol `eval/results/task9_protocol_batch04.md` (pushed before any run, PR #59) and raw outputs in `eval/results/task9_batch04/`. Earlier batches: `task9_batch03.md`, `task9_batch02.md`, `task9_batch01.md`, `task9_runs.md` in the same folder.
-- **Charts:** `docs/figures/batch-04/` (swarm versus single agent, per case, faults caught) and `docs/figures/batch-03/`. Batch-02's charts are `docs/figures/task9_*.png`; real-data fault detection, the airway label swap and predictor calibration are also in `docs/figures/`.
+- **Latest results:** `eval/results/task9_batch05.md` (the 52 held-out cases of batch-04 and batch-05), its protocol `eval/results/task9_protocol_batch05.md` (pushed before any run, PR #72) and raw outputs in `eval/results/task9_batch05_h45/`, `_h46/` and `_h47/`. Earlier batches: `task9_batch04.md`, `task9_batch03.md`, `task9_batch02.md`, `task9_batch01.md`, `task9_runs.md` in the same folder.
+- **Charts:** `docs/figures/batch-05/` (52 held-out cases: swarm versus single agent, faults caught), `docs/figures/batch-04/` and `docs/figures/batch-03/`. Batch-02's charts are `docs/figures/task9_*.png`; real-data fault detection, the airway label swap and predictor calibration are also in `docs/figures/`.
 - **A real run you can replay:** `runs/demo/task9_real_swarm_run1.jsonl`, the first officially graded run. `uv run python -m core.replay runs/demo/task9_real_swarm_run1.jsonl` re-derives all 11 Bayes updates from the log. The API serves it under `/replays` for the UI.
 - **The run with search and memory on:** `runs/demo/task9_tools_run2.jsonl` (`tools-run-02`; see Exa and past.dev below).
 - **Claims audit (MVP):** `uv run python -m core.cli --lab claims` audits four curated claims from the DESeq2 paper with SymPy and simulations, no API key needed. The recorded run is `runs/demo/claims_deseq2.jsonl`; details in `docs/CLAIMS.md`. Extraction from any paper and formal proofs are next.
@@ -33,13 +33,13 @@ Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
 
 | What the judges asked for | Where the evidence is |
 | --- | --- |
-| **Research rigour:** clear question, sound design, baselines or ablations, claims backed by results | Every batch pre-registered before it ran (PRs #48, #59); a single gpt-5.5 agent on the same inputs, prompt, image, grader and $2 cap; ablations for random selection and lessons; failed runs count as 0; bootstrap CIs. [Rigour](#rigour) |
+| **Research rigour:** clear question, sound design, baselines or ablations, claims backed by results | Every batch pre-registered before it ran (PRs #48, #59, #72); a single gpt-5.5 agent on the same inputs, prompt, image, grader and $2 cap; ablations for random selection and lessons; failed runs count as 0; bootstrap CIs. [Rigour](#rigour) |
 | **Novelty:** beyond existing papers and baselines | Analysis forks become questions; pre-registered diagnostics and doc searches compete on EIG per cost; a blind referee gates every update; "unresolved" is a result; the same engine audits a paper's maths. [Novelty](#novelty) |
-| **Results:** measurable, on a real benchmark, against a baseline; a working live demo | BixBench3 task 9, 13 fresh cases: 0.811 vs 0.608, paired +0.203 (95% CI +0.048 to +0.382), 12 of 12 planted faults vs 3. The live site runs a claims audit in about 10 s for $0, and the viewer replays graded runs. [Results](#results-against-the-baseline-and-the-record-pilot) |
-| **Autonomy and self-improvement** | One command runs profile, propose, experiment, deliver, critique and report unattended within $2; 52 runs launched by one command in Modal; lessons from its own runs (measured: no effect); a predictor fine-tuned on its own diagnostics. [Autonomy](#autonomy-and-self-improvement) |
+| **Results:** measurable, on a real benchmark, against a baseline; a working live demo | BixBench3 task 9, 52 fresh pre-registered cases: 0.817 vs 0.671, paired +0.146 (95% CI +0.084 to +0.215), 48 of 48 planted faults vs 14. The live site runs a claims audit in about 10 s for $0, and the viewer replays graded runs. [Results](#results-against-the-baseline-and-the-record-pilot) |
+| **Autonomy and self-improvement** | One command runs profile, propose, experiment, deliver, critique and report unattended within $2; 78 runs in three parallel Modal launches in about 20 minutes. Improvement from its own results: the critic's repair round inside each run; a predictor fine-tuned on its own diagnostic outcomes (log loss 0.600 to 0.472 in distribution, no edge on real data); lessons from its own runs (no effect); and fixes made from its own failure logs that took the clean case from 0.586 to 0.864. [Autonomy](#autonomy-and-self-improvement) |
 | **Interpretability and reproducibility** | Every decision is an event; `core.replay` recomputes every Bayes update from the log; manifests with model IDs, prompt hashes and input digests; Langfuse traces; failures and negatives reported. [Interpretability](#interpretability-and-reproducibility) |
 | **Track 3:** roles that check each other | Proposers (statistician, bioinformatician, sceptic), an experimenter, a blind referee and a critic with one repair round (`agents/`) |
-| **Track 3:** score vs a single-agent baseline on the same budget | Batch-04 above; batch-03 tied, reported as found |
+| **Track 3:** score vs a single-agent baseline on the same budget | Batch-04 and batch-05: 52 fresh cases, +0.146 (+0.084 to +0.215); batch-03 tied, reported as found |
 | **Track 3:** score vs the record | Not comparable: the 0.523 record is all 20 tasks from raw reads; ours is one task from counts. We say so rather than compare |
 | **Track 3:** report what the swarm rejected | [What the swarm rejected](#what-the-swarm-rejected), and the rejected ledger in the run viewer |
 | **Exa challenge:** Exa in the main loop, shown in the demo | Search competes with compute diagnostics on EIG per cost; call path in [Exa](#exa); `tools-run-02` replay in the viewer |
@@ -56,7 +56,20 @@ Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
 
 **The baseline.** A single ReAct agent on gpt-5.5 that plans, runs code, checks and revises (`eval/baseline_agent.py`).
 
-**Batch-04: a fresh held-out suite** (`eval/results/task9_protocol_batch04.md`, `eval/results/task9_batch04.md`). Pre-registered in PR #59. 13 cases made fresh with `make_cases --seed 44` (no input bundle shared with the seed-43 suite), both arms once each, in Modal at commit `95aaa11`. 26 runs, $33.14 of a $45 cap, no crashes, no reruns.
+**Batch-05 and the 52-case result** (`eval/results/task9_protocol_batch05.md`, `eval/results/task9_batch05.md`). Pre-registered in PR #72. Three more suites made fresh with `make_cases` seeds 45 to 47 (39 cases, no bundle shared with any earlier suite), both arms once each, as three parallel Modal launches at commit `3f09a28`: 78 runs, $104.94, no crashes, no reruns. With batch-04's seed-44 suite:
+
+| Measure | Swarm | Single agent |
+| --- | --- | --- |
+| All 52 cases | **0.817 ± 0.081** | 0.671 ± 0.231 |
+| 48 fault cases | **0.813** | 0.654 |
+| Clean cases, 4 runs | 0.864 | 0.868 |
+| Paired difference, 52 cases (95% CI) | **+0.146 (+0.084 to +0.215)** | |
+| Faults caught / noticed only / missed, of 48 | **48 / 0 / 0** | 14 / 6 / 28 |
+| Mean cost per run; runs stopped by the $2 cap | $1.18; 0 | $1.47; 27 |
+
+Per suite: +0.203 (seed 44), +0.123, +0.147 and +0.112 (seed 47, whose interval, −0.010 to +0.276, includes zero); batch-05 alone, +0.127 (+0.065 to +0.196). Leaving out the three cases where the single agent scored 0, which can only favour it, gives +0.104 (+0.057 to +0.154) on 49 cases. One labelled deviation: the cloud fault-scoring step matched no cases because the uploaded truth files kept `case-NN` names, so the same scorer and judge were re-run after renaming. Grades were unaffected. `eval/heldout_summary.py` computes every number here and reproduces batch-04's exactly.
+
+**Batch-04: the first fresh held-out suite** (`eval/results/task9_protocol_batch04.md`, `eval/results/task9_batch04.md`). Pre-registered in PR #59. 13 cases made fresh with `make_cases --seed 44` (no input bundle shared with the seed-43 suite), both arms once each, in Modal at commit `95aaa11`. 26 runs, $33.14 of a $45 cap, no crashes, no reruns.
 
 | Measure | Swarm | Single agent |
 | --- | --- | --- |
@@ -164,7 +177,7 @@ Judges asked for this explicitly. A Crux run reports what it rejected and what i
 
 ### Rigour
 
-- **Pre-registration.** Each batch's protocol was committed before it ran: batch-01 (`eval/results/task9_protocol.md`), batch-02 (`eval/results/task9_protocol_batch02.md`, code commit `799febd`) and batch-03 (`eval/results/task9_protocol_batch03.md`, PR #48). Deviations are reported as deviations: the stopped batch-01 baseline runs (`eval/results/task9_batch01.md`), the four rerun single-agent crashes in batch-02 and the three rerun swarm crashes in batch-03, always next to the pre-registered numbers. Because the seed-43 cases had been run and graded twice by the end of batch-03, batch-04 was pre-registered on a fresh seed-44 suite in PR #59 before it ran (`eval/results/task9_protocol_batch04.md`); its results, with no crashes and no reruns, are in `eval/results/task9_batch04.md`.
+- **Pre-registration.** Each batch's protocol was committed before it ran: batch-01 (`eval/results/task9_protocol.md`), batch-02 (`eval/results/task9_protocol_batch02.md`, code commit `799febd`) and batch-03 (`eval/results/task9_protocol_batch03.md`, PR #48). Deviations are reported as deviations: the stopped batch-01 baseline runs (`eval/results/task9_batch01.md`), the four rerun single-agent crashes in batch-02 and the three rerun swarm crashes in batch-03, always next to the pre-registered numbers. Because the seed-43 cases had been run and graded twice by the end of batch-03, batch-04 was pre-registered on a fresh seed-44 suite in PR #59 before it ran (`eval/results/task9_protocol_batch04.md`); its results, with no crashes and no reruns, are in `eval/results/task9_batch04.md`. Batch-05 added three more fresh suites, pre-registered in PR #72 with the combined 52-case result named as the headline whatever it showed (`eval/results/task9_protocol_batch05.md`).
 - **Failures count.** Failed or ungraded runs score 0 in every pre-registered mean, and every run is listed (`eval/run_task9_arms.py`, `summarise`; `eval/suites/task9/grade_suite.py`). Runs not started for budget would be listed as `not run: budget` (`docs/CLOUD.md`); in batch-03 there were none.
 - **Code decides outcomes.** A diagnostic prints one `RESULT:` line; bins are exhaustive, exclusive rules evaluated by code (`labs/bixbench3/bins.py`). The specification and its SHA-256 are saved before the run, and a spec cannot run twice in a run (`core/orchestrator.py`, `spec_hash`, `_prepare`; `docs/OBSERVABILITY.md`).
 - **A blind referee.** The referee's model sees only the experiment's kind, goal, language, code and query, the bin ids and rules, the observed bin, the result and a log tail. It never sees option statements, priors, posteriors or likelihoods (`agents/referee.py`, `SPEC_FIELDS`).
@@ -183,6 +196,13 @@ We do not claim to have invented LLM-guided experimental design. BED-LLM combine
 - **Autonomy.** After `core.cli` starts, no human acts until the report is written: profiling, proposals, experiments, delivery, critique and the methods write-up all run unattended, within $2, 40 model calls and 30 minutes (`core/config.py`). Run 1 used 20 model calls, $1.03 and 293 s (`eval/results/task9_runs.md`). Batch-03's 52 runs were started by one command and ran, graded, in Modal (`eval/results/task9_batch03.md`, `docs/CLOUD.md`).
 - **Self-correction within a run.** The critic's block findings send the run back to delivery once; in run 1 the repair round fixed the versioned IDs in 7 tables, except one `_PAR_Y` ID in 4 of them. A surprise (an outcome the options did not predict) triggers option regeneration in the engine (`_regenerate`), but the swarm's regeneration is still a stand-in that adds no options.
 - **Learning across runs: measured once, no effect.** Six lessons drafted from the four dev cases' runs were reviewed, frozen and given to a lessons arm on the 9 held-out test cases. Lessons on minus off was +0.010 (95% CI −0.059 to 0.089) (`eval/results/task9_batch03.md`). The reviewer had seen batch-02's test-case results (`eval/results/task9_protocol_batch03.md`). With `lessons` on, each settled question's lesson is written for human review and never reused unreviewed (`docs/LESSONS.md`).
+- **Where it fell short, and what changed.** Every fix between batches came from a failure in the system's own logs, and the next batch was pre-registered. We made the fixes; the system did not change its own code.
+  - Missing gene annotation gave two artifacts a 0, so we added a symbol map: 0.586 and 0.628, then 0.727.
+  - Per-pair refits recovered 427 of 1,232 genes, so we added a one-fit-per-cell-line rule: 0.833.
+  - An untested question was applied three ways, so untested questions now keep the defaults: 0.862.
+  - A merge crash killed three runs, so a bad merge plan now keeps the proposals: 0 crashes in 52 swarm runs, and +0.146 on 52 fresh cases.
+
+  The README's "Where it fell short, and what changed" has the table, and the landing page has the same story.
 - **Learning from its own diagnostics.** The Tinker predictor was trained on the lab's own diagnostic outcomes. It is better calibrated on synthetic data in distribution, and not under shift or on held-out real data (see Tinker below).
 
 ### Interpretability and reproducibility

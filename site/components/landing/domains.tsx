@@ -42,7 +42,8 @@ function Dots({ label, caught, of = 12, strong }: { label: string; caught: numbe
           <span
             key={i}
             className={cn(
-              "size-2 rounded-full sm:size-2.5",
+              "rounded-full",
+              of > 12 ? "size-1.5" : "size-2 sm:size-2.5",
               i < caught ? (strong ? "bg-brand" : "bg-subtle") : "border border-border bg-transparent",
             )}
           />
@@ -63,19 +64,19 @@ function GenomicsPanel() {
   return (
     <div className="space-y-8">
       <div className="space-y-3">
-        <PanelTitle>Mean grader score, 13 fresh cases</PanelTitle>
-        <Bar label="Crux swarm" value={0.811} max={1} strong />
-        <Bar label="Single agent" value={0.608} max={1} />
+        <PanelTitle>Mean grader score, 52 fresh cases</PanelTitle>
+        <Bar label="Crux swarm" value={0.817} max={1} strong />
+        <Bar label="Single agent" value={0.671} max={1} />
       </div>
       <div className="space-y-3">
         <PanelTitle>Planted data faults caught</PanelTitle>
-        <Dots label="Crux swarm" caught={12} strong />
-        <Dots label="Single agent" caught={3} />
+        <Dots label="Crux swarm" caught={48} of={48} strong />
+        <Dots label="Single agent" caught={14} of={48} />
       </div>
       <p className="text-sm leading-relaxed text-muted-foreground">
-        Paired difference <span className="font-mono text-foreground">+0.203</span> (95% CI{" "}
-        <span className="font-mono">+0.048</span> to <span className="font-mono">+0.382</span>). One task of 20, one run
-        per arm per case. On the reused seed-43 suite the scores were tied.
+        Paired difference <span className="font-mono text-foreground">+0.146</span> (95% CI{" "}
+        <span className="font-mono">+0.084</span> to <span className="font-mono">+0.215</span>) over four fresh suites. One
+        task of 20, one run per arm per case. On the reused seed-43 suite the scores were tied.
       </p>
     </div>
   );
@@ -252,7 +253,7 @@ const DOMAINS: Domain[] = [
     id: "genomics",
     title: "Genomics",
     body: "RNA-seq from a published count matrix (BixBench3 task 9). Pre-registered checks look for swapped labels, duplicated or degraded libraries and three more fault types, in network-blocked sandboxes, before any analysis is written.",
-    source: "eval/results/task9_batch04.md",
+    source: "eval/results/task9_batch05.md",
     panel: GenomicsPanel,
   },
   {

@@ -18,8 +18,8 @@ export function AnnouncementBar() {
     <div className="bg-ink text-ink-foreground">
       <div className="mx-auto flex min-h-10 w-full max-w-[90rem] flex-wrap items-center justify-center gap-x-4 gap-y-1 px-5 py-1.5 text-center text-[0.82rem] sm:px-8">
         <p>
-          On 13 fresh pre-registered cases, the swarm scored <span className="font-mono">0.811</span> against{" "}
-          <span className="font-mono">0.608</span> for a single agent.
+          On 52 fresh pre-registered cases, the swarm scored <span className="font-mono">0.817</span> against{" "}
+          <span className="font-mono">0.671</span> for a single agent, and caught all 48 planted faults.
         </p>
         <Link
           href="/#results"

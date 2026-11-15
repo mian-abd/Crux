@@ -99,11 +99,11 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
             className="h-20 w-full object-cover object-top"
           />
           <div className="px-3 py-2.5">
-            <p className="text-xs text-muted-foreground">Latest result, batch-04</p>
+            <p className="text-xs text-muted-foreground">52 fresh cases, batches 04 and 05</p>
             <p className="mt-0.5 font-display text-lg leading-tight">
-              0.811 <span className="text-muted-foreground">vs 0.608</span>
+              0.817 <span className="text-muted-foreground">vs 0.671</span>
             </p>
-            <p className="text-xs text-muted-foreground">Faults caught 12/12 vs 3/12</p>
+            <p className="text-xs text-muted-foreground">Faults caught 48/48 vs 14/48</p>
           </div>
         </Link>
         <SidebarMenu>

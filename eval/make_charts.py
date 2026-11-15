@@ -436,16 +436,24 @@ def chart_task9_fault_detection(rows: list[dict], runs: list[dict], out: Path,
     rerun_caught = base_caught + sum(1 for (c, a), v in again.items()
                                      if a == who and v == "caught")
     who_label = {"swarm": "the swarm", "baseline": "the single agent"}.get(who, who)
+    n_types = len({f for f, _ in cases})
+    per_type = len(cases) // n_types if n_types and len(cases) % n_types == 0 else None
+    shape = (f"{len(cases)} fault cases ({n_types} types, {per_type} each)" if per_type
+             else f"{len(cases)} fault cases ({n_types} types)")
+    crash_note = (
+        f" {n_crash} {who_label.replace('the ', '')} run{'s' if n_crash != 1 else ''} crashed on a "
+        f"harness bug, since fixed; as pre-registered {'they count' if n_crash != 1 else 'it counts'} "
+        f"as missed."
+        + (f" Repeated after the fix, {who_label} caught {rerun_caught} of {len(cases)}." if again
+           else "")
+        if n_crash else " No run crashed."
+    )
     _title(
         fig,
         f"Planted faults caught on BixBench3 task 9{title_note}",
-        f"12 fault cases (6 types, 2 each), one run per arm, same inputs, budget and grader. A judge "
-        f"model holding the truth key read each run's METHODS.md (rubric pre-registered). "
-        f"{n_crash} {who_label.replace('the ', '')} run{'s' if n_crash != 1 else ''} crashed on a "
-        f"harness bug, since fixed; as pre-registered {'they count' if n_crash != 1 else 'it counts'} "
-        f"as missed."
-        + (f" Repeated after the fix, {who_label} caught {rerun_caught} of 12." if again
-           else "")
+        f"{shape}, one run per arm, same inputs, budget and grader. A judge "
+        f"model holding the truth key read each run's METHODS.md (rubric pre-registered)."
+        + crash_note
         + f" Source: {source}.",
     )
     return _save(fig, out, "task9_fault_detection")
