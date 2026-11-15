@@ -10,3 +10,8 @@ export const VIEWER_URL = process.env.NEXT_PUBLIC_CRUX_VIEWER ?? "https://crux-v
 export function viewerReplay(file: string, speed = 8): string {
   return `${VIEWER_URL}/?apireplay=${encodeURIComponent(file)}&speed=${speed}`;
 }
+
+/** An event log bundled with the viewer (web/public/fixtures), replayed in the browser. */
+export function viewerFixture(name: string, speed = 1): string {
+  return `${VIEWER_URL}/?replay=${encodeURIComponent(name)}&speed=${speed}`;
+}

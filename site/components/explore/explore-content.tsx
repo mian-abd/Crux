@@ -3,6 +3,9 @@
 // outer spacing: the public page runs full-bleed bands, the app page sits in
 // the shell's own container.
 
+import { ArrowRightIcon } from "lucide-react";
+import Link from "next/link";
+
 import { BhFwerCounterexample } from "@/components/explore/figures/bh-fwer-counterexample";
 import { BhThreshold } from "@/components/explore/figures/bh-threshold";
 import { EigToy } from "@/components/explore/figures/eig-toy";
@@ -264,6 +267,26 @@ export function ExploreContent({ shell }: { shell: Shell }) {
             </p>
           </div>
         </div>
+
+        <Link
+          href="/runs#jetson"
+          className="group mt-14 flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card px-6 py-5 transition-colors hover:border-foreground/30"
+        >
+          <span>
+            <span className="eyebrow">Measured, on hardware</span>
+            <span className="mt-2 block font-display text-2xl leading-snug">
+              Crux reading this letter through a camera on a Jetson
+            </span>
+            <span className="mt-1 block text-sm text-muted-foreground">
+              It settles HbS from two reads, catches a swapped strip and names it HbC, in 26 seconds. A recorded
+              live run.
+            </span>
+          </span>
+          <ArrowRightIcon
+            className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+            aria-hidden="true"
+          />
+        </Link>
 
         <div className="mt-20">
           <p className="eyebrow">DNA, as measured</p>
