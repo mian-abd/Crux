@@ -19,19 +19,23 @@ GRADER_PYTHON = f"{GRADER_VENV}/bin/python"
 # Layout of the evaluator volume (mounted read-only, only in the orchestrator container).
 REFERENCES = f"{EVALUATOR_MOUNT}/task9"
 TRUTH = f"{EVALUATOR_MOUNT}/task9-suite/truth.json"
-# A second, fresh suite (make_cases seed 44, DU-55): its own case names and truth file, so
-# the seed-43 suite's names, manifests and truth stay untouched.
+# Fresh held-out suites (make_cases seeds 44-47; seed 44 is batch-04, 45-47 batch-05). Each
+# has its own case names (h<seed>-case-NN) and truth file, so the seed-43 suite's names,
+# manifests and truth stay untouched.
+HELDOUT_SEEDS = (44, 45, 46, 47)
 HELDOUT_PREFIX = "h44-"
 TRUTH_HELDOUT = f"{EVALUATOR_MOUNT}/task9-suite-h44/truth.json"
 MANIFESTS = f"{EVALUATOR_MOUNT}/manifests"
+_HELDOUT_CASE = re.compile(r"h(\d+)-case-\d{2}")
 LESSONS = f"{EVALUATOR_MOUNT}/lessons"
 
 SUITE = tuple(f"case-{i:02d}" for i in range(1, 14))
-HELDOUT = tuple(f"{HELDOUT_PREFIX}{case}" for case in SUITE)
+HELDOUT_SUITES = {seed: tuple(f"h{seed}-{case}" for case in SUITE) for seed in HELDOUT_SEEDS}
+HELDOUT = HELDOUT_SUITES[44]
 CASE_FILES = {
     "clean": "task9-clean-v38.json",
     **{case: f"{case}.json" for case in SUITE},
-    **{case: f"{case}.json" for case in HELDOUT},
+    **{case: f"{case}.json" for cases in HELDOUT_SUITES.values() for case in cases},
 }
 ARMS = ("swarm", "swarm-lessons", "swarm-random", "baseline")
 BASELINE_MODELS = ("gpt-5.5", "gpt-4.1-mini")
@@ -45,19 +49,19 @@ _JOB_KEYS = {
 def expand_cases(cases: str | list[str]) -> list[str]:
     """Case names from a list or comma string.
 
-    ``suite`` stands for case-01 to case-13 (seed 43); ``suite-h44`` for h44-case-01 to
-    h44-case-13 (the fresh seed-44 suite).
+    ``suite`` stands for case-01 to case-13 (seed 43); ``suite-h44`` to ``suite-h47`` for
+    h<seed>-case-01 to h<seed>-case-13 (the fresh held-out suites).
     """
     items = cases.split(",") if isinstance(cases, str) else list(cases)
     out: list[str] = []
+    aliases = {f"suite-h{seed}": names for seed, names in HELDOUT_SUITES.items()}
     for item in (c.strip() for c in items):
-        names = (SUITE if item == "suite" else HELDOUT if item == "suite-h44"
-                 else (item,) if item else ())
+        names = SUITE if item == "suite" else aliases.get(item, (item,) if item else ())
         for name in names:
             if name not in CASE_FILES:
                 raise ValueError(
-                    f"unknown case {name!r}; choose clean, suite, case-01..case-13, suite-h44 "
-                    "or h44-case-01..h44-case-13"
+                    f"unknown case {name!r}; choose clean, suite, case-01..case-13, "
+                    "suite-h44..suite-h47 or h<seed>-case-NN"
                 )
             if name in out:
                 raise ValueError(f"case {name} is listed twice")
@@ -92,8 +96,8 @@ def normalise_job(job: dict) -> dict:
     if model not in BASELINE_MODELS:
         raise ValueError(f"job {name}: baseline_model must be one of {BASELINE_MODELS}")
     cases = expand_cases(job.get("cases", []))
-    heldout = {c.startswith(HELDOUT_PREFIX) for c in cases}
-    if job.get("score_faults") and len(heldout) > 1:
+    suites = {suite_of(c) for c in cases}
+    if job.get("score_faults") and len(suites) > 1:
         raise ValueError(f"job {name}: fault scoring needs cases from one suite")
     return {
         "name": name,
@@ -169,10 +173,17 @@ def job_command(job: dict, launch: dict, python: str = "python") -> list[str]:
     return command
 
 
+def suite_of(case: str) -> str:
+    """``h45`` for a held-out case, ``seed43`` for the original suite and the clean case."""
+    m = _HELDOUT_CASE.fullmatch(case)
+    return f"h{m.group(1)}" if m else "seed43"
+
+
 def truth_for(job: dict) -> str:
     """The truth file for a job's suite (fault scoring takes cases from one suite)."""
-    if job["cases"] and all(c.startswith(HELDOUT_PREFIX) for c in job["cases"]):
-        return TRUTH_HELDOUT
+    suites = {suite_of(c) for c in job["cases"]}
+    if len(suites) == 1 and (suite := suites.pop()) != "seed43":
+        return f"{EVALUATOR_MOUNT}/task9-suite-{suite}/truth.json"
     return TRUTH
 
 

@@ -425,7 +425,7 @@ def main(argv: list[str] | None = None) -> None:
     put.add_argument("--truth", type=Path, required=True)
     put.add_argument("--truth-dest", default="/task9-suite/truth.json",
                      help="where the truth file goes on the evaluator volume "
-                          "(/task9-suite-h44/truth.json for the seed-44 suite)")
+                          "(/task9-suite-h<seed>/truth.json for a held-out suite)")
     put.add_argument("--manifests", type=Path, nargs="+", required=True)
     put.add_argument("--lessons", type=Path, nargs="*", default=[])
     put.add_argument("--force", action="store_true", help="overwrite files already there")

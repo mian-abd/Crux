@@ -1,0 +1,1 @@
+[{"name": "suite", "cases": "suite-h45", "arms": ["swarm", "baseline"], "repeats": 1, "max_parallel": 13, "score_faults": true}]

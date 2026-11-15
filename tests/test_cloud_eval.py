@@ -292,6 +292,22 @@ def test_the_fresh_seed_44_suite_has_its_own_names_and_truth():
         plan([{"name": "mixed", "cases": ["case-01", "h44-case-01"], "score_faults": True}])
 
 
+@pytest.mark.parametrize("seed", [45, 46, 47])
+def test_the_batch_05_suites_each_have_their_own_names_and_truth(seed):
+    launch = plan([{"name": f"h{seed}", "cases": f"suite-h{seed}", "arms": ["swarm", "baseline"],
+                    "max_parallel": 13, "score_faults": True}])
+    [job] = launch["jobs"]
+    assert job["cases"] == [f"h{seed}-case-{i:02d}" for i in range(1, 14)]
+    assert job["runs"] == 26
+    command = cloud_jobs.job_command(job, launch)
+    assert f"h{seed}-case-13=/evaluator/manifests/h{seed}-case-13.json" in command
+    assert command[command.index("--max-parallel") + 1] == "13"
+    faults = cloud_jobs.score_faults_command(job, launch)
+    assert faults[faults.index("--truth") + 1] == f"/evaluator/task9-suite-h{seed}/truth.json"
+    with pytest.raises(ValueError, match="one suite"):
+        plan([{"name": "mixed", "cases": ["h44-case-01", f"h{seed}-case-01"], "score_faults": True}])
+
+
 def test_status_lines_show_finished_runs_and_spend():
     launch = plan([{"name": "smoke", "cases": "clean"}])
     budget = BudgetCap(3.0)
