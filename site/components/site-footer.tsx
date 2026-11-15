@@ -33,7 +33,7 @@ export function SiteFooter() {
             <Ext href={REPO_URL}>Source on GitHub</Ext>
           </p>
           <p>
-            <Ext href={repoFile("eval/results/task9_batch02.md")}>Pilot results</Ext>
+            <Ext href={repoFile("eval/results/task9_batch03.md")}>Pilot results</Ext>
           </p>
           <p>
             <Link

@@ -10,8 +10,8 @@ import { CLAIM_LIBRARY, LIBRARY_PAPER } from "@/lib/claim-library";
 import { REPO_URL, repoFile } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-const RESULTS_SOURCE = "eval/results/task9_batch02.md";
-const BATCH03_PROTOCOL = "eval/results/task9_protocol_batch03.md";
+const RESULTS_SOURCE = "eval/results/task9_batch03.md";
+const BATCH02_SOURCE = "eval/results/task9_batch02.md";
 
 function Source({ path }: { path: string }) {
   return (
@@ -48,11 +48,15 @@ function SectionHeading({
 const CAVEATS = [
   {
     title: "Overall scores were statistically tied.",
-    body: "With the single agent's four crashed runs repeated, the paired score difference is 0.045, with a 95% interval of −0.05 to 0.15. That is no score difference we can claim.",
+    body: "With the swarm's three crashed runs repeated, the paired score difference over the 13 cases is +0.068, with a 95% interval of −0.013 to 0.167. That is no score difference we can claim.",
   },
   {
-    title: "The single agent led on the clean case.",
-    body: "With no fault planted it scored 0.868 against the swarm's 0.833, over 3 runs each.",
+    title: "The clean case is level after a fix.",
+    body: "With no fault planted, the swarm scored 0.862 and the single agent 0.860, over 3 runs each (one swarm run is a rerun). An earlier batch, before the fix, had the single agent ahead.",
+  },
+  {
+    title: "Random experiment choice did as well here.",
+    body: "A swarm that picked its checks at random matched the information-gain swarm on score and cost and caught 11 of 12 faults. On this suite, the selection rule showed no advantage.",
   },
   {
     title: "These are the faults the checks were written for.",
@@ -146,27 +150,29 @@ export default function Home() {
                   <div>
                     <dt className="text-sm text-muted-foreground">Single agent</dt>
                     <dd className="mt-2 font-display text-7xl leading-none tabular-nums sm:text-8xl">
-                      5
+                      4
                       <span className="text-4xl text-muted-foreground sm:text-5xl"> / 12</span>
                     </dd>
                   </div>
                 </dl>
                 <p className="mt-8 max-w-md leading-relaxed">
-                  Planted data faults caught. The single agent&apos;s 5 counts reruns of its four
-                  crashed runs; as pre-registered, before those reruns, it caught 3.
+                  Planted data faults caught (batch-03). Three swarm runs crashed on a bug in our
+                  harness and were repeated after the fix; as pre-registered, before those reruns,
+                  the swarm caught 11.
                 </p>
                 <p className="mt-4">
                   <Source path={RESULTS_SOURCE} />
                 </p>
 
                 <div className="mt-12 rounded-lg border border-dashed p-5">
-                  <p className="eyebrow">Batch-03 · running</p>
+                  <p className="eyebrow">Earlier batch · batch-02</p>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                    A newer batch is running now. Its numbers will go here once it is graded. Until
-                    then this space stays empty.
+                    Before the clean-case fix, the single agent led on the clean case (0.868
+                    against 0.833). Faults caught were 12 of 12 against 5 of 12, counting reruns of
+                    the single agent&apos;s four crashed runs.
                   </p>
                   <p className="mt-3">
-                    <Source path={BATCH03_PROTOCOL} />
+                    <Source path={BATCH02_SOURCE} />
                   </p>
                 </div>
               </div>

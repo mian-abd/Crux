@@ -1,6 +1,7 @@
 // One SQLite file under site/.data/ (gitignored) holds accounts, sessions and papers.
+// Node's built-in SQLite (node:sqlite), so installing the site needs no C++ compiler.
 
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -8,15 +9,24 @@ import path from "node:path";
 export const DATA_DIR = path.join(process.cwd(), ".data");
 export const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 
-type Db = InstanceType<typeof Database>;
+type Db = DatabaseSync;
 
 const globalForDb = globalThis as unknown as { __cruxDb?: Db };
 
+// `next build` imports these modules in several workers at once. They must not race to
+// create the real file (a fresh checkout's build failed with "database is locked"), and the
+// build never needs real data, so build workers get a throwaway in-memory database.
+const BUILDING = process.env.NEXT_PHASE === "phase-production-build";
+
 function open(): Db {
+  if (BUILDING) return init(new DatabaseSync(":memory:"));
   mkdirSync(DATA_DIR, { recursive: true });
-  const db = new Database(path.join(DATA_DIR, "crux.sqlite"));
-  db.pragma("journal_mode = WAL");
-  db.pragma("busy_timeout = 5000");
+  const db = new DatabaseSync(path.join(DATA_DIR, "crux.sqlite"), { timeout: 5000 });
+  db.exec("PRAGMA journal_mode = WAL;");
+  return init(db);
+}
+
+function init(db: Db): Db {
   db.exec(`
     CREATE TABLE IF NOT EXISTS paper (
       id TEXT PRIMARY KEY,
@@ -48,8 +58,21 @@ function open(): Db {
     );
     CREATE INDEX IF NOT EXISTS paper_claim_paper ON paper_claim (paper_id, idx);
   `);
-  db.pragma("foreign_keys = ON");
+  db.exec("PRAGMA foreign_keys = ON;");
   return db;
+}
+
+/** Run fn in one transaction: committed if it returns, rolled back if it throws. */
+export function inTransaction<T>(db: Db, fn: () => T): T {
+  db.exec("BEGIN");
+  try {
+    const out = fn();
+    db.exec("COMMIT");
+    return out;
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
 }
 
 export function getDb(): Db {

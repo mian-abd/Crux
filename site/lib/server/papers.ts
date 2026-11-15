@@ -7,7 +7,7 @@ import path from "node:path";
 
 import type { ExtractedKind } from "@/lib/claim-library";
 import type { Extraction } from "@/lib/extract";
-import { UPLOADS_DIR, getDb } from "./db";
+import { UPLOADS_DIR, getDb, inTransaction } from "./db";
 
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
@@ -139,12 +139,12 @@ export async function savePaper(input: {
 export function listPapers(userId: string): PaperSummary[] {
   const rows = getDb()
     .prepare(`${SUMMARY_SQL} WHERE p.user_id = ? ORDER BY p.created_at DESC`)
-    .all(userId) as PaperRow[];
+    .all(userId) as unknown as PaperRow[];
   return rows.map(toSummary);
 }
 
 export function getPaper(userId: string, id: string): PaperSummary | null {
-  const row = getDb().prepare(`${SUMMARY_SQL} WHERE p.user_id = ? AND p.id = ?`).get(userId, id) as
+  const row = getDb().prepare(`${SUMMARY_SQL} WHERE p.user_id = ? AND p.id = ?`).get(userId, id) as unknown as
     | PaperRow
     | undefined;
   return row ? toSummary(row) : null;
@@ -153,7 +153,7 @@ export function getPaper(userId: string, id: string): PaperSummary | null {
 export function getPaperText(userId: string, id: string): string | null {
   const row = getDb()
     .prepare("SELECT text FROM paper WHERE user_id = ? AND id = ?")
-    .get(userId, id) as { text: string } | undefined;
+    .get(userId, id) as unknown as { text: string } | undefined;
   return row?.text ?? null;
 }
 
@@ -164,7 +164,7 @@ export function listClaims(userId: string, paperId: string): PaperClaim[] {
        FROM paper_claim c JOIN paper p ON p.id = c.paper_id
        WHERE p.user_id = ? AND p.id = ? ORDER BY c.idx`,
     )
-    .all(userId, paperId) as {
+    .all(userId, paperId) as unknown as {
     id: string;
     idx: number;
     claim: string;
@@ -190,7 +190,7 @@ export function saveExtraction(
   result: Extraction & { truncated: boolean; model: string },
 ): void {
   const db = getDb();
-  const tx = db.transaction(() => {
+  inTransaction(db, () => {
     const owned = db.prepare("SELECT 1 FROM paper WHERE user_id = ? AND id = ?").get(userId, paperId);
     if (!owned) throw new Error("paper not found");
     db.prepare("DELETE FROM paper_claim WHERE paper_id = ?").run(paperId);
@@ -206,7 +206,6 @@ export function saveExtraction(
               extracted_at = ? WHERE id = ?`,
     ).run(result.title || null, result.model, result.truncated ? 1 : 0, Date.now(), paperId);
   });
-  tx();
 }
 
 export function markExtractionFailed(userId: string, paperId: string, message: string): void {
@@ -219,7 +218,7 @@ export async function deletePaper(userId: string, id: string): Promise<boolean> 
   const db = getDb();
   const row = db
     .prepare("SELECT stored_name FROM paper WHERE user_id = ? AND id = ?")
-    .get(userId, id) as { stored_name: string } | undefined;
+    .get(userId, id) as unknown as { stored_name: string } | undefined;
   if (!row) return false;
   db.prepare("DELETE FROM paper_claim WHERE paper_id = ?").run(id);
   db.prepare("DELETE FROM paper WHERE user_id = ? AND id = ?").run(userId, id);
