@@ -3,7 +3,7 @@
 //   2. recorded replays streamed by the API,
 //   3. bundled fixtures played locally with their recorded timing.
 
-import { DNA_EVENT_TYPES, EVENT_TYPES, type RunEvent } from '../types';
+import { CLAIMS_EVENT_TYPES, DNA_EVENT_TYPES, EVENT_TYPES, type RunEvent } from '../types';
 
 export const API_URL: string = (
   (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000'
@@ -149,7 +149,7 @@ export class SseSource implements EventSourceLike {
       this.cb.onStatus({ state: 'open' });
     };
     // Named SSE events (`event: <type>`) only reach typed listeners.
-    for (const t of [...EVENT_TYPES, ...DNA_EVENT_TYPES]) es.addEventListener(t, handle as EventListener);
+    for (const t of [...EVENT_TYPES, ...DNA_EVENT_TYPES, ...CLAIMS_EVENT_TYPES]) es.addEventListener(t, handle as EventListener);
     es.onmessage = handle;
     es.onerror = () => {
       es.close();

@@ -1,5 +1,6 @@
 // Picks the layout for the run: the One Letter view when run.started says
-// lab "oneletter", the standard Crux layout for every other lab.
+// lab "oneletter", the Paper & claims view for lab "claims", the standard
+// Crux layout for every other lab.
 
 import type { RunState } from '../state/fold';
 import type { SourceInfo } from '../data/useRunStream';
@@ -13,11 +14,14 @@ import { CriticPanel } from './CriticPanel';
 import { RejectedPanel } from './RejectedPanel';
 import { Boundary } from './Boundary';
 import { OneLetterView } from './oneletter/OneLetterView';
+import { ClaimsView } from './claims/ClaimsView';
+import { isClaimsLab } from '../state/claims';
 
-export type LayoutKind = 'oneletter' | 'default';
+export type LayoutKind = 'oneletter' | 'claims' | 'default';
 
 export function layoutFor(state: RunState): LayoutKind {
-  return isOneLetterLab(state) ? 'oneletter' : 'default';
+  if (isOneLetterLab(state)) return 'oneletter';
+  return isClaimsLab(state) ? 'claims' : 'default';
 }
 
 export function DefaultView({ state }: { state: RunState }) {
@@ -62,7 +66,9 @@ export function DefaultView({ state }: { state: RunState }) {
 }
 
 export function RunView({ state, source }: { state: RunState; source: SourceInfo }) {
-  return layoutFor(state) === 'oneletter' ? (
+  const layout = layoutFor(state);
+  if (layout === 'claims') return <ClaimsView state={state} />;
+  return layout === 'oneletter' ? (
     <OneLetterView state={state} source={source} />
   ) : (
     <DefaultView state={state} />

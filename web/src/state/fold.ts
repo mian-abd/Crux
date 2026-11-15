@@ -287,6 +287,28 @@ export function initialDna(): DnaState {
   };
 }
 
+/* Paper & claims (claims.source) ----------------------------------- */
+
+export interface ClaimView {
+  questionId: string;
+  claim: string;
+  /** Substring of the excerpt to highlight; empty when the claim is not quoted. */
+  quote: string;
+  /** "symbolic" or "statistical" per the contract; kept as sent otherwise. */
+  kind: string;
+  planted: boolean;
+}
+
+export interface ClaimsSourceView {
+  seq: number;
+  title: string;
+  citation: string;
+  url: string | null;
+  license: string;
+  excerpt: string;
+  claims: ClaimView[];
+}
+
 export type RunStatus = 'idle' | 'running' | 'finished' | 'error';
 
 export interface RunState {
@@ -323,6 +345,8 @@ export interface RunState {
   malformed: number;
   /** One Letter lab state; stays empty for every other lab. */
   dna: DnaState;
+  /** The paper and its claims (lab "claims"); null for every other lab. */
+  claims: ClaimsSourceView | null;
 }
 
 export const CONSOLE_LIMIT = 400;
@@ -363,6 +387,7 @@ export function initialState(): RunState {
     report: null,
     malformed: 0,
     dna: initialDna(),
+    claims: null,
   };
 }
 
@@ -1288,6 +1313,35 @@ const handlers: Record<string, Handler> = {
       lesson: { seq: ev.seq, added: strArr(p.added), lessonsTotal: Math.max(0, Math.round(num(p.lessons_total))) },
     },
   }),
+
+  'claims.source': (s, p, ev) => {
+    const claims: ClaimView[] = [];
+    for (const raw of arr(p.claims)) {
+      const c = obj(raw);
+      const questionId = str(c.question_id);
+      if (!questionId || claims.some((x) => x.questionId === questionId)) continue;
+      claims.push({
+        questionId,
+        claim: str(c.claim, questionId),
+        quote: str(c.quote),
+        kind: str(c.kind),
+        planted: bool(c.planted),
+      });
+    }
+    const url = str(p.url);
+    return {
+      ...s,
+      claims: {
+        seq: ev.seq,
+        title: str(p.title),
+        citation: str(p.citation),
+        url: /^https?:\/\//i.test(url) ? url : null,
+        license: str(p.license),
+        excerpt: str(p.excerpt),
+        claims,
+      },
+    };
+  },
 
   'budget.tick': (s, p) => ({
     ...s,
