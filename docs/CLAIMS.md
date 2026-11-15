@@ -81,12 +81,12 @@ The lab and its roles are in `labs/claims/` (`lab.py`, `agents.py`, `library.py`
 
 ## The recorded run
 
-`runs/demo/claims_deseq2.jsonl` (with the run's `CLAIMS.md` and manifest in
+`runs/demo/claims_deseq2.jsonl` (the run's `CLAIMS.md`, diagnostic logs and manifest are in
 `runs/demo/claims-deseq2-20261114/`):
 
 | Claim | Engine outcome | Deciding numbers |
 | --- | --- | --- |
-| NB variance | settled `holds` (0.956); `alt_param` rejected | SymPy: variance = μ(αμ + 1), equal to μ + αμ², not μ + μ²/α; Monte Carlo: largest relative error 0.0044 against μ + αμ², 2.14 against μ + μ²/α |
+| NB variance | settled `holds` (0.956); `alt_param` rejected | SymPy: variance = μ(αμ + 1), equal to μ + αμ² (largest residual on the grid 0), not μ + μ²/α (31,920); Monte Carlo: largest relative error 0.0044 against μ + αμ², 2.14 against μ + μ²/α |
 | Wald calibration | settled `holds_if` (0.941); `holds` and `fails_conservative` rejected | FPR 0.1139 with per-gene dispersion against 0.05755 with moderated dispersion on the same data; FPR 0.114 again in a separate per-gene run |
 | BH controls FDR | settled `holds` (0.951); `fails` rejected | no setting of nine above π0·q (largest excess 2.4 standard errors); FDR 0.0450 at π0 = 0.9 (theory 0.045) |
 | BH controls FWER (planted) | `holds` rejected (0.017), so the claim is refuted; the question ended unresolved with `fails` at 0.877 | counterexample: m = 3 tests, 2 nulls and 1 strong signal give FWER 0.0659 (99.9% lower bound 0.0641) |

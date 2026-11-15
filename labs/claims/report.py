@@ -71,6 +71,8 @@ def _fmt(value: object) -> str:
     if isinstance(value, float):
         if not math.isfinite(value):
             return str(value)
+        if value.is_integer() and abs(value) < 1e15:
+            return str(int(value))
         return f"{value:.4g}"
     return str(value)
 
