@@ -385,3 +385,28 @@ async def test_post_runs_with_the_default_launcher_rejects_bad_requests(
         r = await c.post("/runs", json=body)
     assert r.status_code == 400
     assert not any(tmp_path.iterdir())  # nothing was started
+
+
+# ----------------------------------------------------------------------------
+# CORS
+# ----------------------------------------------------------------------------
+async def _allowed_origin(app, origin: str) -> str | None:
+    async with client_for(app) as c:
+        r = await c.get("/health", headers={"Origin": origin})
+    return r.headers.get("access-control-allow-origin")
+
+
+async def test_cors_default_origins_only(tmp_path, monkeypatch):
+    monkeypatch.delenv("CRUX_CORS_ORIGINS", raising=False)
+    app = create_app(tmp_path)
+    assert await _allowed_origin(app, "http://localhost:5173") == "http://localhost:5173"
+    assert await _allowed_origin(app, "http://localhost:3000") is None
+
+
+async def test_cors_origins_from_env(tmp_path, monkeypatch):
+    monkeypatch.setenv("CRUX_CORS_ORIGINS", "http://localhost:3000, https://site.example/ ,")
+    app = create_app(tmp_path)
+    assert await _allowed_origin(app, "http://localhost:3000") == "http://localhost:3000"
+    assert await _allowed_origin(app, "https://site.example") == "https://site.example"
+    assert await _allowed_origin(app, "http://localhost:5173") == "http://localhost:5173"
+    assert await _allowed_origin(app, "https://other.example") is None

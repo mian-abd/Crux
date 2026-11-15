@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import re
 from collections.abc import AsyncIterator
 from pathlib import Path
@@ -31,6 +32,7 @@ from api.launcher import (
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}$")
 TERMINAL_TYPES = frozenset({"run.finished", "run.error"})
 DEFAULT_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+CORS_ORIGINS_ENV = "CRUX_CORS_ORIGINS"
 POLL_S = 0.2
 KEEPALIVE_S = 15.0
 MAX_REPLAY_GAP_S = 2.0
@@ -361,6 +363,12 @@ def _sse(gen: AsyncIterator[str]) -> StreamingResponse:
     )
 
 
+def env_origins() -> list[str]:
+    """Extra allowed origins from ``$CRUX_CORS_ORIGINS`` (comma-separated); none when unset."""
+    raw = os.environ.get(CORS_ORIGINS_ENV, "")
+    return [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
+
+
 def create_app(
     runs_dir: Path = Path("runs"),
     launcher: RunLauncher | None = None,
@@ -370,7 +378,7 @@ def create_app(
     app = FastAPI(title="Crux API")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[*DEFAULT_ORIGINS, *(cors_origins or [])],
+        allow_origins=[*DEFAULT_ORIGINS, *env_origins(), *(cors_origins or [])],
         allow_methods=["*"],
         allow_headers=["*"],
     )
