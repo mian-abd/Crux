@@ -72,10 +72,10 @@ export function libraryClaim(id: string | null | undefined): LibraryClaim | null
 /** Why a claim cannot be checked yet. Fixed wording, so nothing is made up per claim. */
 export function notCheckableReason(kind: ExtractedKind): string {
   if (kind === "empirical") {
-    return "Empirical: checking it needs the study's data. The claims audit only runs derivations and simulations so far.";
+    return "Testing it needs the study's own data.";
   }
   if (kind === "statistical") {
-    return "Statistical, but not one of the four curated claims. No simulation has been written for it yet.";
+    return "Needs a new simulation written for it.";
   }
-  return "Symbolic, but not one of the four curated claims. No derivation has been written for it yet.";
+  return "Needs a new derivation written for it.";
 }

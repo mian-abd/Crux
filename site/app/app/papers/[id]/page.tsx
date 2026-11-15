@@ -86,7 +86,7 @@ export default async function PaperPage({ params }: PageProps<"/app/papers/[id]"
             Set <code className="font-mono text-[0.85em]">OPENAI_API_KEY</code> in{" "}
             <code className="font-mono text-[0.85em]">site/.env.local</code> and restart the server.
             The key stays on the server and is never sent to the browser. Your paper is stored and
-            ready; you can still run the curated audit below.
+            ready; you can still run the demonstration audit below.
           </AlertDescription>
         </Alert>
       )}
@@ -111,79 +111,88 @@ export default async function PaperPage({ params }: PageProps<"/app/papers/[id]"
 
       {extracted && (
         <>
-          <p className="text-sm text-muted-foreground">
-            {plural(claims.length, "claim")} listed by {paper.model}
-            {paper.extractedAt ? ` on ${dateTime(paper.extractedAt)}` : ""}. A model made this list:
-            it can miss claims or misread them, so each one carries its quote.
-            {paper.truncated &&
-              ` Only the first ${MAX_PAPER_CHARS.toLocaleString("en-US")} characters of the paper were read.`}
-          </p>
-
-          <section aria-labelledby="checkable-heading">
-            <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-4">
-              <div>
-                <h2 id="checkable-heading" className="font-display text-3xl">
-                  Checkable now
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {checkable.length === 0
-                    ? "None of this paper's claims match the curated library."
-                    : `${plural(checkable.length, "claim")} matched to the curated library.`}
-                </p>
-              </div>
-              {checkable.length > 0 && <StartAuditButton />}
+          {/* Summary: what Crux found, and what it will test now. */}
+          <section className="grid gap-4 rounded-3xl bg-ink p-6 text-ink-foreground sm:p-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <p className="text-[0.95rem] text-ink-foreground/65">Crux read this paper</p>
+              <p className="mt-3 font-display text-4xl leading-[1.08] sm:text-5xl">
+                {checkable.length > 0
+                  ? `${plural(checkable.length, "claim")} ready to test by experiment`
+                  : "No claim here can be tested by experiment yet"}
+              </p>
+              <p className="mt-3 max-w-2xl leading-relaxed text-ink-foreground/65">
+                {plural(claims.length, "claim")} found, each with the sentence it came from.
+                {checkable.length > 0 &&
+                  " For each one below, competing readings make predictions, and Crux runs the derivation or simulation that best tells them apart."}
+              </p>
             </div>
-            {checkable.length > 0 && (
+            {checkable.length > 0 && <StartAuditButton>Test these claims</StartAuditButton>}
+          </section>
+
+          {checkable.length > 0 && (
+            <section aria-labelledby="checkable-heading">
+              <h2 id="checkable-heading" className="border-b pb-4 font-display text-3xl">
+                Claims Crux will test
+              </h2>
               <ul className="divide-y">
                 {checkable.map((c) => {
                   const lib = libraryClaim(c.libraryId);
                   return (
                     <ClaimItem key={c.id} claim={c}>
-                      <p>
-                        <span className="font-medium text-v-holds">Matched</span>{" "}
-                        <span className="font-mono text-xs text-muted-foreground">{c.libraryId}</span>
-                        {lib && <span className="text-muted-foreground"> · {lib.check}</span>}
-                      </p>
+                      {lib && (
+                        <p>
+                          <span className="font-medium">How Crux tests it:</span>{" "}
+                          <span className="text-muted-foreground">{lib.check}</span>
+                        </p>
+                      )}
                     </ClaimItem>
                   );
                 })}
               </ul>
-            )}
-          </section>
+            </section>
+          )}
 
-          <section aria-labelledby="notyet-heading">
-            <div className="border-b pb-4">
-              <h2 id="notyet-heading" className="font-display text-3xl">
-                Not yet checkable
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {notYet.length === 0
-                  ? "Nothing in this list."
-                  : `${plural(notYet.length, "claim")} the engine has no check for yet.`}
-              </p>
-            </div>
-            {notYet.length > 0 && (
-              <ul className="divide-y">
+          {notYet.length > 0 && (
+            <details className="group rounded-2xl border bg-card">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 [&::-webkit-details-marker]:hidden">
+                <span>
+                  <span className="font-display text-2xl">Other claims found</span>
+                  <span className="ml-3 text-sm text-muted-foreground">
+                    {plural(notYet.length, "claim")}, not tested in this run
+                  </span>
+                </span>
+                <span className="text-sm text-muted-foreground group-open:hidden">Show</span>
+                <span className="hidden text-sm text-muted-foreground group-open:inline">Hide</span>
+              </summary>
+              <ul className="divide-y border-t px-6">
                 {notYet.map((c) => (
                   <ClaimItem key={c.id} claim={c}>
                     <p className="text-muted-foreground">{notCheckableReason(c.kind)}</p>
                   </ClaimItem>
                 ))}
               </ul>
-            )}
-          </section>
+            </details>
+          )}
+
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Claims were read by {paper.model}
+            {paper.extractedAt ? ` on ${dateTime(paper.extractedAt)}` : ""}; a model can miss or misread a claim, so
+            each one keeps its quote, and quotes not found word for word are flagged.
+            {paper.truncated &&
+              ` The first ${MAX_PAPER_CHARS.toLocaleString("en-US")} characters of the paper were read.`}
+          </p>
         </>
       )}
 
       {!extracted && (
         <section className="flex flex-wrap items-center justify-between gap-6 rounded-lg border bg-muted/40 p-6">
           <div className="max-w-2xl">
-            <p className="eyebrow">Claims audit · MVP</p>
+            <p className="eyebrow">Claims audit</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              The audit runs on four curated DESeq2 claims, whatever paper you uploaded.
+              Meanwhile, watch Crux test four statistical claims from the DESeq2 paper, one of them planted false.
             </p>
           </div>
-          <StartAuditButton variant="outline">Run the curated audit</StartAuditButton>
+          <StartAuditButton variant="outline">Run the demonstration audit</StartAuditButton>
         </section>
       )}
     </div>
