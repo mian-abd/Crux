@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Domains } from "@/components/landing/domains";
 import { Loop } from "@/components/landing/loop";
 import { Plate } from "@/components/landing/plate";
+import { Sponsors } from "@/components/landing/sponsors";
 import { Scoreboard } from "@/components/scoreboard";
 import { SiteFooter } from "@/components/site-footer";
 import { AnnouncementBar, SiteHeader } from "@/components/site-header";
@@ -334,6 +335,20 @@ export default function Home() {
                 <CircleArrow />
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* Sponsors */}
+        <section id="sponsors" className={`${WRAP} scroll-mt-24 pt-24 sm:pt-32`}>
+          <div className="max-w-3xl">
+            <p className="eyebrow">Built with</p>
+            <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">What each sponsor does in Crux</h2>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              Every tool below runs in the product, and each card links to the evidence.
+            </p>
+          </div>
+          <div className="mt-14">
+            <Sponsors />
           </div>
         </section>
 

@@ -10,6 +10,7 @@ const NAV = [
   { href: "/#domains", label: "What it tests" },
   { href: "/#results", label: "Results" },
   { href: "/#how", label: "How it works" },
+  { href: "/#sponsors", label: "Built with" },
 ];
 
 /** A slim charcoal bar above the header, for the one result worth knowing first. */
