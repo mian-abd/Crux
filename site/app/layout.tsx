@@ -1,21 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Hanken_Grotesk, IBM_Plex_Mono, Newsreader } from "next/font/google";
+import { Gilda_Display, Google_Sans, Google_Sans_Code } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-// Text: Hanken Grotesk. Display: Newsreader, a variable serif with an optical-size axis,
-// so large headings get its fine display cut. Labels and numbers: IBM Plex Mono.
-const sans = Hanken_Grotesk({ variable: "--font-text", subsets: ["latin"] });
-const mono = IBM_Plex_Mono({ variable: "--font-code", subsets: ["latin"], weight: ["400", "500"] });
-const display = Newsreader({
-  variable: "--font-display",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-});
+// Display: Gilda Display, a high-contrast serif (SIL OFL). Text: Google Sans, with its Greek
+// subset so formulas render μ, α and π in the same face (SIL OFL). Numbers in tables: Google
+// Sans Code (SIL OFL).
+const display = Gilda_Display({ variable: "--font-display", subsets: ["latin"], weight: "400" });
+const sans = Google_Sans({ variable: "--font-text", subsets: ["latin", "greek"] });
+const mono = Google_Sans_Code({ variable: "--font-code", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: { default: "Crux", template: "%s · Crux" },

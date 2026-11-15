@@ -38,12 +38,12 @@ export function LoginForm({ next }: { next: string }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Sign in</CardTitle>
+    <Card className="gap-6 border-0 bg-transparent py-0 shadow-none ring-0">
+      <CardHeader className="px-0">
+        <CardTitle className="font-display text-[2.6rem] leading-none font-normal">Sign in</CardTitle>
         <CardDescription>Use the email and password you signed up with.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         <form onSubmit={onSubmit} noValidate={false}>
           <FieldGroup>
             <Field>

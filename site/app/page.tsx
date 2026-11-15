@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Domains } from "@/components/landing/domains";
 import { Loop } from "@/components/landing/loop";
 import { Plate } from "@/components/landing/plate";
+import { Scoreboard } from "@/components/scoreboard";
 import { SiteFooter } from "@/components/site-footer";
 import { AnnouncementBar, SiteHeader } from "@/components/site-header";
 import { REPO_URL, repoFile } from "@/lib/site";
@@ -235,52 +236,21 @@ export default function Home() {
           <div className={`${WRAP} py-24 sm:py-32`}>
             <div className="max-w-3xl">
               <p className="eyebrow">Results · pilot, one task</p>
-              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">What we measured, and what it does not show</h2>
+              <h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl">On cases nobody had seen, the swarm scored higher</h2>
               <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
                 BixBench3 task 9: an RNA-seq analysis from published counts, with faults planted in the data. The swarm
                 ran against a single gpt-5.5 agent with the same inputs, prompt, sandbox, grader and $2 cap.
               </p>
             </div>
 
-            <div className="mt-16 grid gap-x-20 gap-y-14 lg:grid-cols-[1fr_1.1fr]">
-              <div>
-                <p className="eyebrow">Batch-04 · 13 fresh pre-registered cases</p>
-                <dl className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:gap-x-8">
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Swarm, mean score</dt>
-                    <dd className="mt-2 font-display text-[3.6rem] leading-none tabular-nums sm:text-8xl">0.811</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Single agent</dt>
-                    <dd className="mt-2 font-display text-[3.6rem] leading-none text-subtle tabular-nums sm:text-8xl">0.608</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Faults caught, swarm</dt>
-                    <dd className="mt-2 font-display text-5xl leading-none tabular-nums sm:text-7xl">
-                      12<span className="text-3xl text-subtle sm:text-4xl"> / 12</span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Single agent</dt>
-                    <dd className="mt-2 font-display text-5xl leading-none text-subtle tabular-nums sm:text-7xl">
-                      3<span className="text-3xl sm:text-4xl"> / 12</span>
-                    </dd>
-                  </div>
-                </dl>
-                <p className="mt-10 max-w-md leading-relaxed">
-                  Paired difference <span className="font-mono">+0.203</span>, 95% CI{" "}
-                  <span className="font-mono">+0.048</span> to <span className="font-mono">+0.382</span>. No crashes, no
-                  reruns; $1.17 a run against $1.38. On the clean case: 0.861 against 0.869.
-                </p>
-                <p className="mt-4">
-                  <Source path={BATCH04} />
-                </p>
-              </div>
+            <Scoreboard className="mt-14" />
 
-              <ul className="divide-y border-y">
+            <div className="mt-16">
+              <h3 className="font-display text-3xl">What it does not show</h3>
+              <ul className="mt-8 grid gap-x-12 gap-y-0 md:grid-cols-2">
                 {CAVEATS.map((c) => (
-                  <li key={c.title} className="py-6">
-                    <h3 className="font-medium">{c.title}</h3>
+                  <li key={c.title} className="border-t py-6">
+                    <p className="font-medium">{c.title}</p>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
                     <p className="mt-3">
                       <Source path={c.path} />
@@ -326,7 +296,7 @@ export default function Home() {
                       {card.tags.map((t) => (
                         <li
                           key={t}
-                          className="rounded-full border border-ink-foreground/20 px-2.5 py-1 font-mono text-[0.66rem] tracking-wide uppercase text-ink-foreground/75"
+                          className="rounded-full border border-ink-foreground/20 px-3 py-1 text-[0.8rem] text-ink-foreground/75"
                         >
                           {t}
                         </li>

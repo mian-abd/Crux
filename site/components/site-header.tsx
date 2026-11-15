@@ -5,10 +5,10 @@ import { Wordmark } from "@/components/wordmark";
 import { REPO_URL } from "@/lib/site";
 
 const NAV = [
+  { href: "/explore", label: "Explore" },
   { href: "/#domains", label: "What it tests" },
   { href: "/#results", label: "Results" },
   { href: "/#how", label: "How it works" },
-  { href: "/explore", label: "Explore" },
 ];
 
 /** A slim charcoal bar above the header, for the one result worth knowing first. */
@@ -36,7 +36,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-transparent bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/75 [&:has(+main)]:border-border/60">
       <div className="mx-auto flex h-[4.5rem] w-full max-w-[90rem] items-center gap-6 px-5 sm:px-8">
         <Wordmark />
-        <nav aria-label="Main" className="ml-auto hidden items-center gap-1 lg:flex">
+        <nav aria-label="Main" className="ml-6 hidden items-center gap-1 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -46,16 +46,16 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+        </nav>
+        <div className="ml-auto flex items-center gap-2">
           <a
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            className="rounded-md px-3 py-2 text-[0.95rem] text-muted-foreground transition-colors hover:text-foreground"
+            className="hidden rounded-md px-3 py-2 text-[0.95rem] text-muted-foreground transition-colors hover:text-foreground lg:block"
           >
             GitHub
           </a>
-        </nav>
-        <div className="ml-auto flex items-center gap-2 lg:ml-2">
           <Link
             href="/login"
             className="hidden rounded-md px-3 py-2 text-[0.95rem] text-muted-foreground transition-colors hover:text-foreground sm:block"

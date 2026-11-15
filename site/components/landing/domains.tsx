@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 type Domain = {
   id: string;
   title: string;
-  status: string;
   body: string;
   source: string;
   panel: () => React.ReactNode;
@@ -25,7 +24,7 @@ function Bar({ label, value, max, strong }: { label: string; value: number; max:
       <span className="text-muted-foreground">{label}</span>
       <span className="h-2.5 rounded-full bg-muted">
         <span
-          className={cn("block h-full rounded-full", strong ? "bg-foreground" : "bg-subtle")}
+          className={cn("block h-full rounded-full", strong ? "bg-brand" : "bg-subtle")}
           style={{ width: `${(value / max) * 100}%` }}
         />
       </span>
@@ -44,7 +43,7 @@ function Dots({ label, caught, of = 12, strong }: { label: string; caught: numbe
             key={i}
             className={cn(
               "size-2 rounded-full sm:size-2.5",
-              i < caught ? (strong ? "bg-foreground" : "bg-subtle") : "border border-border bg-transparent",
+              i < caught ? (strong ? "bg-brand" : "bg-subtle") : "border border-border bg-transparent",
             )}
           />
         ))}
@@ -252,7 +251,6 @@ const DOMAINS: Domain[] = [
   {
     id: "genomics",
     title: "Genomics",
-    status: "Graded",
     body: "RNA-seq from a published count matrix (BixBench3 task 9). Pre-registered checks look for swapped labels, duplicated or degraded libraries and three more fault types, in network-blocked sandboxes, before any analysis is written.",
     source: "eval/results/task9_batch04.md",
     panel: GenomicsPanel,
@@ -260,7 +258,6 @@ const DOMAINS: Domain[] = [
   {
     id: "statistics",
     title: "Statistics",
-    status: "Live, $0",
     body: "Is a method calibrated? Each claim becomes competing readings, and simulations decide between them. The whole audit runs in about 10 seconds with no model calls.",
     source: "runs/demo/claims-deseq2-20261114/artifacts/CLAIMS.md",
     panel: StatisticsPanel,
@@ -268,7 +265,6 @@ const DOMAINS: Domain[] = [
   {
     id: "mathematics",
     title: "Mathematics",
-    status: "Live, $0",
     body: "Does the formula hold? SymPy derives it symbolically, a Monte Carlo run checks it, and a search for counterexamples tries to break it. One claim is planted false, to show the engine refutes what it should.",
     source: "docs/CLAIMS.md",
     panel: MathematicsPanel,
@@ -276,7 +272,6 @@ const DOMAINS: Domain[] = [
   {
     id: "design",
     title: "Experimental design",
-    status: "Recorded run",
     body: "Which experiment next? Every option predicts each diagnostic's outcome, and the engine runs the one with the most expected information per unit of cost. These are the numbers from the first graded run.",
     source: "runs/demo/task9_real_swarm_run1.jsonl",
     panel: DesignPanel,
@@ -284,7 +279,6 @@ const DOMAINS: Domain[] = [
   {
     id: "papers",
     title: "Any paper",
-    status: "MVP",
     body: "Upload a PDF, extract its claims with verified quotes, and audit the ones the engine has checks for. Extraction needs an OpenAI key; the audit itself does not.",
     source: "site/README.md",
     panel: PaperPanel,
@@ -317,14 +311,6 @@ export function Domains() {
                   )}
                 >
                   {d.title}
-                </span>
-                <span
-                  className={cn(
-                    "rounded-full border px-2 py-0.5 font-mono text-[0.68rem] tracking-wide uppercase",
-                    isOpen ? "text-muted-foreground" : "hidden",
-                  )}
-                >
-                  {d.status}
                 </span>
                 {isOpen ? (
                   <MinusIcon className="ml-auto size-4 text-muted-foreground" aria-hidden="true" />

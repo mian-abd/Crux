@@ -21,7 +21,7 @@ function ClaimItem({ claim, children }: { claim: PaperClaim; children: React.Rea
   return (
     <li className="py-6">
       <div className="flex flex-wrap items-center gap-2">
-        <Chip className="font-mono tracking-wide uppercase">{claim.kind}</Chip>
+        <Chip className="capitalize">{claim.kind}</Chip>
         {!claim.quoteFound && claim.quote && (
           <Chip className="border-v-unresolved/50 bg-v-unresolved/10 text-v-unresolved">
             <TriangleAlertIcon className="size-3.5" aria-hidden="true" />

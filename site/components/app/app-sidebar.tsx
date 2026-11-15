@@ -1,6 +1,7 @@
 "use client";
 
-import { ActivityIcon, ChevronsUpDownIcon, DnaIcon, FileTextIcon, LogOutIcon, UploadIcon } from "lucide-react";
+import { ActivityIcon, ChevronsUpDownIcon, DnaIcon, HomeIcon, LogOutIcon, UploadIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -31,10 +32,10 @@ import { Wordmark } from "@/components/wordmark";
 import { authClient } from "@/lib/auth-client";
 
 const NAV = [
-  { href: "/app", label: "Your papers", icon: FileTextIcon, match: (p: string) => p === "/app" || p.startsWith("/app/papers") },
+  { href: "/app", label: "Home", icon: HomeIcon, match: (p: string) => p === "/app" || p.startsWith("/app/papers") },
+  { href: "/app/explore", label: "Explore", icon: DnaIcon, match: (p: string) => p.startsWith("/app/explore") },
   { href: "/app/upload", label: "Upload a paper", icon: UploadIcon, match: (p: string) => p === "/app/upload" },
   { href: "/app/runs/demo", label: "Claims audit run", icon: ActivityIcon, match: (p: string) => p.startsWith("/app/runs") },
-  { href: "/app/explore", label: "Explore", icon: DnaIcon, match: (p: string) => p.startsWith("/app/explore") },
 ];
 
 function initials(name: string, email: string): string {
@@ -83,6 +84,26 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <Link
+          href="/#results"
+          className="mx-1 mb-1 block overflow-hidden rounded-xl border bg-card transition-colors hover:border-foreground/25 group-data-[collapsible=icon]:hidden"
+        >
+          <Image
+            src="/plates/galton-quincunx.png"
+            alt=""
+            width={744}
+            height={577}
+            sizes="240px"
+            className="h-20 w-full object-cover object-top"
+          />
+          <div className="px-3 py-2.5">
+            <p className="text-xs text-muted-foreground">Latest result, batch-04</p>
+            <p className="mt-0.5 font-display text-lg leading-tight">
+              0.811 <span className="text-muted-foreground">vs 0.608</span>
+            </p>
+            <p className="text-xs text-muted-foreground">Faults caught 12/12 vs 3/12</p>
+          </div>
+        </Link>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>

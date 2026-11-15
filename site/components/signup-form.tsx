@@ -44,14 +44,14 @@ export function SignupForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Create an account</CardTitle>
+    <Card className="gap-6 border-0 bg-transparent py-0 shadow-none ring-0">
+      <CardHeader className="px-0">
+        <CardTitle className="font-display text-[2.6rem] leading-none font-normal">Create an account</CardTitle>
         <CardDescription>
           Accounts live on this server only. Your password is stored as a hash.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>

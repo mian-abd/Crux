@@ -18,10 +18,10 @@ function Ext({ href, children }: { href: string; children: React.ReactNode }) {
 }
 
 const LINKS = [
+  { href: "/explore", label: "Explore" },
   { href: "/#domains", label: "What it tests" },
   { href: "/#results", label: "Results" },
   { href: "/#how", label: "How it works" },
-  { href: "/explore", label: "Explore" },
   { href: "/login", label: "Sign in" },
 ];
 
@@ -67,7 +67,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t">
-        <p className="mx-auto w-full max-w-[90rem] px-5 py-5 font-mono text-[0.7rem] tracking-wide text-muted-foreground uppercase sm:px-8 lg:px-12">
+        <p className="mx-auto w-full max-w-[90rem] px-5 py-5 text-[0.8rem] text-muted-foreground sm:px-8 lg:px-12">
           © 2026 Crux · Pilot results, one task of 20
         </p>
       </div>

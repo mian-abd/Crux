@@ -116,7 +116,7 @@ export function ClaimCard({ row }: { row: ClaimRow }) {
     >
       <header className="flex flex-wrap items-center gap-2">
         <span className="font-display text-2xl leading-none text-muted-foreground">{row.index}</span>
-        {claim.kind && <Chip className="font-mono tracking-wide uppercase">{claim.kind}</Chip>}
+        {claim.kind && <Chip className="capitalize">{claim.kind}</Chip>}
         {claim.planted && <Chip className="border-v-refuted/40 text-v-refuted">Planted false claim</Chip>}
         {row.extra && <Chip>Raised during the run</Chip>}
         <VerdictChip verdict={verdict} className="ml-auto" />

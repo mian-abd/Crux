@@ -112,7 +112,7 @@ package's `package.json` or repository.
 | [unpdf](https://github.com/unjs/unpdf) (bundles PDF.js, Apache-2.0) | PDF text extraction | MIT |
 | [three](https://threejs.org), [@react-three/fiber](https://github.com/pmndrs/react-three-fiber), [@react-three/drei](https://github.com/pmndrs/drei), [react-force-graph-3d](https://github.com/vasturiano/react-force-graph), [Mol*](https://molstar.org) | Dependencies of the 3D library | MIT |
 | [three.js molecules example](https://threejs.org/examples/#webgl_loader_pdb) (`examples/webgl_loader_pdb.html`, `PDBLoader`, and nine files from `examples/models/pdb/`, tag r187) | The small-molecule views and `public/molecules/*.pdb` | MIT |
-| [Newsreader](https://fonts.google.com/specimen/Newsreader), [Hanken Grotesk](https://fonts.google.com/specimen/Hanken+Grotesk), [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) | Typefaces (display, text, labels), loaded with `next/font` | SIL Open Font License 1.1 |
+| [Gilda Display](https://fonts.google.com/specimen/Gilda+Display), [Google Sans](https://fonts.google.com/specimen/Google+Sans), [Google Sans Code](https://fonts.google.com/specimen/Google+Sans+Code) | Typefaces (display, text, numbers), loaded with `next/font` | SIL Open Font License 1.1 |
 
 ### Images
 
