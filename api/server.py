@@ -7,6 +7,7 @@ The server never needs the engine in-process to stream: it replays
 from __future__ import annotations
 
 import asyncio
+import hmac
 import json
 import os
 import re
@@ -363,6 +364,23 @@ def _sse(gen: AsyncIterator[str]) -> StreamingResponse:
     )
 
 
+RUN_TOKEN_ENV = "CRUX_RUN_TOKEN"
+RUN_TOKEN_HEADER = "X-Crux-Run-Token"
+# Labs whose runs call paid models and Modal. The claims, fake and One Letter labs stay open.
+PAID_LABS = frozenset({"bixbench3"})
+
+
+def paid_run_allowed(lab: str, token: str | None) -> bool:
+    """A paid lab needs the token in ``$CRUX_RUN_TOKEN`` when it is set (as on the hosted API).
+
+    Without the variable (local development) every lab is open, as before.
+    """
+    want = os.environ.get(RUN_TOKEN_ENV, "").strip()
+    if lab not in PAID_LABS or not want:
+        return True
+    return hmac.compare_digest((token or "").strip().encode(), want.encode())
+
+
 def env_origins() -> list[str]:
     """Extra allowed origins from ``$CRUX_CORS_ORIGINS`` (comma-separated); none when unset."""
     raw = os.environ.get(CORS_ORIGINS_ENV, "")
@@ -420,7 +438,9 @@ def create_app(
         }
 
     @app.post("/runs", status_code=202)
-    async def start_run(body: RunRequest) -> dict:
+    async def start_run(body: RunRequest, request: Request) -> dict:
+        if not paid_run_allowed(body.lab, request.headers.get(RUN_TOKEN_HEADER)):
+            raise HTTPException(403, f"{body.lab} runs spend money; send the team's {RUN_TOKEN_HEADER} header")
         run_id = new_run_id()
         try:
             await get_launcher().start(body.lab, body.config, body.seed, body.overrides, run_id)

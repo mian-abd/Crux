@@ -1,0 +1,8 @@
+{
+  "bundle_id": "ca6c72f06342cd52465e2f63e7e130807bd5d2c9d0abc66e6c823d20766800e9",
+  "files": {
+    "inputs_metadata.json": "8f56fa1cf884a11ad15efc4108b77b93c6fbb09e51b00cdf60c02af02d4443e2",
+    "samples.tsv": "00cdb9e46bba0a927a9f3cca5455b5d65e1e58c0e45cf41e0f3628d0430d5bf1",
+    "tagseq_featurecounts_matrix.tsv": "9fffdcac8fd8d7098928cd7fb6adf8bd707e1d4818703327cc1670f00b545ab3"
+  }
+}

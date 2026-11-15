@@ -410,3 +410,24 @@ async def test_cors_origins_from_env(tmp_path, monkeypatch):
     assert await _allowed_origin(app, "https://site.example") == "https://site.example"
     assert await _allowed_origin(app, "http://localhost:5173") == "http://localhost:5173"
     assert await _allowed_origin(app, "https://other.example") is None
+
+
+async def test_paid_lab_needs_the_run_token_when_one_is_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CRUX_RUN_TOKEN", "team-secret")
+    launcher = FakeLauncher(tmp_path)
+    async with client_for(create_app(tmp_path, launcher=launcher)) as c:
+        missing = await c.post("/runs", json={"lab": "bixbench3"})
+        wrong = await c.post("/runs", json={"lab": "bixbench3"}, headers={"X-Crux-Run-Token": "nope"})
+        right = await c.post("/runs", json={"lab": "bixbench3"}, headers={"X-Crux-Run-Token": "team-secret"})
+        free = await c.post("/runs", json={"lab": "claims"})
+    assert missing.status_code == 403 and wrong.status_code == 403
+    assert right.status_code == 202 and free.status_code == 202
+    assert [call[0] for call in launcher.calls] == ["bixbench3", "claims"]
+
+
+async def test_paid_lab_is_open_without_a_configured_token(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("CRUX_RUN_TOKEN", raising=False)
+    launcher = FakeLauncher(tmp_path)
+    async with client_for(create_app(tmp_path, launcher=launcher)) as c:
+        r = await c.post("/runs", json={"lab": "bixbench3"})
+    assert r.status_code == 202

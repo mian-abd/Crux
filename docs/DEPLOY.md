@@ -14,7 +14,13 @@ Task 9 runs execute R and DESeq2 in network-blocked Modal sandboxes, which Railw
 - **`crux-api` without `OPENAI_API_KEY` or Modal tokens.** The free claims audit (about 8 s, $0) and the recorded replays work. A Task 9 run can't spend money: it fails without the keys.
 - **`crux-site` without `OPENAI_API_KEY`.** Paper upload and accounts work. Claim extraction shows its "extraction needs an API key" state instead of letting anyone with an account spend your OpenAI budget. Add the key only behind an invite gate.
 
-**The current deploy differs on one point:** `crux-site` has `OPENAI_API_KEY`, so claim extraction from an uploaded paper works for anyone with an account. Each extraction is one gpt-4.1-mini call (about a cent for a typical paper). Keep a spend limit on the OpenAI project, and remove the variable or rotate the key after the event. `crux-api` now holds `OPENAI_API_KEY`, `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`, `EXA_API_KEY`, `PAST_API_KEY` and the Langfuse keys. It still cannot start a paid Task 9 run: `CRUX_TASK9_CASES` is unset and no case manifest ships in the image, so `/tasks` lists no cases and `POST /runs` for `bixbench3` has nothing to run. The claims and One Letter labs make no paid model calls. Before loading cases, put the start behind a team-only token. Rotate every key after the event.
+**The current deploy differs on one point:** `crux-site` has `OPENAI_API_KEY`, so claim extraction from an uploaded paper works for anyone with an account. Each extraction is one gpt-4.1-mini call (about a cent for a typical paper). Keep a spend limit on the OpenAI project, and remove the variable or rotate the key after the event. `crux-api` holds `OPENAI_API_KEY`, `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`, `EXA_API_KEY`, `PAST_API_KEY` and the Langfuse keys, and `CRUX_TASK9_CASES=/app/runs/demo/cases`, where the image ships the clean Task 9 case's staging manifest (a bundle id and file digests; the inputs are already on the Modal volume, and no truth key is included). Paid runs sit behind a team token: with `CRUX_RUN_TOKEN` set, `POST /runs` for `bixbench3` needs a matching `X-Crux-Run-Token` header and answers 403 without it (`api/server.py`, `paid_run_allowed`). The claims, fake and One Letter labs stay open. The token is in the team's local `.env`; start a run with:
+
+```sh
+curl -X POST https://crux-api-production-fef3e0e8.up.railway.app/runs -H "Content-Type: application/json" \n  -H "X-Crux-Run-Token: $CRUX_RUN_TOKEN" -d '{"lab": "bixbench3", "overrides": {"case": "task9-clean"}}'
+```
+
+Watch it at `https://crux-viewer-production.up.railway.app/?run=<run_id>`. Each run is capped at $2 of model spend, plus Modal compute. Rotate every key after the event, and delete these variables to go back to the safe defaults above.
 
 ## Variables
 

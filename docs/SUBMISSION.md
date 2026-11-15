@@ -16,7 +16,7 @@ Sources: `eval/results/task9_batch04.md` and `eval/results/task9_batch03.md`.
 
 ## Where to look
 
-- **Live site:** https://crux-site-production-95830f5f.up.railway.app (sign up, upload a paper and extract its claims, run the free claims audit, replay graded runs, the 3D Explore gallery). The engine API behind it is https://crux-api-production-fef3e0e8.up.railway.app. It holds the engine's keys but has no Task 9 case loaded, so it cannot start a paid Task 9 run (`docs/DEPLOY.md`).
+- **Live site:** https://crux-site-production-95830f5f.up.railway.app (sign up, upload a paper and extract its claims, run the free claims audit, replay graded runs, the 3D Explore gallery). The engine API behind it is https://crux-api-production-fef3e0e8.up.railway.app. It holds the engine's keys and the clean Task 9 case, so the team can start a live Task 9 run there (behind a team token) and watch it in the run viewer (`docs/DEPLOY.md`).
 - **The loop:** `core/orchestrator.py`. The README has a diagram and a step-by-step map to its functions.
 - **Watch a graded Task 9 run:** https://crux-viewer-production.up.railway.app/?apireplay=task9_real_swarm_run1.jsonl&speed=8 replays run 1 from its event log: questions, EIG rankings, sandboxed diagnostics, the referee, Bayes updates and the rejected ledger.
 - **Watch Exa and past.dev in the loop:** https://crux-viewer-production.up.railway.app/?apireplay=task9_tools_run2.jsonl&speed=8 replays `tools-run-02`. The memory and search panel shows each Exa query's URLs (blocked ones struck through), and the critic's recall of the referee's records.
